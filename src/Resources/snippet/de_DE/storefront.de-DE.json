@@ -1,0 +1,13 @@
+{
+    "novaSearch": {
+        "categories": "Kategorien",
+        "manufacturers": "Hersteller",
+        "count": "{1} 1 Artikel gefunden|]1,Inf[ %count% Artikel gefunden",
+        "showAll": "{1} Ergebnis anzeigen|]1,Inf[ Alle %count% Ergebnisse anzeigen",
+        "noResults": "Keine Treffer für „%term%“",
+        "noResultsHint": "Prüfe die Schreibweise oder versuche einen allgemeineren Begriff.",
+        "noProducts": "Keine Artikel gefunden – vielleicht hilft eine der Kategorien.",
+        "close": "Suchergebnisse schließen",
+        "loading": "Suche läuft …"
+    }
+}

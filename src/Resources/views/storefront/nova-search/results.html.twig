@@ -1,0 +1,117 @@
+{# Ergebnisfenster der Sofortsuche – wird per JavaScript in das Fenster unter dem Suchfeld geladen #}
+{% block nova_search_results %}
+    <div class="nova-search-results" data-nova-search-total="{{ total }}">
+        {% if total == 0 and categories|length == 0 %}
+            {% block nova_search_empty %}
+                <div class="nova-search-empty">
+                    <p class="nova-search-empty-title">{{ 'novaSearch.noResults'|trans({ '%term%': term }) }}</p>
+                    <p class="nova-search-empty-hint">{{ 'novaSearch.noResultsHint'|trans }}</p>
+                </div>
+            {% endblock %}
+        {% else %}
+            <div class="nova-search-layout">
+                {% if categories|length > 0 or (manufacturers and manufacturers|length > 1) %}
+                    {% block nova_search_aside %}
+                        <aside class="nova-search-aside">
+                            {% if categories|length > 0 %}
+                                <div class="nova-search-section">
+                                    <p class="nova-search-heading">{{ 'novaSearch.categories'|trans }}</p>
+                                    <ul class="nova-search-categories list-unstyled">
+                                        {% for category in categories %}
+                                            {% set path = category.breadcrumb|slice(1, -1) %}
+                                            <li>
+                                                <a class="nova-search-link nova-search-category" href="{{ category_url(category) }}">
+                                                    <span class="nova-search-hl">{{ category.translated.name }}</span>
+                                                    {% if path|length > 0 %}
+                                                        <small class="nova-search-category-path">{{ path|join(' › ') }}</small>
+                                                    {% endif %}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+
+                            {% if manufacturers and manufacturers|length > 1 %}
+                                <div class="nova-search-section">
+                                    <p class="nova-search-heading">{{ 'novaSearch.manufacturers'|trans }}</p>
+                                    <div class="nova-search-chips">
+                                        {% for manufacturer in manufacturers %}
+                                            {% set isActive = manufacturer.id in activeManufacturers %}
+                                            <button type="button"
+                                                    class="nova-search-chip{% if isActive %} is-active{% endif %}"
+                                                    data-nova-search-manufacturer="{{ manufacturer.id }}"
+                                                    aria-pressed="{{ isActive ? 'true' : 'false' }}">
+                                                {{ manufacturer.translated.name }}
+                                            </button>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </aside>
+                    {% endblock %}
+                {% endif %}
+
+                {% block nova_search_main %}
+                    <div class="nova-search-main">
+                        {% if total > 0 %}
+                            <p class="nova-search-count" role="status">
+                                {{ 'novaSearch.count'|trans({ '%count%': total }) }}
+                            </p>
+
+                            <ul class="nova-search-products list-unstyled">
+                                {% for product in products %}
+                                    {% block nova_search_product %}
+                                        {% set name = product.translated.name %}
+                                        {% set price = product.calculatedPrice %}
+                                        {% set isFrom = product.calculatedPrices|length > 1 or (product.childCount > 0 and product.variantListingConfig.displayParent) %}
+                                        {% if product.calculatedPrices|length > 1 %}
+                                            {% set price = product.calculatedPrices.last %}
+                                        {% endif %}
+
+                                        <li>
+                                            <a class="nova-search-link nova-search-product" href="{{ seoUrl('frontend.detail.page', { productId: product.id }) }}">
+                                                <span class="nova-search-image">
+                                                    {% if product.cover.media %}
+                                                        {% sw_thumbnails 'nova-search-thumbnail' with {
+                                                            media: product.cover.media,
+                                                            sizes: { default: '180px' },
+                                                            attributes: { alt: name, loading: 'lazy', class: 'nova-search-img' }
+                                                        } %}
+                                                    {% else %}
+                                                        {% sw_icon 'placeholder' style { size: 'fluid' } %}
+                                                    {% endif %}
+                                                </span>
+                                                <span class="nova-search-name nova-search-hl">{{ name }}</span>
+                                                {% if product.variation|length > 0 %}
+                                                    <span class="nova-search-variant">
+                                                        {%- for v in product.variation %}{{ v.option }}{% if not loop.last %}, {% endif %}{% endfor -%}
+                                                    </span>
+                                                {% endif %}
+                                                <span class="nova-search-price">
+                                                    {% if isFrom %}{{ 'listing.listingTextFrom'|trans }} {% endif %}
+                                                    {{ price.unitPrice|currency }}{{ 'general.star'|trans|sw_sanitize }}
+                                                    {% if price.listPrice and price.listPrice.percentage > 0 %}
+                                                        <del class="nova-search-list-price">{{ price.listPrice.price|currency }}</del>
+                                                    {% endif %}
+                                                </span>
+                                            </a>
+                                        </li>
+                                    {% endblock %}
+                                {% endfor %}
+                            </ul>
+
+                            <div class="nova-search-footer">
+                                <a class="btn btn-primary nova-search-link nova-search-all" href="{{ path('frontend.search.page', { search: term }) }}">
+                                    {{ 'novaSearch.showAll'|trans({ '%count%': total }) }}
+                                </a>
+                            </div>
+                        {% else %}
+                            <p class="nova-search-count">{{ 'novaSearch.noProducts'|trans }}</p>
+                        {% endif %}
+                    </div>
+                {% endblock %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

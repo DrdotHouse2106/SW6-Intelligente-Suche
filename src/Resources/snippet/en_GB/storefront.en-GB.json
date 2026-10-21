@@ -1,0 +1,13 @@
+{
+    "novaSearch": {
+        "categories": "Categories",
+        "manufacturers": "Brands",
+        "count": "{1} 1 product found|]1,Inf[ %count% products found",
+        "showAll": "{1} Show result|]1,Inf[ Show all %count% results",
+        "noResults": "No results for “%term%”",
+        "noResultsHint": "Check the spelling or try a more general term.",
+        "noProducts": "No products found – maybe one of the categories helps.",
+        "close": "Close search results",
+        "loading": "Searching …"
+    }
+}

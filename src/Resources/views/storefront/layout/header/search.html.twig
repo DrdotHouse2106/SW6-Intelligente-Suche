@@ -1,0 +1,27 @@
+{% sw_extends '@Storefront/storefront/layout/header/search.html.twig' %}
+
+{#
+ # Ersetzt Shopwares Suchvorschläge durch die Sofortsuche.
+ # Das Formular ist identisch, nur „data-search-widget“ wird durch „data-nova-search“ ersetzt –
+ # so lädt Shopware sein eigenes Vorschlags-Plugin nicht zusätzlich.
+ #}
+{% block layout_header_search_form %}
+    {% if config('NovaSearch.config.active') is same as(false) %}
+        {{ parent() }}
+    {% else %}
+        {% set novaSearchOptions = {
+            url: path('frontend.nova-search.instant'),
+            minChars: shopware.minSearchLength,
+            debounce: config('NovaSearch.config.debounce') ?? 180
+        } %}
+
+        <form action="{{ path('frontend.search.page') }}"
+              method="get"
+              data-nova-search="true"
+              data-nova-search-options="{{ novaSearchOptions|json_encode }}"
+              class="header-search-form js-search-form"
+              role="search">
+            {{ block('layout_header_search_input_group') }}
+        </form>
+    {% endif %}
+{% endblock %}

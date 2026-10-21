@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+
+    <card>
+        <title>Instant search</title>
+        <title lang="de-DE">Sofortsuche</title>
+
+        <input-field type="bool">
+            <name>active</name>
+            <label>Use instant search</label>
+            <label lang="de-DE">Sofortsuche verwenden</label>
+            <helpText lang="de-DE">Aus = Shopwares Standard-Suchvorschläge.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="int">
+            <name>productLimit</name>
+            <label>Number of products in the panel</label>
+            <label lang="de-DE">Anzahl Produkte im Ergebnisfenster</label>
+            <defaultValue>12</defaultValue>
+            <min>1</min>
+            <max>48</max>
+        </input-field>
+
+        <input-field type="bool">
+            <name>showCategories</name>
+            <label>Show matching categories</label>
+            <label lang="de-DE">Passende Kategorien anzeigen</label>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
+            <name>showManufacturers</name>
+            <label>Show brand filter</label>
+            <label lang="de-DE">Herstellerfilter anzeigen</label>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="int">
+            <name>debounce</name>
+            <label>Delay after typing (ms)</label>
+            <label lang="de-DE">Wartezeit nach Tastendruck (ms)</label>
+            <helpText lang="de-DE">Kleiner = schnellere Reaktion, größer = weniger Serverlast. Empfohlen: 150–250.</helpText>
+            <defaultValue>180</defaultValue>
+            <min>0</min>
+            <max>1000</max>
+        </input-field>
+    </card>
+</config>
