@@ -132,6 +132,34 @@ Antwort immer `204`. Es gelten dieselben Regeln wie im Suchfenster: max. 20 Erei
 
 Auch Shopwares Standard-Route `/store-api/search` nutzt das gelernte Ranking und gespeicherte Umschreibungen (die Plugin-Logik sitzt im Such-Builder). Dort wird nichts gezählt – die App kann bei Fehlern also gefahrlos darauf zurückfallen.
 
+## Suchdaten exportieren
+
+Alle gesammelten Daten lassen sich als CSV exportieren – zur Auswertung in Excel oder zur Analyse durch Claude:
+
+```bash
+bin/console nova-search:export                       # alles, alle Verkaufskanäle
+bin/console nova-search:export --days=90             # nur die letzten 90 Tage
+bin/console nova-search:export --type=terms --min-searches=3
+bin/console nova-search:export --sales-channel=<ID> --output=/tmp/export
+```
+
+| Datei | Inhalt |
+|---|---|
+| `suchbegriffe.csv` | Begriff, Suchen, Treffer (zuletzt), Klicks, Warenkorb, Käufe, Klickrate, erstmals/zuletzt gesucht |
+| `suchbegriffe-produkte.csv` | Begriff × Produkt (Nummer, Name) mit Klicks, Warenkorb, Käufen |
+| `claude-umschreibungen.csv` | Begriffe ohne Treffer, Umschreibung durch Claude, Status, Treffer |
+
+| Option | Bedeutung |
+|---|---|
+| `--type` | `terms`, `products`, `rewrites` (mehrfach möglich, Standard: alle) |
+| `--sales-channel` | nur diese Verkaufskanal-ID(s) |
+| `--days` | nur Einträge der letzten N Tage |
+| `--min-searches` | Suchbegriffe erst ab N Suchen |
+| `--output` | Zielordner (Standard `nova-search-export`) |
+| `--delimiter` | Trennzeichen (Standard `;` für deutsches Excel) |
+
+Die Dateien sind UTF-8 mit BOM (Umlaute in Excel korrekt). Suchbegriffe, die Excel als Formel ausführen würde (z. B. `=…`), werden mit einem Apostroph entschärft. Sie enthalten **keine Kundendaten** – nur Suchbegriffe, Produkte und Zähler.
+
 ## Datenschutz
 
 - **Keine personenbezogenen Daten:** gespeichert werden nur Suchbegriffe, Produkt-IDs und Zähler – keine IP-Adressen, Kunden-, Bestell- oder Sitzungs-IDs. Begriffe, die wie E-Mail-Adressen oder Telefonnummern aussehen, werden nie gespeichert.

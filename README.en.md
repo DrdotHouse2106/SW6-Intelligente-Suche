@@ -49,6 +49,10 @@ Shopware's own `/store-api/search` also uses the learned ranking and rewrites (n
 
 With the "Dynamic monthly delivery dates" plugin and its "show in listings" option enabled, search cards show the next shipping date.
 
+## Exporting search data
+
+`bin/console nova-search:export` writes `suchbegriffe.csv` (terms with searches, hits, clicks, carts, orders, CTR), `suchbegriffe-produkte.csv` (term × product) and `claude-umschreibungen.csv` (Claude rewrites). Options: `--type=terms|products|rewrites`, `--sales-channel=<id>`, `--days=N`, `--min-searches=N`, `--output=<dir>`, `--delimiter=;`. UTF-8 with BOM, formula-like values are escaped, no customer data.
+
 ## Compatibility
 
 Shopware 6.7.x (checked against 6.7.15). License: MIT.
