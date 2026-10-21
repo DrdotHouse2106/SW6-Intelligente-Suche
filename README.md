@@ -2,25 +2,36 @@
 
 🇬🇧 [English version](README.en.md)
 
-Schnelle **Sofortsuche** für Shopware 6.7: Schon beim Tippen öffnet sich unter dem Suchfeld ein Ergebnisfenster mit Produktbildern, Preisen, passenden Kategorien und einem Herstellerfilter – ohne externen Suchdienst und ohne zusätzliche Kosten.
+Schnelles **Suchfenster** für Shopware 6.7: Ein Klick ins Suchfeld öffnet ein großes Fenster mit Produktbildern, Filtern und Sortierung – ohne externen Suchdienst und ohne laufende Kosten.
 
 ## Funktionen
 
-- **Ergebnisfenster beim Tippen** mit Bild, Name, Variante, Preis (inkl. „Ab“-Preis und Streichpreis)
-- **Passende Kategorien** mit Pfad, z. B. „Bremsanlage – 2CV6“ und „Bremsanlage – Dyane/Acady“
-- **Herstellerfilter** als Chips direkt im Fenster
-- **Suchwörter hervorgehoben** in Produkt- und Kategorienamen
-- **Tastatur:** ↓/↑ durch die Treffer, Esc schließt, Enter öffnet die volle Ergebnisseite
-- **Smartphone:** Fenster über die volle Breite, Produkte in zwei Spalten
+**Beim Öffnen (noch nichts getippt)**
+- **Beliebte Suchanfragen** – ein Klick startet die Suche
+- **Aktuelle Highlights** – ausgewählte Produkte als Slider mit Bild und Preis
+
+**Beim Tippen**
+- **Produktkarten mit Bild**, Name, Variante, Preis (inkl. „Ab“-Preis, Streichpreis und Rabatt-Markierung)
+- **Filter „Marken“** mit Trefferanzahl und **Preisfilter** mit Schieberegler und Eingabefeldern
+- **Sortierung** (Relevanz, Preis, Name … – wie in Shopware eingestellt)
+- **Passende Kategorien** als Schnellzugriff, z. B. „Bremsanlage 2CV6“
+- **Automatisches Nachladen** weiterer Produkte beim Scrollen
+- Suchwörter werden hervorgehoben
+
+**Bedienung**
+- Enter öffnet die volle Ergebnisseite, Esc oder ✕ schließt das Fenster
+- ↓/↑ durch die Treffer, Fokus bleibt im Fenster
+- **Smartphone:** Fenster über den ganzen Bildschirm, zwei Produktspalten, Filter hinter einem „Filter“-Button, Lupen-Symbol öffnet das Fenster direkt
 - Passt sich automatisch an das Theme an (Farben, Eckenradien)
 
 ## Schnell – auch ohne OpenSearch
 
 - Nutzt Shopwares eigene Produktsuche (MySQL oder – falls vorhanden – OpenSearch)
-- Berechnet nur die Hersteller-Facette; Eigenschafts-, Preis- und Bewertungsfilter werden für das Fenster abgeschaltet
+- Berechnet nur Marken- und Preisfilter; Eigenschafts-, Bewertungs- und Versandfilter werden für das Fenster abgeschaltet
+- Beim Nachladen werden gar keine Filter berechnet
 - Antworten sind **HTTP-Cache-fähig** und werden zusätzlich im Browser zwischengespeichert
 - Anfragen werden beim Tippen gebündelt (Verzögerung einstellbar), veraltete Anfragen abgebrochen
-- Ca. 6 KB JavaScript, wird nur auf Seiten mit Suchfeld geladen
+- Ca. 9,5 KB JavaScript, Inhalte werden erst beim ersten Öffnen geladen
 
 ## Installation
 
@@ -44,10 +55,12 @@ bin/console cache:clear
 | Einstellung | Standard | Bedeutung |
 |---|---|---|
 | Sofortsuche verwenden | an | Aus = Shopwares Standard-Suchvorschläge |
-| Anzahl Produkte | 12 | Produkte im Ergebnisfenster (1–48) |
+| Produkte pro Ladeschritt | 24 | Beim Scrollen wird automatisch nachgeladen |
 | Passende Kategorien anzeigen | an | |
-| Herstellerfilter anzeigen | an | |
+| Filter „Marken“ anzeigen | an | |
 | Wartezeit nach Tastendruck | 180 ms | Kleiner = schnellere Reaktion, größer = weniger Serverlast |
+| Beliebte Suchanfragen | – | Eine pro Zeile, z. B. `chrom`, `scheinwerfer`, `rolldach` (max. 12) |
+| Highlight-Produkte | – | Produkte für „Aktuelle Highlights“ |
 
 Die Mindestlänge des Suchbegriffs kommt aus Shopwares Sucheinstellungen (*Einstellungen → Suche*).
 
@@ -71,7 +84,17 @@ npm install
 npm run build
 ```
 
-Templates erweitern: `nova-search/results.html.twig` enthält die Blöcke `nova_search_results`, `nova_search_empty`, `nova_search_aside`, `nova_search_main` und `nova_search_product`. Nach jeder Anzeige feuert das Storefront-Event `novaSearch/render`.
+Templates erweitern (`views/storefront/nova-search/`):
+
+| Template | Inhalt | Blöcke |
+|---|---|---|
+| `start.html.twig` | Startansicht | `nova_search_start`, `nova_search_popular`, `nova_search_highlights` |
+| `results.html.twig` | Trefferansicht | `nova_search_results`, `nova_search_empty`, `nova_search_filters`, `nova_search_main` |
+| `card.html.twig` | Produktkarte | `nova_search_card` |
+| `items.html.twig` | Nachgeladene Karten | – |
+| `layout/header/search.html.twig` | Rahmen des Fensters | `nova_search_layer_template` |
+
+Nach jeder Anzeige feuert das Storefront-Event `novaSearch/render`.
 
 ## Kompatibilität
 

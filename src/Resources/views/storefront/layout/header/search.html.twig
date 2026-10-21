@@ -1,7 +1,7 @@
 {% sw_extends '@Storefront/storefront/layout/header/search.html.twig' %}
 
 {#
- # Ersetzt Shopwares Suchvorschläge durch die Sofortsuche.
+ # Ersetzt Shopwares Suchvorschläge durch das Suchfenster.
  # Das Formular ist identisch, nur „data-search-widget“ wird durch „data-nova-search“ ersetzt –
  # so lädt Shopware sein eigenes Vorschlags-Plugin nicht zusätzlich.
  #}
@@ -11,6 +11,7 @@
     {% else %}
         {% set novaSearchOptions = {
             url: path('frontend.nova-search.instant'),
+            searchUrl: path('frontend.search.page'),
             minChars: shopware.minSearchLength,
             debounce: config('NovaSearch.config.debounce') ?? 180
         } %}
@@ -22,6 +23,32 @@
               class="header-search-form js-search-form"
               role="search">
             {{ block('layout_header_search_input_group') }}
+
+            {% block nova_search_layer_template %}
+                <template data-nova-search-template>
+                    <div class="nova-search-backdrop"></div>
+                    <div class="nova-search-layer" role="dialog" aria-modal="true" aria-label="{{ 'novaSearch.search'|trans|striptags }}">
+                        <div class="nova-search-layer-inner">
+                            <div class="nova-search-bar">
+                                <span class="nova-search-bar-icon">{% sw_icon 'search' %}</span>
+                                <input type="search"
+                                       class="nova-search-input"
+                                       name="search"
+                                       autocomplete="off"
+                                       autocapitalize="off"
+                                       spellcheck="false"
+                                       enterkeyhint="search"
+                                       placeholder="{{ 'novaSearch.placeholder'|trans|striptags }}"
+                                       aria-label="{{ 'header.searchPlaceholder'|trans|striptags }}">
+                                <button type="button" class="nova-search-close" aria-label="{{ 'novaSearch.close'|trans|striptags }}">
+                                    {% sw_icon 'x' %}
+                                </button>
+                            </div>
+                            <div class="nova-search-body" aria-live="polite"></div>
+                        </div>
+                    </div>
+                </template>
+            {% endblock %}
         </form>
     {% endif %}
 {% endblock %}

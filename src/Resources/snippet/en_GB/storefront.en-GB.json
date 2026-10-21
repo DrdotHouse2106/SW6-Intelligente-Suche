@@ -1,13 +1,26 @@
 {
     "novaSearch": {
-        "categories": "Categories",
         "manufacturers": "Brands",
-        "count": "{1} 1 product found|]1,Inf[ %count% products found",
-        "showAll": "{1} Show result|]1,Inf[ Show all %count% results",
+        "count": "{1} <strong>1</strong> result found|]1,Inf[ <strong>%count%</strong> results found",
         "noResults": "No results for “%term%”",
         "noResultsHint": "Check the spelling or try a more general term.",
         "noProducts": "No products found – maybe one of the categories helps.",
         "close": "Close search results",
-        "loading": "Searching …"
+        "loading": "Searching …",
+        "popular": "Popular searches",
+        "highlights": "Current highlights",
+        "price": "Price",
+        "priceFrom": "Price from",
+        "priceTo": "Price to",
+        "filter": "Filter",
+        "sortBy": "Sorted by:",
+        "resetFilters": "Reset filters",
+        "showMore": "Show more",
+        "loadMore": "Load more results",
+        "previous": "Previous",
+        "next": "Next",
+        "startHint": "What are you looking for? Enter a search term.",
+        "placeholder": "Search …",
+        "search": "Search"
     }
 }

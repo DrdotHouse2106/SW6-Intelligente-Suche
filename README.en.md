@@ -2,17 +2,17 @@
 
 🇩🇪 [Deutsche Version](README.md)
 
-Fast **instant search** for Shopware 6.7: while typing, a results panel opens below the search field with product images, prices, matching categories and a brand filter – no external search service, no extra cost.
+Fast **search window** for Shopware 6.7: clicking the search field opens a large window with product images, filters and sorting – no external search service, no running costs.
 
 ## Features
 
-- Results panel while typing (image, name, variant, price incl. "from" and list price)
-- Matching categories with their path
-- Brand filter chips
+- Start view: popular searches and highlight products (slider)
+- While typing: product cards with images, brand filter with counts, price slider, sorting, matching categories, infinite scroll
+- Mobile: full-screen window, two columns, collapsible filters
 - Highlighted search words
 - Keyboard: ↓/↑ through results, Esc closes, Enter opens the full result page
 - Mobile: full-width panel, two product columns
-- Uses Shopware's own product search (MySQL or OpenSearch), computes only the brand facet, HTTP-cacheable, ~6 KB JavaScript
+- Uses Shopware's own product search (MySQL or OpenSearch), computes only the brand and price facets, HTTP-cacheable, ~9.5 KB JavaScript
 
 ## Installation
 

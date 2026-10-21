@@ -1,0 +1,46 @@
+{# Produktkarte im Suchfenster – Variable: product #}
+{% block nova_search_card %}
+    {% set name = product.translated.name %}
+    {% set price = product.calculatedPrice %}
+    {% set isFrom = product.calculatedPrices|length > 1 or (product.childCount > 0 and product.variantListingConfig.displayParent) %}
+    {% if product.calculatedPrices|length > 1 %}
+        {% set price = product.calculatedPrices.last %}
+    {% endif %}
+    {% set hasListPrice = price.listPrice and price.listPrice.percentage > 0 %}
+
+    <li class="nova-search-card-item">
+        <a class="nova-search-card nova-search-focusable" href="{{ seoUrl('frontend.detail.page', { productId: product.id }) }}">
+            <span class="nova-search-card-media">
+                {% if product.cover.media %}
+                    {% sw_thumbnails 'nova-search-thumbnail' with {
+                        media: product.cover.media,
+                        sizes: { xs: '50vw', sm: '33vw', md: '25vw', default: '220px' },
+                        attributes: { alt: name, loading: 'lazy', class: 'nova-search-card-img' }
+                    } %}
+                {% else %}
+                    {% sw_icon 'placeholder' style { size: 'fluid' } %}
+                {% endif %}
+
+                {% if hasListPrice %}
+                    <span class="nova-search-card-flag">-{{ price.listPrice.percentage|round }} %</span>
+                {% endif %}
+            </span>
+
+            <span class="nova-search-card-title nova-search-hl">{{ name }}</span>
+
+            {% if product.variation|length > 0 %}
+                <span class="nova-search-card-variant">
+                    {%- for v in product.variation %}{{ v.option }}{% if not loop.last %}, {% endif %}{% endfor -%}
+                </span>
+            {% endif %}
+
+            <span class="nova-search-card-price">
+                {% if isFrom %}{{ 'listing.listingTextFrom'|trans }} {% endif %}
+                {{- price.unitPrice|currency }}{{ 'general.star'|trans|sw_sanitize }}
+                {% if hasListPrice %}
+                    <del class="nova-search-card-list-price">{{ price.listPrice.price|currency }}</del>
+                {% endif %}
+            </span>
+        </a>
+    </li>
+{% endblock %}

@@ -1,13 +1,26 @@
 {
     "novaSearch": {
-        "categories": "Kategorien",
-        "manufacturers": "Hersteller",
-        "count": "{1} 1 Artikel gefunden|]1,Inf[ %count% Artikel gefunden",
-        "showAll": "{1} Ergebnis anzeigen|]1,Inf[ Alle %count% Ergebnisse anzeigen",
+        "manufacturers": "Marken",
+        "count": "{1} <strong>1</strong> Ergebnis gefunden|]1,Inf[ <strong>%count%</strong> Ergebnisse gefunden",
         "noResults": "Keine Treffer für „%term%“",
         "noResultsHint": "Prüfe die Schreibweise oder versuche einen allgemeineren Begriff.",
         "noProducts": "Keine Artikel gefunden – vielleicht hilft eine der Kategorien.",
         "close": "Suchergebnisse schließen",
-        "loading": "Suche läuft …"
+        "loading": "Suche läuft …",
+        "popular": "Beliebte Suchanfragen",
+        "highlights": "Aktuelle Highlights",
+        "price": "Preis",
+        "priceFrom": "Preis von",
+        "priceTo": "Preis bis",
+        "filter": "Filter",
+        "sortBy": "Sortiert nach:",
+        "resetFilters": "Filter zurücksetzen",
+        "showMore": "Mehr anzeigen",
+        "loadMore": "Weitere Ergebnisse laden",
+        "previous": "Zurück",
+        "next": "Weiter",
+        "startHint": "Was suchst du? Gib einen Suchbegriff ein.",
+        "placeholder": "Suche …",
+        "search": "Suche"
     }
 }

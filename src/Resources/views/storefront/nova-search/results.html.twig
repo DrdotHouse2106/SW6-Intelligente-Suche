@@ -1,7 +1,7 @@
-{# Ergebnisfenster der Sofortsuche – wird per JavaScript in das Fenster unter dem Suchfeld geladen #}
+{# Trefferansicht des Suchfensters #}
 {% block nova_search_results %}
     <div class="nova-search-results" data-nova-search-total="{{ total }}">
-        {% if total == 0 and categories|length == 0 %}
+        {% if total == 0 and categories|length == 0 and filterCount == 0 %}
             {% block nova_search_empty %}
                 <div class="nova-search-empty">
                     <p class="nova-search-empty-title">{{ 'novaSearch.noResults'|trans({ '%term%': term }) }}</p>
@@ -9,44 +9,65 @@
                 </div>
             {% endblock %}
         {% else %}
-            <div class="nova-search-layout">
-                {% if categories|length > 0 or (manufacturers and manufacturers|length > 1) %}
-                    {% block nova_search_aside %}
-                        <aside class="nova-search-aside">
-                            {% if categories|length > 0 %}
-                                <div class="nova-search-section">
-                                    <p class="nova-search-heading">{{ 'novaSearch.categories'|trans }}</p>
-                                    <ul class="nova-search-categories list-unstyled">
-                                        {% for category in categories %}
-                                            {% set path = category.breadcrumb|slice(1, -1) %}
+            <div class="nova-search-layout{% if manufacturers|length == 0 and not priceRange %} no-filters{% endif %}">
+                {% if manufacturers|length > 0 or priceRange %}
+                    {% block nova_search_filters %}
+                        <aside class="nova-search-filters" id="nova-search-filters">
+                            {% if manufacturers|length > 0 %}
+                                <section class="nova-search-facet">
+                                    <h2 class="nova-search-facet-title">{{ 'novaSearch.manufacturers'|trans }}</h2>
+                                    <ul class="list-unstyled nova-search-facet-list{% if manufacturers|length > 8 %} is-collapsed{% endif %}">
+                                        {% for manufacturer in manufacturers %}
                                             <li>
-                                                <a class="nova-search-link nova-search-category" href="{{ category_url(category) }}">
-                                                    <span class="nova-search-hl">{{ category.translated.name }}</span>
-                                                    {% if path|length > 0 %}
-                                                        <small class="nova-search-category-path">{{ path|join(' › ') }}</small>
-                                                    {% endif %}
-                                                </a>
+                                                <label class="nova-search-check">
+                                                    <input type="checkbox" class="form-check-input nova-search-focusable"
+                                                           value="{{ manufacturer.id }}"
+                                                           data-nova-search-manufacturer
+                                                           {% if manufacturer.active %}checked{% endif %}>
+                                                    <span class="nova-search-check-label">{{ manufacturer.name }}</span>
+                                                    <span class="nova-search-check-count">{{ manufacturer.count }}</span>
+                                                </label>
                                             </li>
                                         {% endfor %}
                                     </ul>
-                                </div>
+                                    {% if manufacturers|length > 8 %}
+                                        <button type="button" class="nova-search-more" data-nova-search-expand>{{ 'novaSearch.showMore'|trans }}</button>
+                                    {% endif %}
+                                </section>
                             {% endif %}
 
-                            {% if manufacturers and manufacturers|length > 1 %}
-                                <div class="nova-search-section">
-                                    <p class="nova-search-heading">{{ 'novaSearch.manufacturers'|trans }}</p>
-                                    <div class="nova-search-chips">
-                                        {% for manufacturer in manufacturers %}
-                                            {% set isActive = manufacturer.id in activeManufacturers %}
-                                            <button type="button"
-                                                    class="nova-search-chip{% if isActive %} is-active{% endif %}"
-                                                    data-nova-search-manufacturer="{{ manufacturer.id }}"
-                                                    aria-pressed="{{ isActive ? 'true' : 'false' }}">
-                                                {{ manufacturer.translated.name }}
-                                            </button>
-                                        {% endfor %}
+                            {% if priceRange and priceRange.max > priceRange.min %}
+                                <section class="nova-search-facet">
+                                    <h2 class="nova-search-facet-title">{{ 'novaSearch.price'|trans }}</h2>
+                                    <div class="nova-search-range" data-nova-search-price data-min="{{ priceRange.min }}" data-max="{{ priceRange.max }}">
+                                        <div class="nova-search-range-slider">
+                                            <input type="range" min="{{ priceRange.min }}" max="{{ priceRange.max }}" step="1"
+                                                   value="{{ priceRange.from ?? priceRange.min }}" data-nova-search-range="from"
+                                                   aria-label="{{ 'novaSearch.priceFrom'|trans|striptags }}">
+                                            <input type="range" min="{{ priceRange.min }}" max="{{ priceRange.max }}" step="1"
+                                                   value="{{ priceRange.to ?? priceRange.max }}" data-nova-search-range="to"
+                                                   aria-label="{{ 'novaSearch.priceTo'|trans|striptags }}">
+                                        </div>
+                                        <div class="nova-search-range-inputs">
+                                            <label class="nova-search-range-field">
+                                                <span class="visually-hidden">{{ 'novaSearch.priceFrom'|trans }}</span>
+                                                <input type="number" inputmode="numeric" class="form-control" min="{{ priceRange.min }}" max="{{ priceRange.max }}"
+                                                       value="{{ priceRange.from ?? priceRange.min }}" data-nova-search-price-input="from">
+                                                <span>{{ context.currency.symbol }}</span>
+                                            </label>
+                                            <label class="nova-search-range-field">
+                                                <span class="visually-hidden">{{ 'novaSearch.priceTo'|trans }}</span>
+                                                <input type="number" inputmode="numeric" class="form-control" min="{{ priceRange.min }}" max="{{ priceRange.max }}"
+                                                       value="{{ priceRange.to ?? priceRange.max }}" data-nova-search-price-input="to">
+                                                <span>{{ context.currency.symbol }}</span>
+                                            </label>
+                                        </div>
                                     </div>
-                                </div>
+                                </section>
+                            {% endif %}
+
+                            {% if filterCount > 0 %}
+                                <button type="button" class="nova-search-reset" data-nova-search-reset>{{ 'novaSearch.resetFilters'|trans }}</button>
                             {% endif %}
                         </aside>
                     {% endblock %}
@@ -54,60 +75,56 @@
 
                 {% block nova_search_main %}
                     <div class="nova-search-main">
-                        {% if total > 0 %}
+                        <div class="nova-search-meta">
                             <p class="nova-search-count" role="status">
-                                {{ 'novaSearch.count'|trans({ '%count%': total }) }}
+                                {{ 'novaSearch.count'|trans({ '%count%': total })|raw }}
                             </p>
 
-                            <ul class="nova-search-products list-unstyled">
-                                {% for product in products %}
-                                    {% block nova_search_product %}
-                                        {% set name = product.translated.name %}
-                                        {% set price = product.calculatedPrice %}
-                                        {% set isFrom = product.calculatedPrices|length > 1 or (product.childCount > 0 and product.variantListingConfig.displayParent) %}
-                                        {% if product.calculatedPrices|length > 1 %}
-                                            {% set price = product.calculatedPrices.last %}
-                                        {% endif %}
+                            {% if manufacturers|length > 0 or priceRange %}
+                                <button type="button" class="nova-search-filter-toggle" aria-controls="nova-search-filters" aria-expanded="false" data-nova-search-filter-toggle>
+                                    {% sw_icon 'filter' style { size: 'sm' } %}
+                                    {{ 'novaSearch.filter'|trans }}{% if filterCount > 0 %} ({{ filterCount }}){% endif %}
+                                </button>
+                            {% endif %}
 
-                                        <li>
-                                            <a class="nova-search-link nova-search-product" href="{{ seoUrl('frontend.detail.page', { productId: product.id }) }}">
-                                                <span class="nova-search-image">
-                                                    {% if product.cover.media %}
-                                                        {% sw_thumbnails 'nova-search-thumbnail' with {
-                                                            media: product.cover.media,
-                                                            sizes: { default: '180px' },
-                                                            attributes: { alt: name, loading: 'lazy', class: 'nova-search-img' }
-                                                        } %}
-                                                    {% else %}
-                                                        {% sw_icon 'placeholder' style { size: 'fluid' } %}
-                                                    {% endif %}
-                                                </span>
-                                                <span class="nova-search-name nova-search-hl">{{ name }}</span>
-                                                {% if product.variation|length > 0 %}
-                                                    <span class="nova-search-variant">
-                                                        {%- for v in product.variation %}{{ v.option }}{% if not loop.last %}, {% endif %}{% endfor -%}
-                                                    </span>
-                                                {% endif %}
-                                                <span class="nova-search-price">
-                                                    {% if isFrom %}{{ 'listing.listingTextFrom'|trans }} {% endif %}
-                                                    {{ price.unitPrice|currency }}{{ 'general.star'|trans|sw_sanitize }}
-                                                    {% if price.listPrice and price.listPrice.percentage > 0 %}
-                                                        <del class="nova-search-list-price">{{ price.listPrice.price|currency }}</del>
-                                                    {% endif %}
-                                                </span>
-                                            </a>
-                                        </li>
-                                    {% endblock %}
+                            {% if sortings and sortings|length > 1 and total > 1 %}
+                                <label class="nova-search-sort">
+                                    <span>{{ 'novaSearch.sortBy'|trans }}</span>
+                                    <select class="form-select form-select-sm" data-nova-search-sort>
+                                        {% for sorting in sortings %}
+                                            <option value="{{ sorting.key }}"{% if sorting.key == currentSorting %} selected{% endif %}>{{ sorting.translated.label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            {% endif %}
+                        </div>
+
+                        {% if categories|length > 0 %}
+                            <div class="nova-search-categories">
+                                {% for category in categories %}
+                                    {% set path = category.breadcrumb|slice(1, -1) %}
+                                    <a class="nova-search-category nova-search-focusable" href="{{ category_url(category) }}">
+                                        <span class="nova-search-hl">{{ category.translated.name }}</span>
+                                        {% if path|length > 0 %}<small>{{ path|last }}</small>{% endif %}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if total > 0 %}
+                            <ul class="nova-search-grid list-unstyled" data-nova-search-grid data-nova-search-has-more="{{ hasMore ? '1' : '0' }}">
+                                {% for product in products %}
+                                    {% sw_include '@NovaSearch/storefront/nova-search/card.html.twig' with { product: product } %}
                                 {% endfor %}
                             </ul>
 
-                            <div class="nova-search-footer">
-                                <a class="btn btn-primary nova-search-link nova-search-all" href="{{ path('frontend.search.page', { search: term }) }}">
-                                    {{ 'novaSearch.showAll'|trans({ '%count%': total }) }}
-                                </a>
-                            </div>
+                            {% if hasMore %}
+                                <div class="nova-search-loadmore" data-nova-search-sentinel>
+                                    <button type="button" class="btn btn-outline-primary" data-nova-search-loadmore>{{ 'novaSearch.loadMore'|trans }}</button>
+                                </div>
+                            {% endif %}
                         {% else %}
-                            <p class="nova-search-count">{{ 'novaSearch.noProducts'|trans }}</p>
+                            <p class="nova-search-hint">{{ 'novaSearch.noProducts'|trans }}</p>
                         {% endif %}
                     </div>
                 {% endblock %}

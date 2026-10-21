@@ -1,0 +1,6 @@
+{# Weitere Produktkarten beim Nachladen (Seite 2 ff.) #}
+<ul class="nova-search-page" data-nova-search-has-more="{{ hasMore ? '1' : '0' }}">
+    {% for product in products %}
+        {% sw_include '@NovaSearch/storefront/nova-search/card.html.twig' with { product: product } %}
+    {% endfor %}
+</ul>

@@ -1,0 +1,44 @@
+{# Startansicht des Suchfensters – bevor etwas getippt wird #}
+{% block nova_search_start %}
+    <div class="nova-search-start">
+        {% if popular|length > 0 %}
+            {% block nova_search_popular %}
+                <section class="nova-search-popular">
+                    <h2 class="nova-search-title">{{ 'novaSearch.popular'|trans }}</h2>
+                    <ul class="list-unstyled">
+                        {% for query in popular %}
+                            <li>
+                                <button type="button" class="nova-search-term nova-search-focusable" data-nova-search-term="{{ query }}">{{ query }}</button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endblock %}
+        {% endif %}
+
+        {% if highlights|length > 0 %}
+            {% block nova_search_highlights %}
+                <section class="nova-search-highlights">
+                    <h2 class="nova-search-title">{{ 'novaSearch.highlights'|trans }}</h2>
+                    <div class="nova-search-slider">
+                        <button type="button" class="nova-search-slider-btn is-prev" data-nova-search-slide="-1" aria-label="{{ 'novaSearch.previous'|trans|striptags }}">
+                            {% sw_icon 'arrow-head-left' %}
+                        </button>
+                        <ul class="nova-search-slider-track list-unstyled">
+                            {% for product in highlights %}
+                                {% sw_include '@NovaSearch/storefront/nova-search/card.html.twig' with { product: product } %}
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="nova-search-slider-btn is-next" data-nova-search-slide="1" aria-label="{{ 'novaSearch.next'|trans|striptags }}">
+                            {% sw_icon 'arrow-head-right' %}
+                        </button>
+                    </div>
+                </section>
+            {% endblock %}
+        {% endif %}
+
+        {% if popular|length == 0 and highlights|length == 0 %}
+            <p class="nova-search-hint">{{ 'novaSearch.startHint'|trans }}</p>
+        {% endif %}
+    </div>
+{% endblock %}
