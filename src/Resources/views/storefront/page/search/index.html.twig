@@ -1,0 +1,17 @@
+{% sw_extends '@Storefront/storefront/page/search/index.html.twig' %}
+
+{# Hinweis, wenn mit einer gespeicherten Umschreibung gesucht wurde (z. B. „bremsbelag ente“ → „bremsbelag 2cv“) #}
+{% block page_search_headline_text %}
+    {% set novaRewrite = page.listing.criteria.extension('novaSearchRewrite') %}
+    {% if novaRewrite %}
+        {{ 'search.headline'|trans({
+            '%count%': page.listing.total,
+            '%searchTerm%': novaRewrite.get('rewrite'),
+        }) }}
+        <small class="d-block mt-2 fs-6 fw-normal text-muted nova-search-rewrite">
+            {{ 'novaSearch.rewriteHintPage'|trans({ '%original%': novaRewrite.get('original') }) }}
+        </small>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

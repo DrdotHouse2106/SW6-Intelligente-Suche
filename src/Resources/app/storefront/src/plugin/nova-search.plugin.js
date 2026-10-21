@@ -1,14 +1,25 @@
+import NovaSearchTracker, { hasCookie } from './nova-search-tracker';
+
 const { PluginBaseClass } = window;
 
 /**
  * Suchfenster im Vollbild – öffnet sich beim Klick ins Suchfeld.
  *
- * Ohne Suchbegriff: beliebte Suchanfragen und Highlight-Produkte.
+ * Ohne Suchbegriff: beliebte Suchanfragen, zuletzt angesehene und Highlight-Produkte.
  * Mit Suchbegriff:  Filter (Marken, Preis), Sortierung, passende Kategorien und
  *                   Produktkarten, die beim Scrollen nachgeladen werden.
  *
  * Alle Inhalte kommen als HTML vom Server (Route frontend.nova-search.instant).
  * Anfragen werden verzögert, veraltete abgebrochen und Antworten zwischengespeichert.
+ *
+ * Lernen: Suchen (nach einer Tipp-Pause), Klicks und „In den Warenkorb“ nach einer Suche werden
+ * anonym an den Server gemeldet (nova-search-tracker.js). Auf Produktseiten wird die Liste
+ * „Zuletzt angesehen“ im localStorage gepflegt.
+ *
+ * Schnittstelle für andere Plugins (Events auf document):
+ *  - nova:search-open / nova:search-close     Suchfenster geöffnet / geschlossen
+ *  - nova:search            { term, total }  Ergebnis angezeigt (nach Tipp-Pause, je Begriff einmal)
+ *  - nova:products-rendered { container }    Produktkarten eingefügt
  */
 export default class NovaSearchPlugin extends PluginBaseClass {
     static options = {
@@ -19,9 +30,24 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         inputSelector: 'input[type=search]',
         toggleButtonSelector: '.js-search-toggle-btn',
         focusableSelector: '.nova-search-focusable',
+        trackUrl: '',
+        learning: true,
+        recentlyViewed: true,
+        recentlyViewedConsent: true,
+        recentStorageKey: 'nova-recently-viewed',
+        recentMax: 20,
+        searchSignalDelay: 1200,
     };
 
     init() {
+        this._tracker = new NovaSearchTracker(this.options.trackUrl, {
+            enabled: this.options.learning,
+            attributionAllowed: () => hasCookie('nova-search-learning'),
+        });
+
+        this._rememberProductView();
+        this._registerPageTracking();
+
         this._headerInput = this.el.querySelector(this.options.inputSelector);
         this._template = this.el.querySelector('[data-nova-search-template]');
         if (!this._headerInput || !this._template || !this.options.url) {
@@ -93,6 +119,7 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             }
         });
         this._body.addEventListener('click', (event) => this._onBodyClick(event));
+        this._body.addEventListener('click', (event) => this._onCardClick(event), true);
         this._body.addEventListener('change', (event) => this._onBodyChange(event));
         this._body.addEventListener('input', (event) => this._onBodyInput(event));
 
@@ -120,6 +147,8 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             this._layer.classList.add('is-open');
             this._backdrop.classList.add('is-open');
             document.documentElement.classList.add('nova-search-locked');
+            this._signaledTerms = new Set();
+            document.dispatchEvent(new CustomEvent('nova:search-open'));
         }
 
         this._input.value = term.trim();
@@ -134,6 +163,7 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         }
 
         this._abort();
+        this._emitSearchSignal();
         this._layer.classList.remove('is-open');
         this._backdrop.classList.remove('is-open');
         document.documentElement.classList.remove('nova-search-locked');
@@ -143,6 +173,8 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         if (this._lastFocus && this._lastFocus !== this._headerInput && document.contains(this._lastFocus)) {
             this._lastFocus.focus();
         }
+
+        document.dispatchEvent(new CustomEvent('nova:search-close'));
     }
 
     /* ---------- Eingabe ---------- */
@@ -161,6 +193,8 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             event.preventDefault();
             const term = this._input.value.trim();
             if (term.length >= this.options.minChars) {
+                // Die Suchergebnisseite zählt die Suche selbst – hier nicht doppelt melden
+                this._cancelSearchSignal();
                 window.location.href = `${this.options.searchUrl}?search=${encodeURIComponent(term)}`;
             }
         } else if (event.key === 'ArrowDown') {
@@ -310,6 +344,9 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             if (state.max !== null) params.set('max-price', state.max);
             if (state.order) params.set('order', state.order);
             if (state.page > 1) params.set('p', state.page);
+        } else {
+            const recent = this._recentIds().slice(0, 12);
+            if (recent.length) params.set('recent', recent.join('|'));
         }
         return params.toString();
     }
@@ -380,7 +417,11 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             const page = document.createElement('div');
             page.innerHTML = html;
             const list = page.querySelector('.nova-search-page');
-            grid.append(...list.children);
+            const added = [...list.children];
+            grid.append(...added);
+            if (added.length) {
+                document.dispatchEvent(new CustomEvent('nova:products-rendered', { detail: { container: grid } }));
+            }
             grid.setAttribute('data-nova-search-has-more', list.getAttribute('data-nova-search-has-more'));
             this._state.page = state.page;
             if (list.getAttribute('data-nova-search-has-more') !== '1') {
@@ -402,6 +443,148 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             this._observer.observe(sentinel);
         }
         this.$emitter.publish('novaSearch/render', { term: this._state.term, body: this._body });
+
+        if (this._body.querySelector('[data-product-information]')) {
+            document.dispatchEvent(new CustomEvent('nova:products-rendered', { detail: { container: this._body } }));
+        }
+
+        const results = this._body.querySelector('.nova-search-results');
+        if (results && this._state.page === 1 && this._state.term.length >= this.options.minChars) {
+            this._scheduleSearchSignal(
+                this._state.term,
+                Number(results.getAttribute('data-nova-search-total')) || 0,
+                results.hasAttribute('data-nova-search-rewritten')
+            );
+        }
+    }
+
+    /* ---------- Lernen: Suche, Klick, Warenkorb ---------- */
+
+    /** Suche erst nach einer Tipp-Pause melden – nicht bei jedem Zwischenstand */
+    _scheduleSearchSignal(term, total, rewritten) {
+        window.clearTimeout(this._signalTimer);
+        this._pendingSignal = { term, total, rewritten };
+        this._signalTimer = window.setTimeout(() => this._emitSearchSignal(), this.options.searchSignalDelay);
+    }
+
+    _cancelSearchSignal() {
+        window.clearTimeout(this._signalTimer);
+        this._pendingSignal = null;
+    }
+
+    _emitSearchSignal() {
+        window.clearTimeout(this._signalTimer);
+        const signal = this._pendingSignal;
+        this._pendingSignal = null;
+
+        // Je Begriff nur einmal pro geöffnetem Fenster (Filter/Sortierung ändern den Begriff nicht)
+        if (!signal || this._signaledTerms?.has(signal.term)) {
+            return;
+        }
+        this._signaledTerms?.add(signal.term);
+
+        document.dispatchEvent(new CustomEvent('nova:search', { detail: { term: signal.term, total: signal.total } }));
+        this._tracker.search(signal.term, signal.total, signal.rewritten);
+    }
+
+    /** Klick auf eine Produktkarte im Suchfenster */
+    _onCardClick(event) {
+        const card = event.target.closest('.nova-search-card');
+        const info = this._productInfo(card);
+        const term = this._state.term;
+        if (!info || term.length < this.options.minChars) {
+            return;
+        }
+
+        this._emitSearchSignal();
+        this._tracker.click(term, info.id);
+    }
+
+    /** Suchergebnisseite und „In den Warenkorb“ – überall im Shop */
+    _registerPageTracking() {
+        if (!this.options.learning) {
+            return;
+        }
+
+        if (window.activeRoute === 'frontend.search.page') {
+            const term = (new URLSearchParams(window.location.search).get('search') || '').trim();
+            document.addEventListener('click', (event) => {
+                const link = event.target.closest('.product-box a[href]');
+                const info = link && !link.closest('form') ? this._productInfo(link) : null;
+                if (info && term) {
+                    this._tracker.click(term, info.id);
+                }
+            }, true);
+        }
+
+        document.addEventListener('submit', (event) => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement) || !form.matches('[data-add-to-cart]')) {
+                return;
+            }
+
+            form.querySelectorAll('input[name^="lineItems["][name$="][id]"]').forEach((input) => {
+                const term = this._tracker.termFor(input.value);
+                if (term) {
+                    this._tracker.cart(term, input.value);
+                }
+            });
+        }, true);
+    }
+
+    _productInfo(element) {
+        const holder = element && element.closest('[data-product-information]');
+        if (!holder) {
+            return null;
+        }
+        try {
+            const info = JSON.parse(holder.getAttribute('data-product-information'));
+            return info && info.id ? info : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /* ---------- Zuletzt angesehen ---------- */
+
+    _recentAllowed() {
+        return this.options.recentlyViewed && (!this.options.recentlyViewedConsent || hasCookie('nova-recently-viewed'));
+    }
+
+    _recentIds() {
+        if (!this._recentAllowed()) {
+            return [];
+        }
+        try {
+            const ids = JSON.parse(window.localStorage.getItem(this.options.recentStorageKey) || '[]');
+            return Array.isArray(ids) ? ids.filter((id) => /^[0-9a-f]{32}$/.test(id)) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    /** Auf der Produktseite das Produkt vorne in die Liste setzen (gleiches Format wie das Nova Theme) */
+    _rememberProductView() {
+        if (window.activeRoute !== 'frontend.detail.page' || !this._recentAllowed()) {
+            return;
+        }
+
+        let productId = null;
+        try {
+            productId = JSON.parse(window.activeRouteParameters || '{}').productId || null;
+        } catch (e) {
+            productId = null;
+        }
+        if (!productId || !/^[0-9a-f]{32}$/.test(productId)) {
+            return;
+        }
+
+        const ids = [productId, ...this._recentIds().filter((id) => id !== productId)].slice(0, this.options.recentMax);
+        try {
+            window.localStorage.setItem(this.options.recentStorageKey, JSON.stringify(ids));
+        } catch (e) {
+            // Speicher voll oder gesperrt – dann eben ohne Liste
+        }
     }
 
     _abort() {

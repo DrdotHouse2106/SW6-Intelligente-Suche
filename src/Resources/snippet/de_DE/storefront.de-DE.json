@@ -21,6 +21,13 @@
         "next": "Weiter",
         "startHint": "Was suchst du? Gib einen Suchbegriff ein.",
         "placeholder": "Suche …",
-        "search": "Suche"
+        "search": "Suche",
+        "recentlyViewed": "Zuletzt angesehen",
+        "rewriteHint": "Ergebnisse für „%rewrite%“ – zu „%original%“ wurde nichts gefunden.",
+        "rewriteHintPage": "Zu „%original%“ wurde nichts gefunden – daher die Treffer für den ähnlichen Begriff.",
+        "cookie": {
+            "learning": "Suche: Käufe Suchbegriffen zuordnen (anonym)",
+            "recentlyViewed": "Zuletzt angesehene Produkte merken"
+        }
     }
 }

@@ -2,6 +2,9 @@
 
 namespace Nova\Search\Controller;
 
+use Nova\Search\Search\LearningProductSearchBuilder;
+use Nova\Search\Service\SearchStatistics;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Content\Category\CategoryCollection;
 use Shopware\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerEntity;
 use Shopware\Core\Content\Product\Aggregate\ProductVisibility\ProductVisibilityDefinition;
@@ -17,6 +20,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\HttpException;
+use Shopware\Core\Framework\Struct\ArrayStruct;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SalesChannel\Entity\SalesChannelRepository;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -29,13 +33,15 @@ use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Liefert die Inhalte des Suchfensters als HTML-Fragmente:
- *  - ohne Suchbegriff: beliebte Suchanfragen und Highlight-Produkte
+ *  - ohne Suchbegriff: beliebte Suchanfragen, zuletzt angesehene und Highlight-Produkte
  *  - mit Suchbegriff:  Filter (Hersteller mit Anzahl, Preis), Sortierung, Kategorien, Produktraster
  *  - ab Seite 2:       nur weitere Produktkarten (Nachladen beim Scrollen)
  *
- * Nutzt Shopwares eigene Produktsuche (MySQL oder OpenSearch). Eigenschafts-, Bewertungs-
- * und Versandfilter werden abgeschaltet, damit die Antwort auch ohne OpenSearch schnell ist.
- * Alle Antworten sind per HTTP-Cache cachebar.
+ * Nutzt Shopwares eigene Produktsuche (MySQL oder OpenSearch) – inklusive gespeicherter Umschreibungen
+ * und gelernter Platzierungen (siehe LearningProductSearchBuilder). Eigenschafts-, Bewertungs- und
+ * Versandfilter werden abgeschaltet, damit die Antwort auch ohne OpenSearch schnell ist.
+ * Antworten sind per HTTP-Cache cachebar – außer bei 0 Treffern, damit eine später gelernte
+ * Umschreibung sofort greift.
  */
 #[Route(defaults: [PlatformRequest::ATTRIBUTE_ROUTE_SCOPE => [StorefrontRouteScope::ID]])]
 class InstantSearchController extends StorefrontController
@@ -53,6 +59,8 @@ class InstantSearchController extends StorefrontController
         private readonly SalesChannelRepository $categoryRepository,
         private readonly SalesChannelRepository $productRepository,
         private readonly SystemConfigService $config,
+        private readonly SearchStatistics $statistics,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -67,7 +75,7 @@ class InstantSearchController extends StorefrontController
         $term = mb_substr(trim((string) $request->query->get('search', '')), 0, self::MAX_TERM_LENGTH);
 
         $response = mb_strlen($term) < self::MIN_TERM_LENGTH
-            ? $this->renderStart($context)
+            ? $this->renderStart($request, $context)
             : $this->renderResults($term, $request, $context);
 
         $response->headers->set('x-robots-tag', 'noindex');
@@ -75,29 +83,90 @@ class InstantSearchController extends StorefrontController
         return $response;
     }
 
-    private function renderStart(SalesChannelContext $context): Response
+    private function renderStart(Request $request, SalesChannelContext $context): Response
     {
         $salesChannelId = $context->getSalesChannelId();
-
-        // Eine Suchanfrage pro Zeile oder durch Komma getrennt
-        $popular = preg_split('/[\r\n,]+/', $this->config->getString('NovaSearch.config.popularSearches', $salesChannelId)) ?: [];
-        $popular = array_slice(array_values(array_filter(array_map('trim', $popular))), 0, 12);
 
         $highlights = new ProductCollection();
         $ids = $this->config->get('NovaSearch.config.highlightProducts', $salesChannelId);
         if (\is_array($ids) && $ids !== []) {
-            $criteria = new Criteria(array_values(array_filter($ids, 'is_string')));
-            $criteria->setTitle('nova-search::highlights');
-            $criteria->addAssociation('cover.media');
-            $criteria->addFilter(new ProductAvailableFilter($salesChannelId, ProductVisibilityDefinition::VISIBILITY_ALL));
+            $highlights = $this->loadProducts(array_values(array_filter($ids, 'is_string')), $context);
+        }
 
-            $highlights = $this->productRepository->search($criteria, $context)->getEntities();
+        // „Zuletzt angesehen“ – die IDs kommen aus dem localStorage des Besuchers (neueste zuerst)
+        $recent = new ProductCollection();
+        if ($this->config->get('NovaSearch.config.recentlyViewed', $salesChannelId) !== false) {
+            $recentIds = \array_slice(array_values(array_filter(
+                explode('|', (string) $request->query->get('recent', '')),
+                static fn (string $id): bool => preg_match('/^[0-9a-f]{32}$/', $id) === 1
+            )), 0, 12);
+            if ($recentIds !== []) {
+                $recent = $this->loadProducts($recentIds, $context);
+            }
         }
 
         return $this->renderStorefront('@NovaSearch/storefront/nova-search/start.html.twig', [
-            'popular' => $popular,
+            'popular' => $this->popularTerms($salesChannelId),
             'highlights' => $highlights,
+            'recent' => $recent,
         ]);
+    }
+
+    /**
+     * Manuell gepflegte Suchanfragen zuerst, danach automatisch ermittelte – zusammen max. 12.
+     *
+     * @return list<string>
+     */
+    private function popularTerms(string $salesChannelId): array
+    {
+        $split = static fn (string $value): array => array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', $value) ?: [])));
+        $popular = $split($this->config->getString('NovaSearch.config.popularSearches', $salesChannelId));
+
+        if ($this->config->get('NovaSearch.config.popularAuto', $salesChannelId) !== false) {
+            try {
+                $popular = array_merge($popular, $this->statistics->popularTerms(
+                    $salesChannelId,
+                    $this->config->getInt('NovaSearch.config.popularMinSearches', $salesChannelId) ?: 5,
+                    12,
+                    $split($this->config->getString('NovaSearch.config.popularBlocklist', $salesChannelId))
+                ));
+            } catch (\Throwable $e) {
+                $this->logger->warning('Nova Suche: Beliebte Suchanfragen konnten nicht geladen werden', ['exception' => $e]);
+            }
+        }
+
+        $unique = [];
+        foreach ($popular as $term) {
+            $unique[mb_strtolower($term)] ??= $term;
+        }
+
+        return \array_slice(array_values($unique), 0, 12);
+    }
+
+    /**
+     * Produkte in der übergebenen Reihenfolge laden (nur sichtbare, aktive Produkte).
+     *
+     * @param list<string> $ids
+     */
+    private function loadProducts(array $ids, SalesChannelContext $context): ProductCollection
+    {
+        $criteria = new Criteria($ids);
+        $criteria->setTitle('nova-search::products');
+        $criteria->addAssociation('cover.media');
+        $criteria->addAssociation('manufacturer');
+        $criteria->addFilter(new ProductAvailableFilter($context->getSalesChannelId(), ProductVisibilityDefinition::VISIBILITY_ALL));
+
+        $products = $this->productRepository->search($criteria, $context)->getEntities();
+
+        $sorted = new ProductCollection();
+        foreach ($ids as $id) {
+            $product = $products->get($id);
+            if ($product !== null) {
+                $sorted->add($product);
+            }
+        }
+
+        return $sorted;
     }
 
     private function renderResults(string $term, Request $request, SalesChannelContext $context): Response
@@ -152,8 +221,19 @@ class InstantSearchController extends StorefrontController
         }
 
         $total = $result?->getTotal() ?? 0;
+
+        // 0 Treffer nicht cachen – sonst greift eine später gelernte Umschreibung erst nach Ablauf des Caches
+        if ($total === 0) {
+            $request->attributes->set(PlatformRequest::ATTRIBUTE_HTTP_CACHE, false);
+            $request->attributes->set(PlatformRequest::ATTRIBUTE_NO_STORE, true);
+        }
+
+        // Wurde mit einer gespeicherten Umschreibung gesucht? → Hinweis „Ergebnisse für …“
+        $rewrite = $result?->getCriteria()->getExtension(LearningProductSearchBuilder::EXTENSION);
+
         $variables = [
             'term' => $term,
+            'rewrite' => $rewrite instanceof ArrayStruct ? $rewrite->all() : null,
             'products' => $result?->getEntities() ?? new ProductCollection(),
             'total' => $total,
             'page' => $page,

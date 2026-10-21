@@ -183,14 +183,39 @@ $nova-search-gap: 1rem;
     grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
     gap: 2rem;
 
+    // Beliebte Suchen links, „Zuletzt angesehen“ und Highlights rechts untereinander
+    .nova-search-popular {
+        grid-row: span 2;
+    }
+
+    .nova-search-recent,
+    .nova-search-highlights {
+        grid-column: 2;
+        min-width: 0;
+    }
+
     &:not(:has(.nova-search-popular)),
-    &:not(:has(.nova-search-highlights)) {
+    &:not(:has(.nova-search-highlights, .nova-search-recent)) {
         grid-template-columns: minmax(0, 1fr);
+
+        .nova-search-recent,
+        .nova-search-highlights {
+            grid-column: auto;
+        }
     }
 
     @media (max-width: 767.98px) {
         grid-template-columns: minmax(0, 1fr);
         gap: 1.5rem;
+
+        .nova-search-popular {
+            grid-row: auto;
+        }
+
+        .nova-search-recent,
+        .nova-search-highlights {
+            grid-column: auto;
+        }
     }
 }
 
@@ -462,6 +487,14 @@ $nova-search-gap: 1rem;
         color: var(--bs-secondary-color, #6c757d);
         pointer-events: none;
     }
+}
+
+.nova-search-rewrite {
+    margin-bottom: 1rem;
+    padding: 0.625rem 0.875rem;
+    background: var(--bs-tertiary-bg, #f2f3f5);
+    border-left: 3px solid var(--bs-primary);
+    border-radius: var(--bs-border-radius, 0.375rem);
 }
 
 .nova-search-meta {

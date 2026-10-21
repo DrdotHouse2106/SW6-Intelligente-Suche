@@ -1,16 +1,23 @@
 {
     "name": "nova/nova-search",
-    "description": "Schnelle Sofortsuche mit Ergebnisfenster für Shopware 6",
+    "description": "Lernendes Suchfenster für Shopware 6: Sofortsuche, Lernen aus Klicks und Käufen, Claude für Suchbegriffe ohne Treffer",
     "type": "shopware-platform-plugin",
     "version": "1.0.0",
     "license": "MIT",
-    "authors": [{ "name": "Nova" }],
+    "authors": [
+        {
+            "name": "Nova"
+        }
+    ],
     "require": {
         "shopware/core": "~6.7.0",
-        "shopware/storefront": "~6.7.0"
+        "shopware/storefront": "~6.7.0",
+        "anthropic-ai/sdk": "^1.0"
     },
     "autoload": {
-        "psr-4": { "Nova\\Search\\": "src/" }
+        "psr-4": {
+            "Nova\\Search\\": "src/"
+        }
     },
     "extra": {
         "shopware-plugin-class": "Nova\\Search\\NovaSearch",
@@ -19,8 +26,8 @@
             "en-GB": "Nova Search"
         },
         "description": {
-            "de-DE": "Schnelle Sofortsuche: Ergebnisfenster mit Bildern, Preisen, Kategorien und Herstellerfilter schon beim Tippen.",
-            "en-GB": "Fast instant search: results panel with images, prices, categories and brand filter while typing."
+            "de-DE": "Suchfenster mit Bildern, Filtern und Sortierung – lernt aus Suchen, Klicks und Käufen und verbessert Suchbegriffe ohne Treffer mit Claude.",
+            "en-GB": "Search window with images, filters and sorting – learns from searches, clicks and purchases and improves zero-result searches with Claude."
         }
     }
 }

@@ -57,7 +57,31 @@
             <name>popularSearches</name>
             <label>Popular searches</label>
             <label lang="de-DE">Beliebte Suchanfragen</label>
-            <helpText lang="de-DE">Eine Suchanfrage pro Zeile (oder durch Komma getrennt), z. B. chrom, scheinwerfer, rolldach. Maximal 12.</helpText>
+            <helpText lang="de-DE">Eine Suchanfrage pro Zeile (oder durch Komma getrennt), z. B. chrom, scheinwerfer, rolldach. Diese stehen immer vorne; automatisch ermittelte ergänzen die Liste bis 12.</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>popularAuto</name>
+            <label>Determine popular searches automatically</label>
+            <label lang="de-DE">Beliebte Suchanfragen automatisch ermitteln</label>
+            <helpText lang="de-DE">Häufigste Suchbegriffe mit Treffern aus den letzten 90 Tagen.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="int">
+            <name>popularMinSearches</name>
+            <label>Minimum number of searches</label>
+            <label lang="de-DE">Mindestanzahl Suchen für „beliebt“</label>
+            <helpText lang="de-DE">Schützt davor, dass einzelne oder gezielt eingegebene Begriffe öffentlich angezeigt werden.</helpText>
+            <defaultValue>5</defaultValue>
+            <min>1</min>
+        </input-field>
+
+        <input-field type="textarea">
+            <name>popularBlocklist</name>
+            <label>Blocked words</label>
+            <label lang="de-DE">Sperrliste</label>
+            <helpText lang="de-DE">Begriffe, die diese Wörter enthalten, werden nie als „beliebt“ angezeigt. Ein Wort pro Zeile oder durch Komma getrennt.</helpText>
         </input-field>
 
         <component name="sw-entity-multi-id-select">
@@ -67,5 +91,77 @@
             <label lang="de-DE">Highlight-Produkte</label>
             <helpText lang="de-DE">Werden als „Aktuelle Highlights“ mit Bild und Preis angezeigt.</helpText>
         </component>
+
+        <input-field type="bool">
+            <name>recentlyViewed</name>
+            <label>Show recently viewed products</label>
+            <label lang="de-DE">„Zuletzt angesehen“ anzeigen</label>
+            <helpText lang="de-DE">Die Liste wird nur im Browser des Besuchers gespeichert (localStorage), nie auf dem Server.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
+            <name>recentlyViewedConsent</name>
+            <label>Only with consent (comfort features)</label>
+            <label lang="de-DE">Nur mit Zustimmung (Cookie-Kategorie „Komfortfunktionen“)</label>
+            <defaultValue>true</defaultValue>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Learning from customer behaviour</title>
+        <title lang="de-DE">Lernen aus dem Kundenverhalten</title>
+
+        <input-field type="bool">
+            <name>learningActive</name>
+            <label>Learn from searches, clicks and purchases</label>
+            <label lang="de-DE">Aus Suchen, Klicks und Käufen lernen</label>
+            <helpText lang="de-DE">Anonym: gespeichert werden nur Suchbegriffe, Produkt-IDs und Zähler – keine IP-Adressen, Kunden- oder Sitzungsdaten. Käufe werden nur mit Zustimmung zur Cookie-Kategorie „Statistik“ zugeordnet.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="int">
+            <name>boostMinScore</name>
+            <label>Minimum learning score for ranking boost</label>
+            <label lang="de-DE">Mindest-Lernwert für bessere Platzierung</label>
+            <helpText lang="de-DE">Klick = 1, Warenkorb = 3, Kauf = 5 Punkte je Begriff und Produkt. Erst ab diesem Wert rückt ein Produkt bei diesem Begriff nach oben – so verzerren Einzelklicks nichts.</helpText>
+            <defaultValue>3</defaultValue>
+            <min>1</min>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Claude (AI)</title>
+        <title lang="de-DE">Claude (KI) – Suchbegriffe ohne Treffer verbessern</title>
+
+        <input-field type="bool">
+            <name>claudeActive</name>
+            <label>Improve searches without results with Claude</label>
+            <label lang="de-DE">Suchbegriffe ohne Treffer mit Claude verbessern</label>
+            <helpText lang="de-DE">Jeder Begriff wird nur einmal ausgewertet; geprüfte Umschreibungen werden dauerhaft gespeichert. Übertragen werden nur Suchbegriffe sowie Shop-, Kategorie- und Markennamen – keine Kundendaten.</helpText>
+            <defaultValue>false</defaultValue>
+        </input-field>
+
+        <input-field type="password">
+            <name>claudeApiKey</name>
+            <label>Anthropic API key</label>
+            <label lang="de-DE">Anthropic-API-Schlüssel</label>
+            <helpText lang="de-DE">Aus der Anthropic Console (console.anthropic.com).</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>claudeModel</name>
+            <label>Model</label>
+            <label lang="de-DE">Modell</label>
+            <defaultValue>claude-haiku-5-5</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
+            <name>claudeSyncOnSearchPage</name>
+            <label>Evaluate new terms immediately on the search result page</label>
+            <label lang="de-DE">Neue Begriffe auf der Suchergebnisseite sofort auswerten</label>
+            <helpText lang="de-DE">Der Kunde sieht direkt passende Treffer (wartet dafür beim ersten Mal bis zu 4 Sekunden). Aus = Auswertung im Hintergrund, stündlich per Scheduled Task.</helpText>
+            <defaultValue>false</defaultValue>
+        </input-field>
     </card>
 </config>

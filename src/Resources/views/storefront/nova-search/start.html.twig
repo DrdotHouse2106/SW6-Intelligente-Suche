@@ -16,6 +16,27 @@
             {% endblock %}
         {% endif %}
 
+        {% if recent|default([])|length > 0 %}
+            {% block nova_search_recent %}
+                <section class="nova-search-recent">
+                    <h2 class="nova-search-title">{{ 'novaSearch.recentlyViewed'|trans }}</h2>
+                    <div class="nova-search-slider">
+                        <button type="button" class="nova-search-slider-btn is-prev" data-nova-search-slide="-1" aria-label="{{ 'novaSearch.previous'|trans|striptags }}">
+                            {% sw_icon 'arrow-head-left' %}
+                        </button>
+                        <ul class="nova-search-slider-track list-unstyled" data-nova-list-id="recently_viewed" data-nova-list-name="Zuletzt angesehen">
+                            {% for product in recent %}
+                                {% sw_include '@NovaSearch/storefront/nova-search/card.html.twig' with { product: product } %}
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="nova-search-slider-btn is-next" data-nova-search-slide="1" aria-label="{{ 'novaSearch.next'|trans|striptags }}">
+                            {% sw_icon 'arrow-head-right' %}
+                        </button>
+                    </div>
+                </section>
+            {% endblock %}
+        {% endif %}
+
         {% if highlights|length > 0 %}
             {% block nova_search_highlights %}
                 <section class="nova-search-highlights">
@@ -24,7 +45,7 @@
                         <button type="button" class="nova-search-slider-btn is-prev" data-nova-search-slide="-1" aria-label="{{ 'novaSearch.previous'|trans|striptags }}">
                             {% sw_icon 'arrow-head-left' %}
                         </button>
-                        <ul class="nova-search-slider-track list-unstyled">
+                        <ul class="nova-search-slider-track list-unstyled" data-nova-list-id="search_highlights" data-nova-list-name="Suche: Highlights">
                             {% for product in highlights %}
                                 {% sw_include '@NovaSearch/storefront/nova-search/card.html.twig' with { product: product } %}
                             {% endfor %}
@@ -37,7 +58,7 @@
             {% endblock %}
         {% endif %}
 
-        {% if popular|length == 0 and highlights|length == 0 %}
+        {% if popular|length == 0 and highlights|length == 0 and recent|default([])|length == 0 %}
             <p class="nova-search-hint">{{ 'novaSearch.startHint'|trans }}</p>
         {% endif %}
     </div>

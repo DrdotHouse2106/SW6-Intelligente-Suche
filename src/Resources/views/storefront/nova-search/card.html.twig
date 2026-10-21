@@ -8,7 +8,16 @@
     {% endif %}
     {% set hasListPrice = price.listPrice and price.listPrice.percentage > 0 %}
 
-    <li class="nova-search-card-item">
+    {# Produktdaten im selben Format wie Shopwares Produktbox – für Tracking (GTM) und Lernen #}
+    {% set productInformation = {
+        id: product.id,
+        name: name,
+        brand: product.manufacturer.translated.name|default(''),
+        price: product.calculatedPrice.unitPrice,
+        sku: product.productNumber
+    } %}
+
+    <li class="nova-search-card-item" data-product-information="{{ productInformation|json_encode }}">
         <a class="nova-search-card nova-search-focusable" href="{{ seoUrl('frontend.detail.page', { productId: product.id }) }}">
             <span class="nova-search-card-media">
                 {% if product.cover.media %}

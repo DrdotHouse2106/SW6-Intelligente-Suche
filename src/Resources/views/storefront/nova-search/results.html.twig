@@ -1,6 +1,6 @@
 {# Trefferansicht des Suchfensters #}
 {% block nova_search_results %}
-    <div class="nova-search-results" data-nova-search-total="{{ total }}">
+    <div class="nova-search-results" data-nova-search-total="{{ total }}"{% if rewrite %} data-nova-search-rewritten="1"{% endif %}>
         {% if total == 0 and categories|length == 0 and filterCount == 0 %}
             {% block nova_search_empty %}
                 <div class="nova-search-empty">
@@ -75,6 +75,14 @@
 
                 {% block nova_search_main %}
                     <div class="nova-search-main">
+                        {% if rewrite %}
+                            {% block nova_search_rewrite_hint %}
+                                <p class="nova-search-rewrite">
+                                    {{ 'novaSearch.rewriteHint'|trans({ '%rewrite%': rewrite.rewrite, '%original%': rewrite.original }) }}
+                                </p>
+                            {% endblock %}
+                        {% endif %}
+
                         <div class="nova-search-meta">
                             <p class="nova-search-count" role="status">
                                 {{ 'novaSearch.count'|trans({ '%count%': total })|raw }}
@@ -112,7 +120,7 @@
                         {% endif %}
 
                         {% if total > 0 %}
-                            <ul class="nova-search-grid list-unstyled" data-nova-search-grid data-nova-search-has-more="{{ hasMore ? '1' : '0' }}">
+                            <ul class="nova-search-grid list-unstyled" data-nova-search-grid data-nova-list-id="search_window" data-nova-list-name="Suchfenster" data-nova-search-has-more="{{ hasMore ? '1' : '0' }}">
                                 {% for product in products %}
                                     {% sw_include '@NovaSearch/storefront/nova-search/card.html.twig' with { product: product } %}
                                 {% endfor %}

@@ -3,11 +3,103 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
+        <!-- Daten -->
+        <service id="Nova\Search\Service\SearchStatistics">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Nova\Search\Service\RewriteStore">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <!-- Suche: Umschreibungen anwenden und gelernte Produkte boosten -->
+        <service id="Nova\Search\Search\LearningProductSearchBuilder"
+                 decorates="Shopware\Core\Content\Product\SearchKeyword\ProductSearchBuilderInterface">
+            <argument type="service" id="Nova\Search\Search\LearningProductSearchBuilder.inner"/>
+            <argument type="service" id="Nova\Search\Service\RewriteStore"/>
+            <argument type="service" id="Nova\Search\Service\SearchStatistics"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- Claude -->
+        <service id="Nova\Search\Rewrite\ClaudeRewriteSuggester">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="Nova\Search\Rewrite\RewriteSuggesterInterface" alias="Nova\Search\Rewrite\ClaudeRewriteSuggester"/>
+
+        <service id="Nova\Search\Rewrite\RewriteService">
+            <argument type="service" id="Nova\Search\Service\RewriteStore"/>
+            <argument type="service" id="Nova\Search\Rewrite\RewriteSuggesterInterface"/>
+            <argument type="service" id="Shopware\Core\Content\Product\SalesChannel\Search\ProductSearchRoute"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- Hintergrund -->
+        <service id="Nova\Search\ScheduledTask\SearchLearningTask">
+            <tag name="shopware.scheduled.task"/>
+        </service>
+
+        <service id="Nova\Search\ScheduledTask\SearchLearningTaskHandler">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Nova\Search\Rewrite\RewriteService"/>
+            <argument type="service" id="Nova\Search\Service\SearchStatistics"/>
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <service id="Nova\Search\Command\RewriteCommand">
+            <argument type="service" id="Nova\Search\Rewrite\RewriteService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Ereignisse -->
+        <service id="Nova\Search\Subscriber\SearchPageSubscriber">
+            <argument type="service" id="Nova\Search\Service\SearchStatistics"/>
+            <argument type="service" id="Nova\Search\Service\RewriteStore"/>
+            <argument type="service" id="Nova\Search\Rewrite\RewriteService"/>
+            <argument type="service" id="Shopware\Core\Content\Product\SalesChannel\Search\ProductSearchRoute"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Nova\Search\Subscriber\OrderAttributionSubscriber">
+            <argument type="service" id="Nova\Search\Service\SearchStatistics"/>
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Nova\Search\Cookie\CookieListener">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <tag name="kernel.event_listener" event="Shopware\Core\Content\Cookie\Event\CookieGroupCollectEvent"/>
+        </service>
+
+        <!-- Storefront -->
         <service id="Nova\Search\Controller\InstantSearchController" public="true">
             <argument type="service" id="Shopware\Core\Content\Product\SalesChannel\Search\ProductSearchRoute"/>
             <argument type="service" id="sales_channel.category.repository"/>
             <argument type="service" id="sales_channel.product.repository"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Nova\Search\Service\SearchStatistics"/>
+            <argument type="service" id="logger"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Nova\Search\Controller\TrackingController" public="true">
+            <argument type="service" id="Nova\Search\Service\SearchStatistics"/>
+            <argument type="service" id="Nova\Search\Service\RewriteStore"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>
