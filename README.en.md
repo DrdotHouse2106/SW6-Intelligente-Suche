@@ -36,6 +36,19 @@ bin/console cache:clear
 
 Configure it under *Extensions → My extensions → Nova Search → Configure*.
 
+
+## Store API for apps
+
+All routes are `POST` with a JSON body and the usual `sw-access-key` / `sw-context-token` headers.
+
+- `POST /store-api/nova-search/search` – `{ search, p?, limit? (24, max 48), order?, properties?, manufacturer? }` → `{ ids, total, page, limit, sorting, availableSortings: [{ key, label }], rewrite: null | { original, term } }`. Uses the learned ranking and stored Claude rewrites. Does **not** count the search (the app reports each final search once via `track`); zero-result terms are only queued for rewriting. Missing/too short `search` → `400`.
+- `POST /store-api/nova-search/popular` – `{ limit? (10, max 20) }` → `{ terms: [...] }`.
+- `POST /store-api/nova-search/track` – `{ events: [{ type: "search"|"click"|"cart"|"purchase", term, productId?, total?, quantity? }] }` → `204`. Max. 20 events per call and 300 per context token and hour. `purchase` only counts if the logged-in customer actually ordered the product within 48 hours, once per token and product. Only term, product ID and counters are stored.
+
+Shopware's own `/store-api/search` also uses the learned ranking and rewrites (no counting).
+
+With the "Dynamic monthly delivery dates" plugin and its "show in listings" option enabled, search cards show the next shipping date.
+
 ## Compatibility
 
 Shopware 6.7.x (checked against 6.7.15). License: MIT.

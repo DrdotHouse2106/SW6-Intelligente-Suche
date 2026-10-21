@@ -3,8 +3,7 @@
 namespace Nova\Search\Controller;
 
 use Nova\Search\Search\LearningProductSearchBuilder;
-use Nova\Search\Service\SearchStatistics;
-use Psr\Log\LoggerInterface;
+use Nova\Search\Service\PopularSearches;
 use Shopware\Core\Content\Category\CategoryCollection;
 use Shopware\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerEntity;
 use Shopware\Core\Content\Product\Aggregate\ProductVisibility\ProductVisibilityDefinition;
@@ -59,8 +58,7 @@ class InstantSearchController extends StorefrontController
         private readonly SalesChannelRepository $categoryRepository,
         private readonly SalesChannelRepository $productRepository,
         private readonly SystemConfigService $config,
-        private readonly SearchStatistics $statistics,
-        private readonly LoggerInterface $logger,
+        private readonly PopularSearches $popularSearches,
     ) {
     }
 
@@ -106,41 +104,10 @@ class InstantSearchController extends StorefrontController
         }
 
         return $this->renderStorefront('@NovaSearch/storefront/nova-search/start.html.twig', [
-            'popular' => $this->popularTerms($salesChannelId),
+            'popular' => $this->popularSearches->get($salesChannelId, 12),
             'highlights' => $highlights,
             'recent' => $recent,
         ]);
-    }
-
-    /**
-     * Manuell gepflegte Suchanfragen zuerst, danach automatisch ermittelte – zusammen max. 12.
-     *
-     * @return list<string>
-     */
-    private function popularTerms(string $salesChannelId): array
-    {
-        $split = static fn (string $value): array => array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', $value) ?: [])));
-        $popular = $split($this->config->getString('NovaSearch.config.popularSearches', $salesChannelId));
-
-        if ($this->config->get('NovaSearch.config.popularAuto', $salesChannelId) !== false) {
-            try {
-                $popular = array_merge($popular, $this->statistics->popularTerms(
-                    $salesChannelId,
-                    $this->config->getInt('NovaSearch.config.popularMinSearches', $salesChannelId) ?: 5,
-                    12,
-                    $split($this->config->getString('NovaSearch.config.popularBlocklist', $salesChannelId))
-                ));
-            } catch (\Throwable $e) {
-                $this->logger->warning('Nova Suche: Beliebte Suchanfragen konnten nicht geladen werden', ['exception' => $e]);
-            }
-        }
-
-        $unique = [];
-        foreach ($popular as $term) {
-            $unique[mb_strtolower($term)] ??= $term;
-        }
-
-        return \array_slice(array_values($unique), 0, 12);
     }
 
     /**

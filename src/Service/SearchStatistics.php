@@ -186,6 +186,45 @@ class SearchStatistics
         return $ids;
     }
 
+    /**
+     * Welche dieser Produkte hat der Kunde in den letzten Stunden tatsächlich bestellt?
+     * (Prüfung für Käufe, die die App meldet – nur das Ergebnis wird verwendet, nichts gespeichert.)
+     *
+     * @param list<string> $productIds
+     *
+     * @return list<string>
+     */
+    public function recentlyOrderedProductIds(string $customerId, array $productIds, int $hours): array
+    {
+        $productIds = array_values(array_filter($productIds, Uuid::isValid(...)));
+        if ($productIds === [] || !Uuid::isValid($customerId)) {
+            return [];
+        }
+
+        $since = (new \DateTimeImmutable(sprintf('-%d hours', max(1, $hours))))->format(Defaults::STORAGE_DATE_TIME_FORMAT);
+
+        /** @var list<string> $ids */
+        $ids = $this->connection->fetchFirstColumn(
+            'SELECT DISTINCT LOWER(HEX(li.`product_id`))
+             FROM `order_line_item` li
+             INNER JOIN `order` o ON o.`id` = li.`order_id` AND o.`version_id` = li.`order_version_id`
+             INNER JOIN `order_customer` oc ON oc.`order_id` = o.`id` AND oc.`order_version_id` = o.`version_id`
+             WHERE oc.`customer_id` = :customer
+               AND o.`version_id` = :version
+               AND o.`created_at` >= :since
+               AND li.`product_id` IN (:products)',
+            [
+                'customer' => Uuid::fromHexToBytes($customerId),
+                'version' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
+                'since' => $since,
+                'products' => Uuid::fromHexToBytesList($productIds),
+            ],
+            ['products' => ArrayParameterType::BINARY]
+        );
+
+        return $ids;
+    }
+
     private function now(): string
     {
         return (new \DateTimeImmutable())->format(Defaults::STORAGE_DATE_TIME_FORMAT);

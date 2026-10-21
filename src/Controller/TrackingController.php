@@ -2,10 +2,7 @@
 
 namespace Nova\Search\Controller;
 
-use Nova\Search\Service\RewriteStore;
-use Nova\Search\Service\SearchStatistics;
-use Psr\Log\LoggerInterface;
-use Shopware\Core\Framework\Uuid\Uuid;
+use Nova\Search\Service\EventRecorder;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
@@ -28,16 +25,13 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(defaults: [PlatformRequest::ATTRIBUTE_ROUTE_SCOPE => [StorefrontRouteScope::ID]])]
 class TrackingController extends StorefrontController
 {
-    private const MAX_EVENTS_PER_REQUEST = 20;
     private const MAX_EVENTS_PER_HOUR = 300;
     private const MAX_BODY_BYTES = 8192;
     private const SESSION_KEY = 'nova-search-track';
 
     public function __construct(
-        private readonly SearchStatistics $statistics,
-        private readonly RewriteStore $rewrites,
+        private readonly EventRecorder $recorder,
         private readonly SystemConfigService $config,
-        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -56,47 +50,16 @@ class TrackingController extends StorefrontController
 
         $body = (string) $request->getContent();
         $data = \strlen($body) <= self::MAX_BODY_BYTES ? json_decode($body, true) : null;
-        $events = \is_array($data) && \is_array($data['events'] ?? null) ? \array_slice($data['events'], 0, self::MAX_EVENTS_PER_REQUEST) : [];
+        $events = EventRecorder::parse(\is_array($data) ? ($data['events'] ?? null) : null);
 
-        $events = array_values(array_filter($events, fn ($event): bool => \is_array($event) && $this->allow($request)));
+        $events = array_values(array_filter($events, fn (array $event): bool => $this->allow($request)));
         if ($events === []) {
             return new Response(null, Response::HTTP_NO_CONTENT);
         }
 
-        // Nur Produkte, die es wirklich gibt
-        $productIds = array_values(array_filter(array_map(
-            static fn (array $event): string => \is_string($event['productId'] ?? null) ? strtolower($event['productId']) : '',
-            $events
-        ), Uuid::isValid(...)));
-
-        try {
-            $existing = array_flip($this->statistics->existingProductIds($productIds));
-
-            foreach ($events as $event) {
-                $term = \is_string($event['term'] ?? null) ? $event['term'] : '';
-                if ($term === '') {
-                    continue;
-                }
-
-                $type = $event['type'] ?? '';
-                if ($type === 'search') {
-                    $hits = \is_numeric($event['hits'] ?? null) ? (int) $event['hits'] : 0;
-                    $this->statistics->recordSearch($salesChannelId, $term, $hits);
-                    if ($hits === 0 && empty($event['rewritten'])) {
-                        $this->rewrites->markPending($salesChannelId, $term);
-                    }
-                    continue;
-                }
-
-                $productId = \is_string($event['productId'] ?? null) ? strtolower($event['productId']) : '';
-                if (isset($existing[$productId]) && \in_array($type, [SearchStatistics::TYPE_CLICK, SearchStatistics::TYPE_CART], true)) {
-                    $this->statistics->recordProduct($salesChannelId, $term, $productId, $type);
-                }
-            }
-        } catch (\Throwable $e) {
-            // Erfassung ist optional – Fehler nie an den Besucher weitergeben
-            $this->logger->warning('Nova Suche: Ereignisse konnten nicht gespeichert werden', ['exception' => $e]);
-        }
+        // Käufe meldet das Storefront nicht per Beacon – die ordnet der OrderAttributionSubscriber zu
+        $events = array_values(array_filter($events, static fn (array $event): bool => ($event['type'] ?? '') !== EventRecorder::TYPE_PURCHASE));
+        $this->recorder->record($salesChannelId, $events);
 
         return new Response(null, Response::HTTP_NO_CONTENT);
     }

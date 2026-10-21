@@ -43,6 +43,21 @@
                 </span>
             {% endif %}
 
+            {# Dynamische Lieferzeiten (Plugin „Dynamische Monats-Lieferzeiten“) – nur wenn installiert und
+               dort „Versandtermin in Produkt-Listings anzeigen“ aktiv ist #}
+            {% block nova_search_card_monthly_delivery %}
+                {% set monthlyDelivery = product.extensions.monthlyDelivery ?? null %}
+                {% if monthlyDelivery and monthlyDelivery.shipDateFormatted is defined and monthlyDelivery.shipDateFormatted
+                    and config('MonthlyDeliveryPlugin.config.showInListing') %}
+                    <span class="nova-search-card-delivery">
+                        {{ 'novaSearch.monthlyDelivery'|trans({
+                            '%weekday%': ('novaSearch.weekdayShort.' ~ monthlyDelivery.shipWeekday)|trans,
+                            '%date%': monthlyDelivery.shipDateFormatted
+                        }) }}
+                    </span>
+                {% endif %}
+            {% endblock %}
+
             <span class="nova-search-card-price">
                 {% if isFrom %}{{ 'listing.listingTextFrom'|trans }} {% endif %}
                 {{- price.unitPrice|currency }}{{ 'general.star'|trans|sw_sanitize }}

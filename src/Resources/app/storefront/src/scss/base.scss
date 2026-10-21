@@ -662,6 +662,13 @@ $nova-search-gap: 1rem;
     color: var(--bs-secondary-color, #6c757d);
 }
 
+.nova-search-card-delivery {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--bs-success, #198754);
+}
+
 .nova-search-card-price {
     margin-top: auto;
     padding-top: 1rem;

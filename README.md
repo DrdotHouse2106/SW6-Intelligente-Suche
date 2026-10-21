@@ -27,6 +27,8 @@ Die Suche **lernt dabei mit**: Was Kunden suchen, anklicken, in den Warenkorb le
 - **Smartphone:** Fenster über den ganzen Bildschirm, zwei Produktspalten, Filter hinter einem „Filter“-Button, Lupen-Symbol öffnet das Fenster direkt
 - Passt sich automatisch an das Theme an (Farben, Eckenradien)
 
+**Dynamische Lieferzeiten:** Ist das Plugin „Dynamische Monats-Lieferzeiten“ installiert und dort „Versandtermin in Produkt-Listings anzeigen“ aktiv, zeigt jede Suchkarte kompakt den nächsten Versandtermin („Versand am Mo, 02.11.2026“). Ohne das Plugin passiert nichts.
+
 ## Schnell – auch ohne OpenSearch
 
 - Nutzt Shopwares eigene Produktsuche (MySQL oder – falls vorhanden – OpenSearch)
@@ -64,6 +66,71 @@ Die Suche **lernt dabei mit**: Was Kunden suchen, anklicken, in den Warenkorb le
 **Kosten (Schätzung):** Claude Haiku 5.5 kostet 0,10 $ je 1 Mio. Eingabe- und 0,50 $ je 1 Mio. Ausgabe-Tokens. Eine gebündelte Anfrage mit 30 Begriffen braucht grob 1.500 Eingabe- und 1.000 Ausgabe-Tokens – also deutlich unter 0,1 Cent. **1.000 neue Begriffe ohne Treffer kosten damit rund 2–3 Cent.**
 
 **Fehlerfest:** Fehlt der API-Schlüssel, ist Claude nicht erreichbar oder antwortet nicht verwertbar, läuft die Suche ganz normal weiter. Fehlversuche werden gezählt; nach drei Versuchen wird ein Begriff nicht mehr angefragt.
+
+## Store-API für Apps
+
+Die Shop-App nutzt die Nova Suche über die Store-API – mit demselben gelernten Ranking und denselben Claude-Umschreibungen wie das Suchfenster. Authentifizierung wie bei jeder Store-API-Anfrage über die Header `sw-access-key` und `sw-context-token`; alle Routen erwarten `POST` mit JSON-Body.
+
+### Suche
+
+```http
+POST /store-api/nova-search/search
+{ "search": "bremsbelag ente", "p": 1, "limit": 24, "order": "score",
+  "properties": "<Options-ID>|<Options-ID>", "manufacturer": "<Hersteller-ID>" }
+```
+
+| Feld | Pflicht | Bedeutung |
+|---|---|---|
+| `search` | ja | Suchbegriff, mind. 2 Zeichen – sonst `400` (Shopware-Fehlerstruktur) |
+| `p` | nein | Seite (Standard 1) |
+| `limit` | nein | Treffer pro Seite (Standard 24, max. 48) |
+| `order` | nein | Sortierschlüssel aus `availableSortings`; unbekannte Werte → Standard-Sortierung |
+| `properties` | nein | Eigenschafts-Optionen mit `|` getrennt, z. B. das gewählte Fahrzeug |
+| `manufacturer` | nein | Hersteller-IDs mit `|` getrennt |
+
+Antwort:
+
+```json
+{
+  "ids": ["0190…", "0188…"],
+  "total": 30, "page": 1, "limit": 24, "sorting": "score",
+  "availableSortings": [{ "key": "score", "label": "Relevanz" }, { "key": "price-asc", "label": "Preis aufsteigend" }],
+  "rewrite": { "original": "bremsbelag ente", "term": "bremsbelag 2cv" }
+}
+```
+
+`ids` sind die Produkt-IDs in Ranking-Reihenfolge – Preise, Bilder und Bestand lädt die App wie gewohnt über `/store-api/product`. `rewrite` ist `null`, wenn ohne Umschreibung gesucht wurde; sonst kann die App „Ergebnisse für …“ anzeigen.
+
+**Wichtig:** Diese Route zählt die Suche **nicht** in der Statistik, weil die App sie beim Blättern und Nachladen mehrfach aufruft. Die App meldet jede fertige Suche genau einmal über `track` (siehe unten). Begriffe ohne Treffer werden hier nur für die Claude-Umschreibung vorgemerkt.
+
+### Beliebte Suchanfragen
+
+```http
+POST /store-api/nova-search/popular
+{ "limit": 10 }
+```
+
+Antwort: `{ "terms": ["chrom", "scheinwerfer", "rolldach"] }` – gleiche Liste wie im Suchfenster (manuelle zuerst, dann automatische, Sperrliste beachtet), max. 20.
+
+### Nutzungssignale (Lernen)
+
+```http
+POST /store-api/nova-search/track
+{ "events": [
+  { "type": "search",   "term": "bremse", "total": 24 },
+  { "type": "click",    "term": "bremse", "productId": "0190…" },
+  { "type": "cart",     "term": "bremse", "productId": "0190…", "quantity": 2 },
+  { "type": "purchase", "term": "bremse", "productId": "0190…" }
+] }
+```
+
+Antwort immer `204`. Es gelten dieselben Regeln wie im Suchfenster: max. 20 Ereignisse pro Aufruf und **300 pro Kontext-Token und Stunde**, nur existierende Produkte, Begriffe werden normalisiert, E-Mail-Adressen und Telefonnummern verworfen. Gespeichert werden nur Begriff, Produkt-ID und Zähler – kein Token, keine Kunden- oder Bestelldaten.
+
+`purchase` zählt nur, wenn der angemeldete Kunde (auch Gast) dieses Produkt in den **letzten 48 Stunden wirklich bestellt** hat, und je Kontext-Token und Produkt nur einmal. So lassen sich keine Käufe erfinden.
+
+### Shopwares eigene Suche
+
+Auch Shopwares Standard-Route `/store-api/search` nutzt das gelernte Ranking und gespeicherte Umschreibungen (die Plugin-Logik sitzt im Such-Builder). Dort wird nichts gezählt – die App kann bei Fehlern also gefahrlos darauf zurückfallen.
 
 ## Datenschutz
 
