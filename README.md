@@ -285,6 +285,10 @@ Serverseitig: Eine gespeicherte Umschreibung hängt an der Criteria als Extensio
 
 Shopware 6.7.x (geprüft gegen 6.7.15).
 
+## Roadmap
+
+Geplante Funktionen (Synonyme, Weiterleitungen, Auswertungen in der Administration, Empfehlungen, Produktberater, Assistent …) stehen mit Stand in der [ROADMAP.md](ROADMAP.md).
+
 ## Häufige Probleme und Lösungen
 
 Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetreten sind. **Neue Probleme bitte ergänzen** (oder als Issue melden), damit andere nicht lange suchen müssen.

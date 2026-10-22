@@ -75,3 +75,6 @@ Known pitfalls from real installations. **Please add new ones** (or open an issu
 - **Claude does nothing:** API key, Claude switch, scheduled tasks and message queue must run; test with `bin/console nova-search:rewrite`.
 - **No typo tolerance:** use OpenSearch, or rely on the Claude stage.
 
+## Roadmap
+
+Planned features (synonyms, redirects, admin analytics, recommendations, product finder, shopping assistant …) are listed in [ROADMAP.md](ROADMAP.md) (German).
