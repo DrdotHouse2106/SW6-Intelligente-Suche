@@ -39,6 +39,10 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         recentMax: 20,
         searchSignalDelay: 1200,
         exactNumberParam: 'exact-number',
+        recentSearches: true,
+        recentSearchesKey: 'nova-search-history',
+        recentSearchesMax: 8,
+        labels: {},
     };
 
     init() {
@@ -91,7 +95,7 @@ export default class NovaSearchPlugin extends PluginBaseClass {
     }
 
     _emptyState(term) {
-        return { term, manufacturers: new Set(), min: null, max: null, order: '', page: 1 };
+        return { term, manufacturers: new Set(), properties: new Set(), min: null, max: null, order: '', page: 1 };
     }
 
     /* ---------- Öffnen über das Suchfeld im Header ---------- */
@@ -163,6 +167,12 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         this._body.addEventListener('click', (event) => this._onCardClick(event), true);
         this._body.addEventListener('change', (event) => this._onBodyChange(event));
         this._body.addEventListener('input', (event) => this._onBodyInput(event));
+        // Nach „In den Warenkorb“ schließen, damit der Warenkorb (Offcanvas) sichtbar ist
+        this._body.addEventListener('submit', (event) => {
+            if (event.target.matches('[data-nova-search-buy]')) {
+                window.setTimeout(() => this.close(), 0);
+            }
+        });
 
         // Weitere Produkte laden, sobald das Ende der Liste sichtbar wird
         this._observer = 'IntersectionObserver' in window
@@ -236,6 +246,7 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             if (term.length >= this.options.minChars) {
                 // Die Suchergebnisseite zählt die Suche selbst – hier nicht doppelt melden
                 this._cancelSearchSignal();
+                this._rememberSearch(term);
                 window.location.href = this._searchPageUrl(term);
             }
         } else if (event.key === 'ArrowDown') {
@@ -284,6 +295,21 @@ export default class NovaSearchPlugin extends PluginBaseClass {
     _onBodyClick(event) {
         const target = event.target;
 
+        const removeHistory = target.closest('[data-nova-search-history-remove]');
+        if (removeHistory) {
+            this._removeRecentSearch(removeHistory.getAttribute('data-nova-search-history-remove'));
+            this._renderRecentSearches();
+            this._input.focus();
+            return;
+        }
+
+        if (target.closest('[data-nova-search-history-clear]')) {
+            this._saveRecentSearches([]);
+            this._renderRecentSearches();
+            this._input.focus();
+            return;
+        }
+
         const term = target.closest('[data-nova-search-term]');
         if (term) {
             this._input.value = term.getAttribute('data-nova-search-term');
@@ -329,6 +355,9 @@ export default class NovaSearchPlugin extends PluginBaseClass {
 
         if (target.matches('[data-nova-search-manufacturer]')) {
             target.checked ? this._state.manufacturers.add(target.value) : this._state.manufacturers.delete(target.value);
+            this._reload();
+        } else if (target.matches('[data-nova-search-property]')) {
+            target.checked ? this._state.properties.add(target.value) : this._state.properties.delete(target.value);
             this._reload();
         } else if (target.matches('[data-nova-search-sort]')) {
             this._state.order = target.value;
@@ -381,6 +410,7 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         if (state.term.length >= this.options.minChars) {
             params.set('search', state.term);
             if (state.manufacturers.size) params.set('manufacturer', [...state.manufacturers].sort().join('|'));
+            if (state.properties.size) params.set('properties', [...state.properties].sort().join('|'));
             if (state.min !== null) params.set('min-price', state.min);
             if (state.max !== null) params.set('max-price', state.max);
             if (state.order) params.set('order', state.order);
@@ -490,6 +520,15 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             document.dispatchEvent(new CustomEvent('nova:products-rendered', { detail: { container: this._body } }));
         }
 
+        // „In den Warenkorb“-Formulare mit Shopwares Warenkorb-Plugin verbinden
+        if (this._body.querySelector('[data-nova-search-buy]')) {
+            try {
+                window.PluginManager?.initializePlugins();
+            } catch (e) { /* ohne JS-Plugin funktioniert das Formular trotzdem (Seitenwechsel) */ }
+        }
+
+        this._renderRecentSearches();
+
         const results = this._body.querySelector('.nova-search-results');
         if (results && this._state.page === 1 && this._state.term.length >= this.options.minChars) {
             this._scheduleSearchSignal(
@@ -525,6 +564,9 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         }
         this._signaledTerms?.add(signal.term);
 
+        if (signal.total > 0) {
+            this._rememberSearch(signal.term);
+        }
         document.dispatchEvent(new CustomEvent('nova:search', { detail: { term: signal.term, total: signal.total } }));
         this._tracker.search(signal.term, signal.total, signal.rewritten);
     }
@@ -565,7 +607,13 @@ export default class NovaSearchPlugin extends PluginBaseClass {
                 return;
             }
 
+            // Direkt aus dem Suchfenster: zählt auch als Klick auf das Ergebnis
+            const fromLayer = this._body && this._body.contains(form) && this._state.term.length >= this.options.minChars;
             form.querySelectorAll('input[name^="lineItems["][name$="][id]"]').forEach((input) => {
+                if (fromLayer) {
+                    this._emitSearchSignal();
+                    this._tracker.click(this._state.term, input.value);
+                }
                 const term = this._tracker.termFor(input.value);
                 if (term) {
                     this._tracker.cart(term, input.value);
@@ -585,6 +633,100 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         } catch (e) {
             return null;
         }
+    }
+
+    /* ---------- Zuletzt gesucht ---------- */
+
+    _recentSearchesAllowed() {
+        return this.options.recentSearches && (!this.options.recentlyViewedConsent || hasCookie('nova-recently-viewed'));
+    }
+
+    _recentSearches() {
+        if (!this._recentSearchesAllowed()) {
+            return [];
+        }
+        try {
+            const terms = JSON.parse(window.localStorage.getItem(this.options.recentSearchesKey) || '[]');
+            return Array.isArray(terms) ? terms.filter((t) => typeof t === 'string' && t.length > 0 && t.length <= 100) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    _saveRecentSearches(terms) {
+        try {
+            if (terms.length === 0) {
+                window.localStorage.removeItem(this.options.recentSearchesKey);
+            } else {
+                window.localStorage.setItem(this.options.recentSearchesKey, JSON.stringify(terms.slice(0, this.options.recentSearchesMax)));
+            }
+        } catch (e) { /* Speicher gesperrt */ }
+    }
+
+    _rememberSearch(term) {
+        const value = (term || '').trim();
+        if (!this._recentSearchesAllowed() || value.length < this.options.minChars) {
+            return;
+        }
+        const lower = value.toLowerCase();
+        this._saveRecentSearches([value, ...this._recentSearches().filter((t) => t.toLowerCase() !== lower)]);
+    }
+
+    _removeRecentSearch(term) {
+        this._saveRecentSearches(this._recentSearches().filter((t) => t !== term));
+    }
+
+    /** Chips „Zuletzt gesucht“ oben in der Startansicht – nur im Browser gespeichert */
+    _renderRecentSearches() {
+        const start = this._body.querySelector('.nova-search-start');
+        if (!start) {
+            return;
+        }
+        start.querySelector('.nova-search-history')?.remove();
+
+        const terms = this._recentSearches();
+        if (terms.length === 0) {
+            return;
+        }
+
+        const labels = this.options.labels || {};
+        const section = document.createElement('section');
+        section.className = 'nova-search-history';
+
+        const title = document.createElement('span');
+        title.className = 'nova-search-history-title';
+        title.textContent = labels.recentSearches || 'Zuletzt gesucht';
+        section.append(title);
+
+        terms.forEach((term) => {
+            const chip = document.createElement('span');
+            chip.className = 'nova-search-history-chip';
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'nova-search-history-term nova-search-focusable';
+            button.setAttribute('data-nova-search-term', term);
+            button.textContent = term;
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'nova-search-history-remove';
+            remove.setAttribute('data-nova-search-history-remove', term);
+            remove.setAttribute('aria-label', `${labels.recentSearchesRemove || 'Entfernen'}: ${term}`);
+            remove.textContent = '×';
+
+            chip.append(button, remove);
+            section.append(chip);
+        });
+
+        const clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'nova-search-history-clear';
+        clear.setAttribute('data-nova-search-history-clear', '');
+        clear.textContent = labels.recentSearchesClear || 'Alles löschen';
+        section.append(clear);
+
+        start.prepend(section);
     }
 
     /* ---------- Zuletzt angesehen ---------- */

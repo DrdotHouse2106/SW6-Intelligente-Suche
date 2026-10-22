@@ -58,6 +58,22 @@
                 {% endif %}
             {% endblock %}
 
+            {# Bewertung (Sterne) #}
+            {% if config('NovaSearch.config.cardRating') is not same as(false) and product.ratingAverage > 0 %}
+                {% block nova_search_card_rating %}
+                    {% set novaRating = product.ratingAverage|round(1) %}
+                    <span class="nova-search-card-rating" title="{{ novaRating }} / 5" aria-label="{{ novaRating }} / 5">
+                        <span class="nova-search-card-stars" style="--nova-rating: {{ (product.ratingAverage / 5 * 100)|round }}%" aria-hidden="true">★★★★★</span>
+                    </span>
+                {% endblock %}
+            {% endif %}
+
+            {# Verfügbarkeit: Hinweis nur, wenn das Produkt derzeit nicht bestellbar ist #}
+            {% set novaAvailable = not product.isCloseout or product.availableStock >= product.minPurchase %}
+            {% if config('NovaSearch.config.cardAvailability') is not same as(false) and not novaAvailable %}
+                <span class="nova-search-card-soldout">{{ 'novaSearch.soldOut'|trans }}</span>
+            {% endif %}
+
             <span class="nova-search-card-price">
                 {% if isFrom %}{{ 'listing.listingTextFrom'|trans }} {% endif %}
                 {{- price.unitPrice|currency }}{{ 'general.star'|trans|sw_sanitize }}
@@ -66,5 +82,27 @@
                 {% endif %}
             </span>
         </a>
+
+        {# „In den Warenkorb“ direkt im Suchfenster – wie Shopwares Produktbox (nur ohne Varianten-Auswahl) #}
+        {% set novaBuy = config('NovaSearch.config.cardBuyButton') is not same as(false)
+            and novaAvailable and product.calculatedPrices|length <= 1 and product.childCount <= 0 %}
+        {% if novaBuy %}
+            {% block nova_search_card_buy %}
+                {% set id = product.id %}
+                <form action="{{ path('frontend.checkout.line-item.add') }}" method="post" class="nova-search-card-buy" data-add-to-cart="true" data-nova-search-buy>
+                    <input type="hidden" name="redirectTo" value="frontend.checkout.cart.page">
+                    <input type="hidden" name="lineItems[{{ id }}][id]" value="{{ id }}">
+                    <input type="hidden" name="lineItems[{{ id }}][referencedId]" value="{{ id }}">
+                    <input type="hidden" name="lineItems[{{ id }}][type]" value="product">
+                    <input type="hidden" name="lineItems[{{ id }}][stackable]" value="1">
+                    <input type="hidden" name="lineItems[{{ id }}][removable]" value="1">
+                    <input type="hidden" name="lineItems[{{ id }}][quantity]" value="{{ product.minPurchase ?: 1 }}">
+                    <input type="hidden" name="product-name" value="{{ name }}">
+                    <button type="submit" class="btn btn-buy nova-search-card-buy-btn nova-search-focusable" aria-label="{{ 'novaSearch.addToCartAria'|trans({ '%name%': name })|striptags }}">
+                        {{ 'novaSearch.addToCart'|trans }}
+                    </button>
+                </form>
+            {% endblock %}
+        {% endif %}
     </li>
 {% endblock %}

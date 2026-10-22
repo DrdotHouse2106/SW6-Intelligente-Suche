@@ -1,3 +1,6 @@
+# 1.5.0
+- New: recent searches, automatic highlights, property filters, rating stars, availability hint and add-to-cart button on cards, own text and recommendations when nothing is found, minimum characters setting
+
 # 1.4.0
 - New: checkbox "Exact part number only" in the search layer – shows only products with exactly this number; Store API parameter exactNumber
 

@@ -13,13 +13,19 @@
         {% set novaSearchOptions = {
             url: path('frontend.nova-search.instant'),
             searchUrl: path('frontend.search.page'),
-            minChars: shopware.minSearchLength,
+            minChars: config('NovaSearch.config.minChars') ?: shopware.minSearchLength,
             debounce: config('NovaSearch.config.debounce') ?? 180,
             trackUrl: path('frontend.nova-search.track'),
             learning: config('NovaSearch.config.learningActive') is not same as(false),
             recentlyViewed: config('NovaSearch.config.recentlyViewed') is not same as(false),
             recentlyViewedConsent: config('NovaSearch.config.recentlyViewedConsent') is not same as(false),
-            exactNumberParam: 'exact-number'
+            exactNumberParam: 'exact-number',
+            recentSearches: config('NovaSearch.config.recentSearches') is not same as(false),
+            labels: {
+                recentSearches: 'novaSearch.recentSearches'|trans|striptags,
+                recentSearchesClear: 'novaSearch.recentSearchesClear'|trans|striptags,
+                recentSearchesRemove: 'novaSearch.recentSearchesRemove'|trans|striptags
+            }
         } %}
         {% set novaShowExact = config('NovaSearch.config.numberSearch') is not same as(false)
             and config('NovaSearch.config.numberCheckbox') is not same as(false) %}

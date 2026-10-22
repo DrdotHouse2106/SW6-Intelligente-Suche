@@ -9,13 +9,16 @@ Die Suche **lernt dabei mit**: Was Kunden suchen, anklicken, in den Warenkorb le
 ## Funktionen
 
 **Beim Öffnen (noch nichts getippt)**
+- **Zuletzt gesucht** – die letzten Suchbegriffe des Besuchers als Chips, einzeln entfernbar oder „Alles löschen“ (nur im Browser gespeichert, mit derselben Zustimmung wie „Zuletzt angesehen“)
 - **Beliebte Suchanfragen** – automatisch aus echten Suchen ermittelt (und/oder von Hand gepflegt); ein Klick startet die Suche
 - **Zuletzt angesehen** – die Produkte, die der Besucher zuletzt angeschaut hat
-- **Aktuelle Highlights** – ausgewählte Produkte als Slider mit Bild und Preis
+- **Aktuelle Highlights** – von Hand gewählt oder automatisch: **Bestseller**, **beliebt in der Suche** oder **neu** (jeweils 90 Tage, stündlich aktualisiert; gewählte Produkte stehen vorne)
 
 **Beim Tippen**
 - **Produktkarten mit Bild**, Name, Variante, Preis (inkl. „Ab“-Preis, Streichpreis und Rabatt-Markierung)
-- **Filter „Marken“** mit Trefferanzahl und **Preisfilter** mit Schieberegler und Eingabefeldern
+- **Filter „Marken“** mit Trefferanzahl, **Preisfilter** mit Schieberegler und Eingabefeldern und wahlweise **Eigenschaften** (z. B. Fahrzeugmodell)
+- **Auf der Karte:** Bewertungssterne, Hinweis „Derzeit nicht lieferbar“ und Button **„In den Warenkorb“** (bei Produkten ohne Variantenauswahl; öffnet den Warenkorb wie gewohnt)
+- **Keine Treffer:** eigener Text je Shop (z. B. „Teil anfragen“) und **Produktempfehlungen**
 - **Sortierung** (Relevanz, Preis, Name … – wie in Shopware eingestellt)
 - **Passende Kategorien** als Schnellzugriff, z. B. „Bremsanlage 2CV6“
 - **Automatisches Nachladen** weiterer Produkte beim Scrollen
@@ -361,6 +364,30 @@ Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetre
 **Ursache:** „Nummern auch über den Anfang finden“ – kurze Nummernanfänge passen zu mehreren Produkten
 
 **Lösung:** Einstellung abschalten; dann zählt nur die exakte Nummer
+
+### „In den Warenkorb“ im Suchfenster fehlt bei manchen Produkten
+
+**Ursache:** Gewollt bei Produkten mit Variantenauswahl, Staffelpreisen oder Abverkauf ohne Bestand – dort muss auf der Produktseite gewählt werden
+
+**Lösung:** Keine; die Karte führt zur Produktseite. Ganz abschalten: *Suchfenster: Treffer → Button „In den Warenkorb“*
+
+### Nach „In den Warenkorb“ wechselt die Seite statt den Warenkorb seitlich zu öffnen
+
+**Ursache:** Shopwares Warenkorb-JavaScript wurde für die nachgeladenen Karten nicht gestartet (z. B. durch ein anderes Plugin oder Theme)
+
+**Lösung:** Funktioniert trotzdem (Weiterleitung in den Warenkorb). Bitte als Issue melden, mit Theme-Name
+
+### Eigenschaften-Filter erscheint nicht
+
+**Ursache:** Die Eigenschaft ist in Shopware nicht als Filter freigegeben, oder keiner der Treffer hat sie
+
+**Lösung:** *Kataloge → Eigenschaften → (Eigenschaft) → „In Produktfiltern anzeigen“* aktivieren und unter *Suchfenster: Treffer → Eigenschaften als Filter* auswählen
+
+### „Zuletzt gesucht“ bleibt leer
+
+**Ursache:** Es werden nur Suchen mit Treffern gemerkt, und nur mit Zustimmung im Cookie-Banner (Komfortfunktionen)
+
+**Lösung:** Im Cookie-Banner zustimmen, etwas suchen und kurz warten (die Suche wird nach einer Tipp-Pause gemerkt)
 
 ### Synonym wirkt nicht
 

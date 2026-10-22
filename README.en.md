@@ -83,6 +83,10 @@ Known pitfalls from real installations. **Please add new ones** (or open an issu
 
 Terms that look like a number (at least 3 digits, no other words) are looked up in a normalized **number index** first: product number, manufacturer number, EAN and optionally custom fields and properties (e.g. OE numbers). Spaces, dots, dashes and slashes are ignored (`25043 25031` = `2504325031`). If nothing matches, the regular search runs. A checkbox "Exact part number only" next to the search field restricts results to products with exactly this number (Store API: `exactNumber: true`). Rebuild: `bin/console nova-search:numbers` (also hourly after settings changed).
 
+## Search layer additions (1.5.0)
+
+Recent searches as chips (browser only, with consent), automatic highlights (bestsellers, popular in search, newest), property filters (e.g. vehicle model), rating stars, "currently unavailable" hint and an "add to cart" button on cards, own text and product recommendations when nothing is found, configurable minimum characters.
+
 ## Roadmap
 
 Planned features (synonyms, redirects, admin analytics, recommendations, product finder, shopping assistant …) are listed in [ROADMAP.md](ROADMAP.md) (German).

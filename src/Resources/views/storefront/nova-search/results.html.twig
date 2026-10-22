@@ -17,13 +17,39 @@
                         <p class="nova-search-empty-hint">{{ 'novaSearch.exactNoResultsHint'|trans }}</p>
                     {% else %}
                         <p class="nova-search-empty-title">{{ 'novaSearch.noResults'|trans({ '%term%': term }) }}</p>
-                        <p class="nova-search-empty-hint">{{ 'novaSearch.noResultsHint'|trans }}</p>
+                        {% if noResultsText|default('') %}
+                            <div class="nova-search-empty-text">{{ noResultsText|sw_sanitize }}</div>
+                        {% else %}
+                            <p class="nova-search-empty-hint">{{ 'novaSearch.noResultsHint'|trans }}</p>
+                        {% endif %}
                     {% endif %}
                 </div>
+
+                {% if recommendations|default([])|length > 0 %}
+                    {% block nova_search_empty_recommendations %}
+                        <section class="nova-search-highlights nova-search-recommendations">
+                            <h2 class="nova-search-title">{{ 'novaSearch.recommendations'|trans }}</h2>
+                            <div class="nova-search-slider">
+                                <button type="button" class="nova-search-slider-btn is-prev" data-nova-search-slide="-1" aria-label="{{ 'novaSearch.previous'|trans|striptags }}">
+                                    {% sw_icon 'arrow-head-left' %}
+                                </button>
+                                <ul class="nova-search-slider-track list-unstyled" data-nova-list-id="search_no_results" data-nova-list-name="Suche: Empfehlungen ohne Treffer">
+                                    {% for product in recommendations %}
+                                        {% sw_include '@NovaSearch/storefront/nova-search/card.html.twig' with { product: product } %}
+                                    {% endfor %}
+                                </ul>
+                                <button type="button" class="nova-search-slider-btn is-next" data-nova-search-slide="1" aria-label="{{ 'novaSearch.next'|trans|striptags }}">
+                                    {% sw_icon 'arrow-head-right' %}
+                                </button>
+                            </div>
+                        </section>
+                    {% endblock %}
+                {% endif %}
             {% endblock %}
         {% else %}
-            <div class="nova-search-layout{% if manufacturers|length == 0 and not priceRange %} no-filters{% endif %}">
-                {% if manufacturers|length > 0 or priceRange %}
+            {% set novaProperties = properties|default([]) %}
+            <div class="nova-search-layout{% if manufacturers|length == 0 and not priceRange and novaProperties|length == 0 %} no-filters{% endif %}">
+                {% if manufacturers|length > 0 or priceRange or novaProperties|length > 0 %}
                     {% block nova_search_filters %}
                         <aside class="nova-search-filters" id="nova-search-filters">
                             {% if manufacturers|length > 0 %}
@@ -48,6 +74,30 @@
                                     {% endif %}
                                 </section>
                             {% endif %}
+
+                            {% for group in novaProperties %}
+                                {% block nova_search_property_facet %}
+                                    <section class="nova-search-facet">
+                                        <h2 class="nova-search-facet-title">{{ group.name }}</h2>
+                                        <ul class="list-unstyled nova-search-facet-list{% if group.options|length > 8 %} is-collapsed{% endif %}">
+                                            {% for option in group.options %}
+                                                <li>
+                                                    <label class="nova-search-check">
+                                                        <input type="checkbox" class="form-check-input nova-search-focusable"
+                                                               value="{{ option.id }}"
+                                                               data-nova-search-property
+                                                               {% if option.active %}checked{% endif %}>
+                                                        <span class="nova-search-check-label">{{ option.name }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% if group.options|length > 8 %}
+                                            <button type="button" class="nova-search-more" data-nova-search-expand>{{ 'novaSearch.showMore'|trans }}</button>
+                                        {% endif %}
+                                    </section>
+                                {% endblock %}
+                            {% endfor %}
 
                             {% if priceRange and priceRange.max > priceRange.min %}
                                 <section class="nova-search-facet">

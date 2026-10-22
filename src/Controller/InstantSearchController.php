@@ -5,11 +5,13 @@ namespace Nova\Search\Controller;
 use Nova\Search\Rules\SearchRules;
 use Nova\Search\Search\LearningProductSearchBuilder;
 use Nova\Search\Subscriber\SearchRedirectSubscriber;
+use Nova\Search\Service\HighlightProvider;
 use Nova\Search\Service\PopularSearches;
 use Shopware\Core\Content\Category\CategoryCollection;
 use Shopware\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerEntity;
 use Shopware\Core\Content\Product\Aggregate\ProductVisibility\ProductVisibilityDefinition;
 use Shopware\Core\Content\Product\ProductCollection;
+use Shopware\Core\Content\Property\PropertyGroupCollection;
 use Shopware\Core\Content\Product\SalesChannel\ProductAvailableFilter;
 use Shopware\Core\Content\Product\SalesChannel\Search\AbstractProductSearchRoute;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Aggregation\Bucket\TermsAggregation;
@@ -62,6 +64,7 @@ class InstantSearchController extends StorefrontController
         private readonly SystemConfigService $config,
         private readonly PopularSearches $popularSearches,
         private readonly SearchRules $rules,
+        private readonly HighlightProvider $highlightProvider,
     ) {
     }
 
@@ -88,11 +91,7 @@ class InstantSearchController extends StorefrontController
     {
         $salesChannelId = $context->getSalesChannelId();
 
-        $highlights = new ProductCollection();
-        $ids = $this->config->get('NovaSearch.config.highlightProducts', $salesChannelId);
-        if (\is_array($ids) && $ids !== []) {
-            $highlights = $this->loadProducts(array_values(array_filter($ids, 'is_string')), $context);
-        }
+        $highlights = $this->highlights($context, 12);
 
         // „Zuletzt angesehen“ – die IDs kommen aus dem localStorage des Besuchers (neueste zuerst)
         $recent = new ProductCollection();
@@ -111,6 +110,30 @@ class InstantSearchController extends StorefrontController
             'highlights' => $highlights,
             'recent' => $recent,
         ]);
+    }
+
+    /**
+     * „Aktuelle Highlights“ – von Hand gewählt oder automatisch (Bestseller, beliebt, neu).
+     */
+    private function highlights(SalesChannelContext $context, int $limit, bool $fallbackToBestseller = false): ProductCollection
+    {
+        $salesChannelId = $context->getSalesChannelId();
+        $manual = $this->config->get('NovaSearch.config.highlightProducts', $salesChannelId);
+        $manual = \is_array($manual) ? array_values(array_filter($manual, static fn ($id): bool => \is_string($id) && preg_match('/^[0-9a-f]{32}$/', $id) === 1)) : [];
+        $mode = $this->config->getString('NovaSearch.config.highlightMode', $salesChannelId) ?: 'manual';
+        if ($fallbackToBestseller && $mode === 'manual' && $manual === []) {
+            $mode = 'bestseller';
+        }
+
+        $ids = $this->highlightProvider->ids($mode, $salesChannelId, $manual);
+        if ($ids === []) {
+            return new ProductCollection();
+        }
+
+        // Etwas mehr laden, weil nicht sichtbare/nicht verfügbare Produkte herausfallen
+        $products = $this->loadProducts(\array_slice($ids, 0, $limit * 2), $context);
+
+        return new ProductCollection(\array_slice($products->getElements(), 0, $limit));
     }
 
     /**
@@ -152,6 +175,11 @@ class InstantSearchController extends StorefrontController
         ));
         $order = (string) $request->query->get('order', '');
         $order = preg_match('/^[a-z0-9-]{1,50}$/', $order) === 1 ? $order : '';
+        $propertyGroups = $this->idConfig('NovaSearch.config.filterPropertyGroups', $salesChannelId);
+        $propertyIds = $propertyGroups === [] ? [] : array_values(array_filter(
+            explode('|', (string) $request->query->get('properties', '')),
+            static fn (string $id): bool => preg_match('/^[0-9a-f]{32}$/', $id) === 1
+        ));
         $minPrice = $this->price($request->query->get('min-price'));
         $maxPrice = $this->price($request->query->get('max-price'));
 
@@ -162,6 +190,7 @@ class InstantSearchController extends StorefrontController
                 'limit' => $limit,
                 'p' => $page,
                 'manufacturer' => implode('|', $manufacturerIds),
+                'properties' => implode('|', $propertyIds),
                 'order' => $order,
                 'min-price' => $minPrice,
                 'max-price' => $maxPrice,
@@ -170,7 +199,8 @@ class InstantSearchController extends StorefrontController
             [
                 'manufacturer-filter' => true,
                 'price-filter' => true,
-                'property-filter' => false,
+                'property-filter' => $propertyGroups !== [],
+                'property-whitelist' => $propertyGroups,
                 'rating-filter' => false,
                 'shipping-free-filter' => false,
                 // Beim Nachladen werden keine Filterwerte gebraucht
@@ -220,6 +250,32 @@ class InstantSearchController extends StorefrontController
             return $this->renderStorefront('@NovaSearch/storefront/nova-search/items.html.twig', $variables);
         }
 
+        // Eigenschaften-Filter (z. B. Fahrzeugmodell)
+        $properties = [];
+        $propertyResult = $result?->getAggregations()->get('properties');
+        if ($propertyGroups !== [] && $propertyResult instanceof EntityResult && $propertyResult->getEntities() instanceof PropertyGroupCollection) {
+            foreach ($propertyResult->getEntities() as $group) {
+                if (!\in_array($group->getId(), $propertyGroups, true) || $group->getOptions() === null || $group->getOptions()->count() === 0) {
+                    continue;
+                }
+                $options = [];
+                foreach ($group->getOptions() as $option) {
+                    $options[] = [
+                        'id' => $option->getId(),
+                        'name' => (string) $option->getTranslation('name'),
+                        'active' => \in_array($option->getId(), $propertyIds, true),
+                    ];
+                }
+                $properties[] = ['id' => $group->getId(), 'name' => (string) $group->getTranslation('name'), 'options' => $options];
+            }
+        }
+
+        // Keine Treffer: eigener Text und Produktempfehlungen (nicht bei „Nur exakte Teilenummer“)
+        $recommendations = new ProductCollection();
+        if ($total === 0 && !$exactNumber && $this->config->get('NovaSearch.config.noResultsProducts', $salesChannelId) !== false) {
+            $recommendations = $this->highlights($context, 12, true);
+        }
+
         // Hersteller mit Anzahl der Treffer
         $manufacturers = [];
         $counts = [];
@@ -266,8 +322,23 @@ class InstantSearchController extends StorefrontController
             'categories' => !$exactNumber && $this->config->get('NovaSearch.config.showCategories', $salesChannelId) !== false
                 ? $this->findCategories($term, $context)
                 : new CategoryCollection(),
-            'filterCount' => \count($manufacturerIds) + ($minPrice !== null || $maxPrice !== null ? 1 : 0),
+            'filterCount' => \count($manufacturerIds) + \count($propertyIds) + ($minPrice !== null || $maxPrice !== null ? 1 : 0),
+            'properties' => $properties,
+            'recommendations' => $recommendations,
+            'noResultsText' => $exactNumber ? '' : trim($this->config->getString('NovaSearch.config.noResultsText', $salesChannelId)),
         ]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function idConfig(string $key, string $salesChannelId): array
+    {
+        $value = $this->config->get($key, $salesChannelId);
+
+        return \is_array($value)
+            ? array_values(array_filter($value, static fn ($id): bool => \is_string($id) && preg_match('/^[0-9a-f]{32}$/', $id) === 1))
+            : [];
     }
 
     private function price(mixed $value): ?int

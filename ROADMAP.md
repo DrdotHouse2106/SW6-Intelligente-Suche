@@ -17,10 +17,9 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 - ✅ Beliebte Suchanfragen (automatisch + von Hand, Sperrliste)
 - ✅ Aktuelle Highlights als Slider
 - ✅ Zuletzt angesehene Produkte
-- ⬜ **Zuletzt gesucht**: eigene letzte Suchbegriffe des Besuchers als Chips, einzeln
+- ✅ **Zuletzt gesucht**: eigene letzte Suchbegriffe des Besuchers als Chips, einzeln
   entfernbar (✕) und „Alles löschen“. Nur im Browser gespeichert, nur mit Komfort-Einwilligung
-- ⬜ Highlights wahlweise automatisch: „am beliebtesten“, „Bestseller“, „neu“ oder Produkte aus
-  einem dynamischen Produktstream
+- 🟡 Highlights wahlweise automatisch: „am beliebtesten“, „Bestseller“, „neu“ (1.5.0) – Produktstream folgt
 
 ### 1.2 Ergebnisse beim Tippen
 
@@ -28,12 +27,12 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 - ✅ Filter Marken + Preis, Sortierung, passende Kategorien, Nachladen beim Scrollen
 - ✅ **Suche nach Artikel-, Hersteller- und OE-Nummern** (1.3.0), Checkbox „Nur exakte Teilenummer“ (1.4.0) inkl. Schreibweisen mit/ohne
   Leerzeichen, Punkt, Bindestrich (z. B. `12345 678` / `12345678`)
-- ⬜ Mindestanzahl Zeichen, ab der gesucht wird (einstellbar)
-- ⬜ „In den Warenkorb“-Button direkt auf der Karte (Menge 1, Varianten → Produktseite)
-- ⬜ Verfügbarkeits-Hinweis auf der Karte (nicht vorrätig / Lieferzeit), optional ausblenden
-- ⬜ Bewertungssterne auf der Karte (Shopware-Produktbewertungen)
-- ⬜ Weitere Filter wählbar: Eigenschaften (z. B. Fahrzeugmodell), Kategorie, „auf Lager“,
-  „im Angebot“ – Reihenfolge und Auswahl in der Konfiguration
+- ✅ Mindestanzahl Zeichen, ab der gesucht wird (einstellbar)
+- ✅ „In den Warenkorb“-Button direkt auf der Karte (Menge 1, Varianten → Produktseite)
+- ✅ Verfügbarkeits-Hinweis auf der Karte (nicht vorrätig / Lieferzeit), optional ausblenden
+- ✅ Bewertungssterne auf der Karte (Shopware-Produktbewertungen)
+- 🟡 Weitere Filter wählbar: Eigenschaften (z. B. Fahrzeugmodell) ✅ 1.5.0 – Kategorie, „auf Lager“,
+  „im Angebot“ folgen
 - ⬜ Zustand in der Browser-URL (Begriff, Filter, Sortierung): Neuladen und „Zurück“ stellen das
   Fenster wieder her; Suchbegriff bleibt beim Weiterklicken erhalten (abschaltbar)
 - ⬜ Layout wählbar: **Vollbild** (wie jetzt) oder **schwebend** unter dem Suchfeld
@@ -42,8 +41,8 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 
 - ✅ Hinweistext bei 0 Treffern
 - ✅ Claude-Umschreibung für Begriffe ohne Treffer (dauerhaft gespeichert, Kostenlimit)
-- ⬜ **Empfohlene Produkte bei 0 Treffern** (beliebte Produkte oder frei wählbarer Produktstream)
-- ⬜ Eigener Text/HTML für „keine Treffer“, übersetzbar (Textbaustein), z. B. mit Telefonnummer
+- ✅ **Empfohlene Produkte bei 0 Treffern** (beliebte Produkte oder frei wählbarer Produktstream)
+- ✅ Eigener Text/HTML für „keine Treffer“, übersetzbar (Textbaustein), z. B. mit Telefonnummer
   und Link „Teil anfragen“
 
 ### 1.4 Regeln (Merchandising)

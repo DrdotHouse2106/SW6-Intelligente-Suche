@@ -90,8 +90,30 @@
             <entity>product</entity>
             <label>Highlight products</label>
             <label lang="de-DE">Highlight-Produkte</label>
-            <helpText lang="de-DE">Werden als „Aktuelle Highlights“ mit Bild und Preis angezeigt.</helpText>
+            <helpText lang="de-DE">Werden als „Aktuelle Highlights“ mit Bild und Preis angezeigt – bei automatischer Auswahl vorne.</helpText>
         </component>
+
+        <input-field type="single-select">
+            <name>highlightMode</name>
+            <label>Highlights</label>
+            <label lang="de-DE">Aktuelle Highlights</label>
+            <helpText lang="de-DE">Automatisch: Bestseller = meistverkauft (90 Tage), Beliebt in der Suche = am häufigsten geklickt/gekauft nach einer Suche (90 Tage), Neu = zuletzt angelegt. Wird stündlich aktualisiert.</helpText>
+            <defaultValue>manual</defaultValue>
+            <options>
+                <option><id>manual</id><name>Selected products only</name><name lang="de-DE">Nur die gewählten Produkte</name></option>
+                <option><id>bestseller</id><name>Bestsellers</name><name lang="de-DE">Bestseller</name></option>
+                <option><id>popular</id><name>Popular in search</name><name lang="de-DE">Beliebt in der Suche</name></option>
+                <option><id>newest</id><name>Newest</name><name lang="de-DE">Neu</name></option>
+            </options>
+        </input-field>
+
+        <input-field type="bool">
+            <name>recentSearches</name>
+            <label>Show recent searches</label>
+            <label lang="de-DE">„Zuletzt gesucht“ anzeigen</label>
+            <helpText lang="de-DE">Die letzten Suchbegriffe des Besuchers als Chips (einzeln entfernbar, „Alles löschen“). Nur im Browser gespeichert, mit derselben Zustimmung wie „Zuletzt angesehen“.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
 
         <input-field type="bool">
             <name>recentlyViewed</name>
@@ -106,6 +128,67 @@
             <label>Only with consent (comfort features)</label>
             <label lang="de-DE">Nur mit Zustimmung (Cookie-Kategorie „Komfortfunktionen“)</label>
             <defaultValue>true</defaultValue>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Search layer: results</title>
+        <title lang="de-DE">Suchfenster: Treffer</title>
+
+        <input-field type="int">
+            <name>minChars</name>
+            <label>Minimum characters</label>
+            <label lang="de-DE">Mindestanzahl Zeichen</label>
+            <helpText lang="de-DE">Ab so vielen Zeichen werden Treffer gezeigt. Leer = Shopware-Einstellung (Einstellungen → Suche).</helpText>
+            <min>1</min>
+            <max>10</max>
+        </input-field>
+
+        <component name="sw-entity-multi-id-select">
+            <name>filterPropertyGroups</name>
+            <entity>property_group</entity>
+            <label>Property filters</label>
+            <label lang="de-DE">Eigenschaften als Filter</label>
+            <helpText lang="de-DE">Z. B. „Fahrzeugmodell“ – erscheinen im Suchfenster als Filter. Die Eigenschaft muss in Shopware „In Produktfiltern anzeigen“ aktiv haben. Wenige auswählen, jede kostet etwas Rechenzeit.</helpText>
+        </component>
+
+        <input-field type="bool">
+            <name>cardBuyButton</name>
+            <label>"Add to cart" button on products</label>
+            <label lang="de-DE">Button „In den Warenkorb“ auf den Produktkarten</label>
+            <helpText lang="de-DE">Nur bei Produkten ohne Variantenauswahl und Staffelpreise; sonst führt die Karte zur Produktseite.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
+            <name>cardRating</name>
+            <label>Show rating stars</label>
+            <label lang="de-DE">Bewertungssterne anzeigen</label>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
+            <name>cardAvailability</name>
+            <label>Show "currently unavailable"</label>
+            <label lang="de-DE">„Derzeit nicht lieferbar“ anzeigen</label>
+            <helpText lang="de-DE">Bei Abverkaufsartikeln ohne ausreichenden Bestand.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
+            <name>noResultsProducts</name>
+            <label>Recommend products when nothing is found</label>
+            <label lang="de-DE">Bei 0 Treffern Produkte empfehlen</label>
+            <helpText lang="de-DE">Zeigt die „Aktuellen Highlights“ – sind keine gewählt, die Bestseller.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="textarea">
+            <name>noResultsText</name>
+            <label>Own text when nothing is found</label>
+            <label lang="de-DE">Eigener Text bei 0 Treffern</label>
+            <helpText lang="de-DE">Ersetzt den Standard-Hinweis. Einfaches HTML erlaubt (Links, fett), z. B. Telefonnummer und Link „Teil anfragen“. Pro Verkaufskanal einstellbar.</helpText>
+            <placeholder>Wir suchen das Teil gern für Sie: &lt;a href="/kontakt"&gt;Teil anfragen&lt;/a&gt; oder rufen Sie uns an.</placeholder>
         </input-field>
     </card>
 

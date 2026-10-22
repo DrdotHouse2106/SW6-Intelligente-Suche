@@ -43,6 +43,13 @@
         "exactNumber": "Nur exakte Teilenummer",
         "exactNumberHint": "Zeigt nur Produkte mit genau dieser Nummer (Artikel-, Hersteller- oder OE-Nummer) – Leerzeichen, Punkte und Bindestriche sind egal.",
         "exactNoResults": "Keine Teilenummer „%term%“ gefunden.",
-        "exactNoResultsHint": "Bitte die Nummer prüfen – oder das Häkchen „Nur exakte Teilenummer“ entfernen, um normal zu suchen."
+        "exactNoResultsHint": "Bitte die Nummer prüfen – oder das Häkchen „Nur exakte Teilenummer“ entfernen, um normal zu suchen.",
+        "recentSearches": "Zuletzt gesucht:",
+        "recentSearchesClear": "Alles löschen",
+        "recentSearchesRemove": "Entfernen",
+        "recommendations": "Vielleicht passt eines davon",
+        "soldOut": "Derzeit nicht lieferbar",
+        "addToCart": "In den Warenkorb",
+        "addToCartAria": "%name% in den Warenkorb legen"
     }
 }

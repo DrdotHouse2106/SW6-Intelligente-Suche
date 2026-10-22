@@ -43,6 +43,13 @@
         "exactNumber": "Exact part number only",
         "exactNumberHint": "Shows only products with exactly this number (product, manufacturer or OE number) – spaces, dots and dashes are ignored.",
         "exactNoResults": "No part number “%term%” found.",
-        "exactNoResultsHint": "Please check the number – or untick “Exact part number only” to search normally."
+        "exactNoResultsHint": "Please check the number – or untick “Exact part number only” to search normally.",
+        "recentSearches": "Recently searched:",
+        "recentSearchesClear": "Clear all",
+        "recentSearchesRemove": "Remove",
+        "recommendations": "Maybe one of these fits",
+        "soldOut": "Currently unavailable",
+        "addToCart": "Add to cart",
+        "addToCartAria": "Add %name% to cart"
     }
 }

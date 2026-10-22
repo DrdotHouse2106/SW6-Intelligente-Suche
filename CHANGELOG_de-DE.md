@@ -1,3 +1,12 @@
+# 1.5.0
+- Neu: „Zuletzt gesucht“ als Chips in der Startansicht (einzeln entfernbar, „Alles löschen“; nur im Browser, mit Zustimmung)
+- Neu: Aktuelle Highlights automatisch – Bestseller, beliebt in der Suche oder neu
+- Neu: Eigenschaften als Filter im Suchfenster (z. B. Fahrzeugmodell)
+- Neu: Produktkarten mit Bewertungssternen, „Derzeit nicht lieferbar“ und Button „In den Warenkorb“
+- Neu: Bei 0 Treffern eigener Text je Shop und Produktempfehlungen
+- Neu: Mindestanzahl Zeichen einstellbar
+- „In den Warenkorb“ aus dem Suchfenster zählt fürs Lernen wie ein Klick
+
 # 1.4.0
 - Neu: Checkbox „Nur exakte Teilenummer“ im Suchfenster – zeigt ausschließlich Produkte mit genau dieser Nummer, sonst „Keine Teilenummer … gefunden“; bleibt für die Sitzung erhalten, gilt auch für Enter; Store-API-Parameter exactNumber
 - Begriffe aus der Nummernsuche werden nicht mehr an Claude zur Umschreibung gegeben
