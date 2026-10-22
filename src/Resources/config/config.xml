@@ -198,6 +198,14 @@
             <defaultValue>true</defaultValue>
         </input-field>
 
+        <input-field type="bool">
+            <name>numberCheckbox</name>
+            <label>Show checkbox "Exact part number only"</label>
+            <label lang="de-DE">Checkbox „Nur exakte Teilenummer“ im Suchfenster</label>
+            <helpText lang="de-DE">Neben dem Suchfeld. Ist sie angehakt, erscheinen ausschließlich Produkte mit genau dieser Nummer – ohne unscharfe Treffer. Die Auswahl bleibt für die Sitzung des Besuchers erhalten.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
         <input-field type="multi-select">
             <name>numberSources</name>
             <label>Numbers to search</label>

@@ -165,6 +165,7 @@ class InstantSearchController extends StorefrontController
                 'order' => $order,
                 'min-price' => $minPrice,
                 'max-price' => $maxPrice,
+                LearningProductSearchBuilder::EXACT_NUMBER_PARAM => LearningProductSearchBuilder::isExactNumberRequest($request) ? 1 : null,
             ], static fn ($v) => $v !== '' && $v !== null),
             [
                 'manufacturer-filter' => true,
@@ -201,10 +202,12 @@ class InstantSearchController extends StorefrontController
         // Wurde mit einer gespeicherten Umschreibung gesucht? → Hinweis „Ergebnisse für …“
         $rewrite = $result?->getCriteria()->getExtension(LearningProductSearchBuilder::EXTENSION);
 
-        $redirect = $this->rules->redirect($term, $salesChannelId);
+        $exactNumber = LearningProductSearchBuilder::isExactNumberRequest($request);
+        $redirect = $exactNumber ? null : $this->rules->redirect($term, $salesChannelId);
 
         $variables = [
             'term' => $term,
+            'exactNumber' => $exactNumber,
             'redirect' => $redirect !== null ? SearchRedirectSubscriber::absolute($redirect, $request) : null,
             'rewrite' => $rewrite instanceof ArrayStruct ? $rewrite->all() : null,
             'products' => $result?->getEntities() ?? new ProductCollection(),
@@ -260,7 +263,7 @@ class InstantSearchController extends StorefrontController
             'priceRange' => $priceRange,
             'sortings' => $result?->getAvailableSortings(),
             'currentSorting' => $result?->getSorting(),
-            'categories' => $this->config->get('NovaSearch.config.showCategories', $salesChannelId) !== false
+            'categories' => !$exactNumber && $this->config->get('NovaSearch.config.showCategories', $salesChannelId) !== false
                 ? $this->findCategories($term, $context)
                 : new CategoryCollection(),
             'filterCount' => \count($manufacturerIds) + ($minPrice !== null || $maxPrice !== null ? 1 : 0),

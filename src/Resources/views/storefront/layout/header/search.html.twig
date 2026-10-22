@@ -18,8 +18,11 @@
             trackUrl: path('frontend.nova-search.track'),
             learning: config('NovaSearch.config.learningActive') is not same as(false),
             recentlyViewed: config('NovaSearch.config.recentlyViewed') is not same as(false),
-            recentlyViewedConsent: config('NovaSearch.config.recentlyViewedConsent') is not same as(false)
+            recentlyViewedConsent: config('NovaSearch.config.recentlyViewedConsent') is not same as(false),
+            exactNumberParam: 'exact-number'
         } %}
+        {% set novaShowExact = config('NovaSearch.config.numberSearch') is not same as(false)
+            and config('NovaSearch.config.numberCheckbox') is not same as(false) %}
 
         <form action="{{ path('frontend.search.page') }}"
               method="get"
@@ -45,6 +48,14 @@
                                        enterkeyhint="search"
                                        placeholder="{{ 'novaSearch.placeholder'|trans|striptags }}"
                                        aria-label="{{ 'header.searchPlaceholder'|trans|striptags }}">
+                                {% if novaShowExact %}
+                                    {% block nova_search_exact_number %}
+                                        <label class="nova-search-exact" title="{{ 'novaSearch.exactNumberHint'|trans|striptags }}">
+                                            <input type="checkbox" class="form-check-input nova-search-exact-input" data-nova-search-exact>
+                                            <span class="nova-search-exact-label">{{ 'novaSearch.exactNumber'|trans|sw_sanitize }}</span>
+                                        </label>
+                                    {% endblock %}
+                                {% endif %}
                                 <button type="button" class="nova-search-close" aria-label="{{ 'novaSearch.close'|trans|striptags }}">
                                     {% sw_icon 'x' %}
                                 </button>

@@ -61,6 +61,13 @@ class LearningProductSearchBuilder implements ProductSearchBuilderInterface
         $original = \is_array($search) ? implode(' ', $search) : (string) $search;
         $salesChannelId = $context->getSalesChannelId();
 
+        if (self::isExactNumberRequest($request)) {
+            $this->buildExactNumberSearch($original, $criteria, $salesChannelId);
+            $this->addExclusions($criteria, $salesChannelId);
+
+            return;
+        }
+
         if ($this->buildNumberSearch($original, $criteria, $salesChannelId)) {
             $this->addExclusions($criteria, $salesChannelId);
 
@@ -92,6 +99,44 @@ class LearningProductSearchBuilder implements ProductSearchBuilderInterface
 
         $this->addExclusions($criteria, $salesChannelId);
         $this->addLearnedBoost($original, $criteria, $context);
+    }
+
+    /** Request-Parameter der Checkbox „Nur exakte Teilenummer“ */
+    public const EXACT_NUMBER_PARAM = 'exact-number';
+
+    public static function isExactNumberRequest(Request $request): bool
+    {
+        $value = $request->query->get(self::EXACT_NUMBER_PARAM) ?? $request->request->all()[self::EXACT_NUMBER_PARAM] ?? null;
+
+        return \in_array($value, [true, 1, '1', 'true'], true);
+    }
+
+    /**
+     * „Nur exakte Teilenummer“: ausschließlich Produkte mit genau dieser Nummer – keine unscharfe
+     * Suche, keine Umschreibung, kein Nummernanfang. Ohne Treffer bleibt die Liste leer.
+     */
+    private function buildExactNumberSearch(string $term, Criteria $criteria, string $salesChannelId): void
+    {
+        $ids = [];
+        $candidates = NumberIndex::exactCandidates($term);
+        if ($this->numberIndex !== null && $candidates !== []) {
+            try {
+                $ids = $this->numberIndex->find($candidates, false);
+            } catch (\Throwable $e) {
+                $this->logger->warning('Nova Suche: Nummern-Index konnte nicht gelesen werden', ['exception' => $e]);
+            }
+        }
+
+        // Ohne Treffer: Filter, der nichts findet
+        $ids = $ids === [] ? [str_repeat('0', 32)] : $ids;
+
+        $criteria->addFilter(new OrFilter([
+            new EqualsAnyFilter('product.id', $ids),
+            new EqualsAnyFilter('product.parentId', $ids),
+        ]));
+        $criteria->addQuery(new ScoreQuery(new EqualsAnyFilter('product.id', $ids), 1000));
+        $criteria->addQuery(new ScoreQuery(new EqualsAnyFilter('product.parentId', $ids), 500));
+        $criteria->addExtension(self::NUMBER_EXTENSION, new ArrayStruct(['term' => trim($term), 'exact' => true]));
     }
 
     /**

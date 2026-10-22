@@ -1,3 +1,7 @@
+# 1.4.0
+- Neu: Checkbox „Nur exakte Teilenummer“ im Suchfenster – zeigt ausschließlich Produkte mit genau dieser Nummer, sonst „Keine Teilenummer … gefunden“; bleibt für die Sitzung erhalten, gilt auch für Enter; Store-API-Parameter exactNumber
+- Begriffe aus der Nummernsuche werden nicht mehr an Claude zur Umschreibung gegeben
+
 # 1.3.0
 - Neu: Nummernsuche – Artikel-, Hersteller-, EAN- und OE-Nummern (Zusatzfelder, Eigenschaften) unabhängig von Leerzeichen, Punkten, Bindestrichen und Schrägstrichen; auch über den Nummernanfang
 - Nummern-Index wird beim Speichern von Produkten aktualisiert, komplett im stündlichen Lauf bzw. mit bin/console nova-search:numbers

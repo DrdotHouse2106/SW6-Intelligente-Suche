@@ -58,7 +58,8 @@ class SearchPageSubscriber implements EventSubscriberInterface
                 $this->statistics->recordSearch($salesChannelId, $term, $listing->getTotal());
             }
 
-            if ($listing->getTotal() > 0 || $rewritten) {
+            // Treffer, Umschreibung oder Nummernsuche → nichts für Claude vormerken
+            if ($listing->getTotal() > 0 || $rewritten || $listing->getCriteria()->hasExtension(LearningProductSearchBuilder::NUMBER_EXTENSION)) {
                 return;
             }
 

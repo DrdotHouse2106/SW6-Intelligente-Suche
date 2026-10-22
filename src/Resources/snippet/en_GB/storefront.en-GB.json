@@ -39,6 +39,10 @@
             "6": "Sat",
             "7": "Sun"
         },
-        "redirectHint": "Go straight to “%term%” – press Enter or click here"
+        "redirectHint": "Go straight to “%term%” – press Enter or click here",
+        "exactNumber": "Exact part number only",
+        "exactNumberHint": "Shows only products with exactly this number (product, manufacturer or OE number) – spaces, dots and dashes are ignored.",
+        "exactNoResults": "No part number “%term%” found.",
+        "exactNoResultsHint": "Please check the number – or untick “Exact part number only” to search normally."
     }
 }

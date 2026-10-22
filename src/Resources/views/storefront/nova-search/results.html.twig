@@ -12,8 +12,13 @@
         {% if total == 0 and categories|length == 0 and filterCount == 0 %}
             {% block nova_search_empty %}
                 <div class="nova-search-empty">
-                    <p class="nova-search-empty-title">{{ 'novaSearch.noResults'|trans({ '%term%': term }) }}</p>
-                    <p class="nova-search-empty-hint">{{ 'novaSearch.noResultsHint'|trans }}</p>
+                    {% if exactNumber|default(false) %}
+                        <p class="nova-search-empty-title">{{ 'novaSearch.exactNoResults'|trans({ '%term%': term }) }}</p>
+                        <p class="nova-search-empty-hint">{{ 'novaSearch.exactNoResultsHint'|trans }}</p>
+                    {% else %}
+                        <p class="nova-search-empty-title">{{ 'novaSearch.noResults'|trans({ '%term%': term }) }}</p>
+                        <p class="nova-search-empty-hint">{{ 'novaSearch.noResultsHint'|trans }}</p>
+                    {% endif %}
                 </div>
             {% endblock %}
         {% else %}

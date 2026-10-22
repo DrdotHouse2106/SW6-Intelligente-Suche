@@ -1,6 +1,7 @@
 import NovaSearchTracker, { hasCookie } from './nova-search-tracker';
 
 const { PluginBaseClass } = window;
+const EXACT_KEY = 'nova-search-exact';
 
 /**
  * Suchfenster im Vollbild – öffnet sich beim Klick ins Suchfeld.
@@ -37,6 +38,7 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         recentStorageKey: 'nova-recently-viewed',
         recentMax: 20,
         searchSignalDelay: 1200,
+        exactNumberParam: 'exact-number',
     };
 
     init() {
@@ -61,6 +63,31 @@ export default class NovaSearchPlugin extends PluginBaseClass {
 
         this._restoreSearchTerm();
         this._registerTriggers();
+    }
+
+    _isExact() {
+        return !!(this._exact && this._exact.checked);
+    }
+
+    _storedExact() {
+        try {
+            return window.sessionStorage.getItem(EXACT_KEY) === '1';
+        } catch (e) {
+            return false;
+        }
+    }
+
+    _exactFromUrl() {
+        return window.activeRoute === 'frontend.search.page'
+            && new URLSearchParams(window.location.search).get(this.options.exactNumberParam) === '1';
+    }
+
+    _searchPageUrl(term) {
+        const params = new URLSearchParams({ search: term });
+        if (this._isExact()) {
+            params.set(this.options.exactNumberParam, '1');
+        }
+        return `${this.options.searchUrl}?${params.toString()}`;
     }
 
     _emptyState(term) {
@@ -107,6 +134,20 @@ export default class NovaSearchPlugin extends PluginBaseClass {
         document.body.append(fragment);
 
         this._input.addEventListener('input', () => this._onInput());
+
+        // Checkbox „Nur exakte Teilenummer“ – bleibt für die Sitzung erhalten
+        this._exact = this._layer.querySelector('[data-nova-search-exact]');
+        if (this._exact) {
+            this._exact.checked = this._exactFromUrl() || this._storedExact();
+            this._exact.addEventListener('change', () => {
+                try {
+                    window.sessionStorage.setItem(EXACT_KEY, this._exact.checked ? '1' : '0');
+                } catch (e) { /* Speicher gesperrt */ }
+                this._state = this._emptyState(this._input.value.trim());
+                this._load();
+                this._input.focus();
+            });
+        }
         this._input.addEventListener('keydown', (event) => this._onInputKeydown(event));
         this._layer.querySelector('.nova-search-close').addEventListener('click', () => this.close());
         this._backdrop.addEventListener('click', () => this.close());
@@ -195,7 +236,7 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             if (term.length >= this.options.minChars) {
                 // Die Suchergebnisseite zählt die Suche selbst – hier nicht doppelt melden
                 this._cancelSearchSignal();
-                window.location.href = `${this.options.searchUrl}?search=${encodeURIComponent(term)}`;
+                window.location.href = this._searchPageUrl(term);
             }
         } else if (event.key === 'ArrowDown') {
             event.preventDefault();
@@ -344,6 +385,7 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             if (state.max !== null) params.set('max-price', state.max);
             if (state.order) params.set('order', state.order);
             if (state.page > 1) params.set('p', state.page);
+            if (this._isExact()) params.set(this.options.exactNumberParam, '1');
         } else {
             const recent = this._recentIds().slice(0, 12);
             if (recent.length) params.set('recent', recent.join('|'));

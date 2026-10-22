@@ -66,6 +66,28 @@ class NumberIndex
     }
 
     /**
+     * Varianten für „Nur exakte Teilenummer“: jede Eingabe ab 3 Zeichen gilt als Nummer –
+     * auch ohne Ziffern-Mindestzahl (z. B. „ab12cd“).
+     *
+     * @return list<string>
+     */
+    public static function exactCandidates(string $term): array
+    {
+        $normalized = self::normalize($term);
+        if (\strlen($normalized) < 3 || \strlen($normalized) > 64) {
+            return [];
+        }
+
+        $candidates = [$normalized];
+        $withoutLabel = (string) preg_replace('/^(?:oe|oem|nr|art|artnr|ref|teilenr|teilenummer)(?=[a-z0-9]{3,})/', '', $normalized);
+        if ($withoutLabel !== $normalized) {
+            $candidates[] = $withoutLabel;
+        }
+
+        return $candidates;
+    }
+
+    /**
      * @param list<string> $candidates
      *
      * @return list<string> Produkt-IDs (hex)

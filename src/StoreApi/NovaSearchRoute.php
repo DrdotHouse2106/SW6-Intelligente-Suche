@@ -83,6 +83,8 @@ class NovaSearchRoute extends AbstractNovaSearchRoute
             'manufacturer' => self::ids($body['manufacturer'] ?? null),
             // Für die App werden keine Filterwerte gebraucht – nur die Treffer
             'no-aggregations' => true,
+            // „Nur exakte Teilenummer“
+            LearningProductSearchBuilder::EXACT_NUMBER_PARAM => \in_array($body['exactNumber'] ?? false, [true, 1, '1', 'true'], true) ? 1 : '',
         ], static fn ($value): bool => $value !== '');
 
         $result = $this->load($request, $params, $context);
@@ -102,7 +104,7 @@ class NovaSearchRoute extends AbstractNovaSearchRoute
             ];
         }
 
-        if ($page === 1 && $total === 0 && $rewrite === null) {
+        if ($page === 1 && $total === 0 && $rewrite === null && !isset($params[LearningProductSearchBuilder::EXACT_NUMBER_PARAM])) {
             $this->markPending($context->getSalesChannelId(), $term);
         }
 

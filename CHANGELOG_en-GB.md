@@ -1,3 +1,6 @@
+# 1.4.0
+- New: checkbox "Exact part number only" in the search layer – shows only products with exactly this number; Store API parameter exactNumber
+
 # 1.3.0
 - New: number search – product, manufacturer, EAN and OE numbers (custom fields, properties) regardless of spaces, dots, dashes and slashes; also by prefix
 - Number index is updated when products are saved, fully rebuilt hourly or via bin/console nova-search:numbers

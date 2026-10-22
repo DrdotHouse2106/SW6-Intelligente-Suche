@@ -39,6 +39,10 @@
             "6": "Sa",
             "7": "So"
         },
-        "redirectHint": "Direkt zu „%term%“ – Enter drücken oder hier klicken"
+        "redirectHint": "Direkt zu „%term%“ – Enter drücken oder hier klicken",
+        "exactNumber": "Nur exakte Teilenummer",
+        "exactNumberHint": "Zeigt nur Produkte mit genau dieser Nummer (Artikel-, Hersteller- oder OE-Nummer) – Leerzeichen, Punkte und Bindestriche sind egal.",
+        "exactNoResults": "Keine Teilenummer „%term%“ gefunden.",
+        "exactNoResultsHint": "Bitte die Nummer prüfen – oder das Häkchen „Nur exakte Teilenummer“ entfernen, um normal zu suchen."
     }
 }
