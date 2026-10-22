@@ -110,11 +110,12 @@ Antwort:
   "ids": ["0190…", "0188…"],
   "total": 30, "page": 1, "limit": 24, "sorting": "score",
   "availableSortings": [{ "key": "score", "label": "Relevanz" }, { "key": "price-asc", "label": "Preis aufsteigend" }],
-  "rewrite": { "original": "bremsbelag ente", "term": "bremsbelag 2cv" }
+  "rewrite": { "original": "bremsbelag ente", "term": "bremsbelag 2cv" },
+  "redirect": null
 }
 ```
 
-`ids` sind die Produkt-IDs in Ranking-Reihenfolge – Preise, Bilder und Bestand lädt die App wie gewohnt über `/store-api/product`. `rewrite` ist `null`, wenn ohne Umschreibung gesucht wurde; sonst kann die App „Ergebnisse für …“ anzeigen.
+`ids` sind die Produkt-IDs in Ranking-Reihenfolge – Preise, Bilder und Bestand lädt die App wie gewohnt über `/store-api/product`. `rewrite` ist `null`, wenn ohne Umschreibung gesucht wurde; sonst kann die App „Ergebnisse für …“ anzeigen. `redirect` enthält das Ziel einer Weiterleitung für genau diesen Begriff (Pfad im Shop wie `/account` oder volle Adresse), sonst `null`.
 
 **Wichtig:** Diese Route zählt die Suche **nicht** in der Statistik, weil die App sie beim Blättern und Nachladen mehrfach aufruft. Die App meldet jede fertige Suche genau einmal über `track` (siehe unten). Begriffe ohne Treffer werden hier nur für die Claude-Umschreibung vorgemerkt.
 
@@ -146,6 +147,49 @@ Antwort immer `204`. Es gelten dieselben Regeln wie im Suchfenster: max. 20 Erei
 ### Shopwares eigene Suche
 
 Auch Shopwares Standard-Route `/store-api/search` nutzt das gelernte Ranking und gespeicherte Umschreibungen (die Plugin-Logik sitzt im Such-Builder). Dort wird nichts gezählt – die App kann bei Fehlern also gefahrlos darauf zurückfallen.
+
+## Suchregeln: Synonyme und Weiterleitungen
+
+*Erweiterungen → Nova Suche → Konfigurieren → Suchregeln.* Am besten unter **„Alle Verkaufskanäle“** pflegen; einzelne Shops können eigene Regeln bekommen. Gilt für Suchfenster, Suchergebnisseite und App.
+
+**Synonyme** – eine Gruppe pro Zeile, Begriffe mit Komma getrennt:
+
+```
+bremsklötze, bremsbeläge
+auspuff, schalldämpfer, abgasanlage
+```
+
+- Jeder Begriff einer Gruppe findet auch die Produkte der anderen: „bremsklötze“ zeigt Bremsbeläge.
+- Mehrwortsuchen bleiben genau: „bremsklötze 2cv“ zeigt Bremsbeläge **für den 2CV**, nicht alle Bremsbeläge (Shopwares UND-Suche bleibt erhalten).
+- Begriffe aus mehreren Wörtern sind möglich („zweiter schalldämpfer“), Groß-/Kleinschreibung ist egal, Zeilen mit `#` sind Kommentare.
+- **Übernahme aus einem anderen Suchdienst:** Synonyme dort als CSV exportieren und je Gruppe eine Zeile einfügen – Komma, Semikolon oder Tabulator als Trenner werden erkannt.
+
+**Weiterleitungen** – ein Begriff pro Zeile, `Suchbegriff = Ziel`:
+
+```
+kundenkonto = /account
+versand = /versand-und-zahlungsbedingungen/
+```
+
+- Gilt bei genau diesem Suchbegriff: Enter bzw. die Suchergebnisseite führt direkt zum Ziel; im Suchfenster erscheint oben ein Link „Direkt zu …“.
+- Ziel ist ein Pfad im Shop (wird um die Shop-Adresse inkl. Sprachpfad ergänzt) oder eine vollständige `https://`-Adresse. Andere Angaben werden ignoriert.
+- Die App bekommt das Ziel im Feld `redirect` der Such-API.
+
+## Ausgeschlossene Produkte
+
+*Konfigurieren → Ausgeschlossene Produkte.* Ausgeschlossene Produkte erscheinen nicht in Suchfenster, Suchergebnisseite, Suchvorschlägen und App – über Kategorien und Direktlinks bleiben sie erreichbar.
+
+- **Abverkaufsartikel ohne Bestand ausblenden** – „Abverkauf“ aktiv und Lagerbestand ≤ 0
+- **Produkte** (bei Hauptprodukten auch alle Varianten), **Kategorien**, **Tags** (z. B. Tag „nicht in Suche“)
+- **Zusatzfeld**: technischer Name eines Ja/Nein-Zusatzfelds am Produkt; ist es eingeschaltet, wird das Produkt ausgeblendet. So lassen sich bestehende Ausschluss-Markierungen eines bisherigen Suchdienstes weiterverwenden – das alte Plugin bzw. dessen geplante Aufgabe wird dann nicht mehr gebraucht.
+
+## Umstieg von einem externen Suchdienst
+
+1. Nova Suche installieren (ist zunächst in keinem Shop aktiv).
+2. Synonyme, Weiterleitungen und Ausschlüsse übernehmen (siehe oben).
+3. In einem kleinen Shop **„Sofortsuche verwenden“** einschalten, Cache löschen, testen.
+4. Dort das Plugin bzw. Skript des bisherigen Dienstes deaktivieren – sonst öffnen sich zwei Suchfenster.
+5. Nach ein paar Tagen die übrigen Shops umstellen, altes Plugin deinstallieren, Abo kündigen.
 
 ## Suchdaten exportieren
 
@@ -292,6 +336,24 @@ Geplante Funktionen (Synonyme, Weiterleitungen, Auswertungen in der Administrati
 ## Häufige Probleme und Lösungen
 
 Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetreten sind. **Neue Probleme bitte ergänzen** (oder als Issue melden), damit andere nicht lange suchen müssen.
+
+### Synonym wirkt nicht
+
+**Ursache:** Keiner der anderen Begriffe der Gruppe kommt in Produktnamen bzw. Suchwörtern vor – oder das Suchfenster zeigt noch ein zwischengespeichertes Ergebnis
+
+**Lösung:** Mindestens ein Begriff der Gruppe muss so geschrieben sein wie im Shop (z. B. „bremsbeläge“, wenn die Produkte so heißen). Nach Änderungen an den Regeln einmal *Einstellungen → Caches & Indizes → Cache löschen*
+
+### Weiterleitung greift nicht
+
+**Ursache:** Der Begriff muss genau passen (nur Groß-/Kleinschreibung und Leerzeichen am Rand sind egal), oder das Ziel ist ungültig (z. B. ohne `/` am Anfang bzw. ohne `https://`)
+
+**Lösung:** Zeile prüfen, z. B. `kundenkonto = /account`. Beim Tippen im Suchfenster erscheint der Link erst bei genau diesem Begriff
+
+### Ausgeschlossenes Produkt erscheint trotzdem
+
+**Ursache:** Zwischengespeicherte Ergebnisse oder Ausschluss nur in einem anderen Verkaufskanal eingestellt
+
+**Lösung:** Oben in der Konfiguration den richtigen Verkaufskanal (oder „Alle Verkaufskanäle“) wählen, danach Cache löschen. Varianten werden ausgeschlossen, wenn das Hauptprodukt eingetragen ist
 
 ### Nach der Installation ändert sich nichts
 

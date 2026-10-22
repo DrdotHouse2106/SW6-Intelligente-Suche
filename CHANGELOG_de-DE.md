@@ -1,3 +1,9 @@
+# 1.2.0
+- Neu: Synonyme (eine Gruppe pro Zeile) – gelten in Suchfenster, Suchergebnisseite und App; Mehrwortsuchen bleiben genau
+- Neu: Weiterleitungen für Suchbegriffe (z. B. „kundenkonto“ → Konto) – Enter führt direkt zum Ziel, im Suchfenster erscheint ein Link, die Store-API liefert das Feld `redirect`
+- Neu: Ausgeschlossene Produkte – Abverkauf ohne Bestand, Produkte, Kategorien, Tags oder Ja/Nein-Zusatzfeld
+- README: Umstieg von einem externen Suchdienst
+
 # 1.1.0
 - Monatliches Kostenlimit für die Claude-Stufe (Standard 5 USD, 0 = aus) mit Warnschwelle (Standard 80 %)
 - Verbrauch wird je Monat und Modell aus den gemeldeten Tokens berechnet und gespeichert

@@ -9,7 +9,12 @@ use Psr\Log\LoggerInterface;
 use Shopware\Core\Content\Product\SearchKeyword\ProductSearchBuilderInterface;
 use Shopware\Core\Framework\Adapter\Request\RequestParamHelper;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\AndFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\Filter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\NotFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Query\ScoreQuery;
 use Shopware\Core\Framework\Struct\ArrayStruct;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -23,7 +28,9 @@ use Symfony\Component\HttpFoundation\Request;
  *    (z. B. „bremsbelag ente“ → „bremsbelag 2cv“), wird direkt mit der Umschreibung gesucht.
  *    Die Criteria bekommt dann die Extension „novaSearchRewrite“ für den Hinweis „Ergebnisse für …“.
  *
- * 2. Lernen: Produkte, die bei genau diesem Begriff oft geklickt, in den Warenkorb gelegt oder
+ * 2. Ausschlüsse: Produkte, die laut Konfiguration nie in Suchergebnissen erscheinen sollen.
+ *
+ * 3. Lernen: Produkte, die bei genau diesem Begriff oft geklickt, in den Warenkorb gelegt oder
  *    gekauft wurden, bekommen zusätzliche Relevanz-Punkte. Das wirkt nur auf die Sortierung
  *    nach Relevanz – die Trefferliste selbst bleibt unverändert, weil Shopwares Suchwort-Filter
  *    weiterhin gelten.
@@ -72,7 +79,76 @@ class LearningProductSearchBuilder implements ProductSearchBuilderInterface
             $this->decorated->build($request, $criteria, $context);
         }
 
+        $this->addExclusions($criteria, $salesChannelId);
         $this->addLearnedBoost($original, $criteria, $context);
+    }
+
+    /**
+     * Ausschlüsse aus der Konfiguration (Abverkauf ohne Bestand, Produkte, Kategorien, Tags, Zusatzfeld).
+     */
+    private function addExclusions(Criteria $criteria, string $salesChannelId): void
+    {
+        $filter = self::exclusionFilter(
+            $this->config->getBool('NovaSearch.config.excludeCloseoutOutOfStock', $salesChannelId),
+            self::idList($this->config->get('NovaSearch.config.excludeProducts', $salesChannelId)),
+            self::idList($this->config->get('NovaSearch.config.excludeCategories', $salesChannelId)),
+            self::idList($this->config->get('NovaSearch.config.excludeTags', $salesChannelId)),
+            $this->config->getString('NovaSearch.config.excludeCustomField', $salesChannelId),
+        );
+
+        if ($filter !== null) {
+            $criteria->addFilter($filter);
+        }
+    }
+
+    /**
+     * @param list<string> $productIds
+     * @param list<string> $categoryIds
+     * @param list<string> $tagIds
+     */
+    public static function exclusionFilter(bool $closeout, array $productIds, array $categoryIds, array $tagIds, string $customField): ?Filter
+    {
+        $excluded = [];
+
+        if ($closeout) {
+            $excluded[] = new AndFilter([
+                new EqualsFilter('product.isCloseout', true),
+                new RangeFilter('product.stock', [RangeFilter::LTE => 0]),
+            ]);
+        }
+
+        if ($productIds !== []) {
+            // Hauptprodukt ausgeschlossen → auch alle Varianten
+            $excluded[] = new EqualsAnyFilter('product.id', $productIds);
+            $excluded[] = new EqualsAnyFilter('product.parentId', $productIds);
+        }
+
+        if ($categoryIds !== []) {
+            $excluded[] = new EqualsAnyFilter('product.categoriesRo.id', $categoryIds);
+        }
+
+        if ($tagIds !== []) {
+            $excluded[] = new EqualsAnyFilter('product.tags.id', $tagIds);
+        }
+
+        $customField = trim($customField);
+        if (preg_match('/^[A-Za-z][A-Za-z0-9_]{0,99}$/', $customField) === 1) {
+            $excluded[] = new EqualsFilter('product.customFields.' . $customField, true);
+        }
+
+        return $excluded === [] ? null : new NotFilter(NotFilter::CONNECTION_OR, $excluded);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function idList(mixed $value): array
+    {
+        if (!\is_array($value)) {
+            return [];
+        }
+
+        return array_values(array_filter($value, static fn ($id): bool => \is_string($id) && preg_match('/^[0-9a-f]{32}$/', $id) === 1));
     }
 
     private function addLearnedBoost(string $term, Criteria $criteria, SalesChannelContext $context): void

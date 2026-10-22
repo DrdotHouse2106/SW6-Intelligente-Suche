@@ -1,3 +1,8 @@
+# 1.2.0
+- New: synonyms (one group per line) for search layer, search page and app; multi-word searches stay precise
+- New: redirects for search terms – Enter goes straight to the target, the layer shows a link, the Store API returns `redirect`
+- New: excluded products – closeout without stock, products, categories, tags or a yes/no custom field
+
 # 1.1.0
 - Monthly cost limit for the Claude stage (default 5 USD, 0 = off) with warning threshold (default 80 %)
 - Usage is calculated per month and model from the reported tokens and stored

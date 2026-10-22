@@ -1,6 +1,14 @@
 {# Trefferansicht des Suchfensters #}
 {% block nova_search_results %}
     <div class="nova-search-results" data-nova-search-total="{{ total }}"{% if rewrite %} data-nova-search-rewritten="1"{% endif %}>
+        {% if redirect|default(null) %}
+            {% block nova_search_redirect %}
+                <a class="nova-search-redirect nova-search-focusable" href="{{ redirect }}" data-nova-search-redirect>
+                    <span class="nova-search-redirect-label">{{ 'novaSearch.redirectHint'|trans({ '%term%': term }) }}</span>
+                    <span class="nova-search-redirect-arrow" aria-hidden="true">→</span>
+                </a>
+            {% endblock %}
+        {% endif %}
         {% if total == 0 and categories|length == 0 and filterCount == 0 %}
             {% block nova_search_empty %}
                 <div class="nova-search-empty">

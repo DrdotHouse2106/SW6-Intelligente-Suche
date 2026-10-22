@@ -11,7 +11,8 @@ use Shopware\Core\System\SalesChannel\StoreApiResponse;
  * {
  *   "ids": ["…"], "total": 30, "page": 1, "limit": 24,
  *   "sorting": "score", "availableSortings": [{ "key": "score", "label": "Relevanz" }],
- *   "rewrite": null | { "original": "bremsbelag ente", "term": "bremsbelag 2cv" }
+ *   "rewrite": null | { "original": "bremsbelag ente", "term": "bremsbelag 2cv" },
+ *   "redirect": null | "/account"   (Weiterleitung für diesen Begriff: Pfad im Shop oder volle Adresse)
  * }
  *
  * @extends StoreApiResponse<ArrayStruct<array<string, mixed>>>
@@ -23,7 +24,7 @@ class NovaSearchRouteResponse extends StoreApiResponse
      * @param list<array{key: string, label: string}> $availableSortings
      * @param array{original: string, term: string}|null $rewrite
      */
-    public function __construct(array $ids, int $total, int $page, int $limit, ?string $sorting, array $availableSortings, ?array $rewrite)
+    public function __construct(array $ids, int $total, int $page, int $limit, ?string $sorting, array $availableSortings, ?array $rewrite, ?string $redirect = null)
     {
         /** @var array<string, mixed> $data */
         $data = [
@@ -34,6 +35,7 @@ class NovaSearchRouteResponse extends StoreApiResponse
             'sorting' => $sorting,
             'availableSortings' => $availableSortings,
             'rewrite' => $rewrite,
+            'redirect' => $redirect,
         ];
 
         parent::__construct(new ArrayStruct($data, 'nova_search_result'));

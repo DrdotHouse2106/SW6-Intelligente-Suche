@@ -75,6 +75,10 @@ Known pitfalls from real installations. **Please add new ones** (or open an issu
 - **Claude does nothing:** API key, Claude switch, scheduled tasks and message queue must run; test with `bin/console nova-search:rewrite`.
 - **No typo tolerance:** use OpenSearch, or rely on the Claude stage.
 
+## Search rules and exclusions (1.2.0)
+
+*Configure → Search rules:* **synonyms** (one group per line, comma-separated, e.g. `brake pads, brake shoes`) and **redirects** (`term = /path` or `term = https://…`). Multi-word searches keep Shopware's AND logic. *Excluded products:* closeout products without stock, products (incl. variants), categories, tags or a yes/no custom field. Applies to the search layer, search page and Store API (`redirect` field).
+
 ## Roadmap
 
 Planned features (synonyms, redirects, admin analytics, recommendations, product finder, shopping assistant …) are listed in [ROADMAP.md](ROADMAP.md) (German).

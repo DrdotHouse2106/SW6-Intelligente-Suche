@@ -2,7 +2,9 @@
 
 namespace Nova\Search\Controller;
 
+use Nova\Search\Rules\SearchRules;
 use Nova\Search\Search\LearningProductSearchBuilder;
+use Nova\Search\Subscriber\SearchRedirectSubscriber;
 use Nova\Search\Service\PopularSearches;
 use Shopware\Core\Content\Category\CategoryCollection;
 use Shopware\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerEntity;
@@ -59,6 +61,7 @@ class InstantSearchController extends StorefrontController
         private readonly SalesChannelRepository $productRepository,
         private readonly SystemConfigService $config,
         private readonly PopularSearches $popularSearches,
+        private readonly SearchRules $rules,
     ) {
     }
 
@@ -198,8 +201,11 @@ class InstantSearchController extends StorefrontController
         // Wurde mit einer gespeicherten Umschreibung gesucht? → Hinweis „Ergebnisse für …“
         $rewrite = $result?->getCriteria()->getExtension(LearningProductSearchBuilder::EXTENSION);
 
+        $redirect = $this->rules->redirect($term, $salesChannelId);
+
         $variables = [
             'term' => $term,
+            'redirect' => $redirect !== null ? SearchRedirectSubscriber::absolute($redirect, $request) : null,
             'rewrite' => $rewrite instanceof ArrayStruct ? $rewrite->all() : null,
             'products' => $result?->getEntities() ?? new ProductCollection(),
             'total' => $total,

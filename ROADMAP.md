@@ -48,20 +48,20 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 
 ### 1.4 Regeln (Merchandising)
 
-- ⬜ **Synonyme**: Gruppen gleichwertiger Begriffe (z. B. `bremsklötze, bremsbeläge`) –
-  Verwaltung in der Administration, Import/Export als CSV
-- ⬜ **Weiterleitungen**: Suchbegriff → Seite (z. B. `kundenkonto` → Konto, `versand` →
+- ✅ **Synonyme**: Gruppen gleichwertiger Begriffe (z. B. `bremsklötze, bremsbeläge`) –
+  in der Plugin-Konfiguration (1.2.0); eigene Verwaltungsseite mit CSV-Import/-Export folgt in Phase 2
+- ✅ **Weiterleitungen**: Suchbegriff → Seite (z. B. `kundenkonto` → Konto, `versand` →
   Versandinfos, `widerruf` → Widerrufsseite)
-- ⬜ **Ausgeschlossene Produkte**: Produkte/Kategorien/Eigenschaften, die nie im Suchfenster
+- ✅ **Ausgeschlossene Produkte**: Produkte/Kategorien/Eigenschaften, die nie im Suchfenster
   erscheinen
-- ⬜ Pro Verkaufskanal und Sprache pflegbar
+- 🟡 Pro Verkaufskanal pflegbar (je Sprache noch nicht)
 
 ### 1.5 Übernahme der bestehenden Daten
 
-- ⬜ Import vorhandener Synonym-Gruppen aus einer CSV-Datei (Export des bisherigen Dienstes)
+- ✅ Import vorhandener Synonym-Gruppen: CSV-Zeilen in das Feld „Synonyme“ einfügen
 - ⬜ Import von Suchbegriffen und Klickdaten der letzten Monate (CSV), damit „Beliebte
   Suchanfragen“ und das Lernen nicht bei null starten
-- ⬜ Umstiegs-Checkliste in der README (altes Plugin deaktivieren, Skript entfernen)
+- ✅ Umstiegs-Checkliste in der README (altes Plugin deaktivieren, Skript entfernen)
 
 ---
 

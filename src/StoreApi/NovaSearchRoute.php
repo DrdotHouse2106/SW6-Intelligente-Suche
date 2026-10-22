@@ -2,6 +2,7 @@
 
 namespace Nova\Search\StoreApi;
 
+use Nova\Search\Rules\SearchRules;
 use Nova\Search\Search\LearningProductSearchBuilder;
 use Nova\Search\Service\RewriteStore;
 use Psr\Log\LoggerInterface;
@@ -42,6 +43,7 @@ class NovaSearchRoute extends AbstractNovaSearchRoute
     public function __construct(
         private readonly AbstractProductSearchRoute $productSearchRoute,
         private readonly RewriteStore $rewrites,
+        private readonly SearchRules $rules,
         private readonly SystemConfigService $config,
         private readonly LoggerInterface $logger,
     ) {
@@ -120,7 +122,8 @@ class NovaSearchRoute extends AbstractNovaSearchRoute
             $limit,
             $result?->getSorting(),
             $sortings,
-            $rewrite
+            $rewrite,
+            $this->rules->redirect($term, $context->getSalesChannelId())
         );
     }
 

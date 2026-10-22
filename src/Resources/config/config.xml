@@ -185,4 +185,76 @@
             <defaultValue>false</defaultValue>
         </input-field>
     </card>
+
+    <card>
+        <title>Search rules</title>
+        <title lang="de-DE">Suchregeln</title>
+
+        <input-field type="textarea">
+            <name>synonyms</name>
+            <label>Synonyms</label>
+            <label lang="de-DE">Synonyme</label>
+            <helpText lang="de-DE">Eine Gruppe pro Zeile, Begriffe mit Komma trennen. Jeder Begriff einer Gruppe findet auch die Produkte der anderen. Zeilen mit # sind Kommentare. Gilt für Suchfenster, Suchergebnisseite und App. Tipp: unter „Alle Verkaufskanäle“ pflegen, damit es überall gilt.</helpText>
+            <helpText>One group per line, separate terms with commas. Each term of a group also finds the products of the others. Lines starting with # are comments.</helpText>
+            <placeholder>bremsklötze, bremsbeläge
+auspuff, schalldämpfer, abgasanlage
+rückspiegel, außenspiegel, innenspiegel</placeholder>
+        </input-field>
+
+        <input-field type="textarea">
+            <name>redirects</name>
+            <label>Redirects</label>
+            <label lang="de-DE">Weiterleitungen</label>
+            <helpText lang="de-DE">Ein Begriff pro Zeile: Suchbegriff = Ziel. Ziel ist ein Pfad im Shop (/account) oder eine vollständige Adresse (https://…). Gilt bei genau diesem Suchbegriff (Groß-/Kleinschreibung egal): Enter führt direkt zum Ziel, im Suchfenster erscheint ein Link.</helpText>
+            <helpText>One term per line: search term = target. The target is a shop path (/account) or a full URL.</helpText>
+            <placeholder>kundenkonto = /account
+versand = /versand-und-zahlungsbedingungen/
+widerruf = /widerrufsbelehrung/</placeholder>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Excluded products</title>
+        <title lang="de-DE">Ausgeschlossene Produkte</title>
+
+        <input-field type="bool">
+            <name>excludeCloseoutOutOfStock</name>
+            <label>Hide closeout products without stock in search</label>
+            <label lang="de-DE">Abverkaufsartikel ohne Bestand in der Suche ausblenden</label>
+            <helpText lang="de-DE">Produkte mit „Abverkauf“ und Lagerbestand 0 oder weniger erscheinen nicht in Suchfenster, Suchergebnisseite und App. Über Kategorien und Direktlinks bleiben sie erreichbar (anders als Shopwares Einstellung, die sie überall ausblendet).</helpText>
+            <defaultValue>false</defaultValue>
+        </input-field>
+
+        <component name="sw-entity-multi-id-select">
+            <name>excludeProducts</name>
+            <entity>product</entity>
+            <label>Excluded products</label>
+            <label lang="de-DE">Ausgeschlossene Produkte</label>
+            <helpText lang="de-DE">Erscheinen nie in den Suchergebnissen. Bei Hauptprodukten gilt das auch für alle Varianten.</helpText>
+        </component>
+
+        <component name="sw-entity-multi-id-select">
+            <name>excludeCategories</name>
+            <entity>category</entity>
+            <label>Excluded categories</label>
+            <label lang="de-DE">Ausgeschlossene Kategorien</label>
+            <helpText lang="de-DE">Produkte, die einer dieser Kategorien zugeordnet sind, erscheinen nicht in den Suchergebnissen.</helpText>
+        </component>
+
+        <component name="sw-entity-multi-id-select">
+            <name>excludeTags</name>
+            <entity>tag</entity>
+            <label>Excluded tags</label>
+            <label lang="de-DE">Ausgeschlossene Tags</label>
+            <helpText lang="de-DE">Produkte mit einem dieser Tags (z. B. „nicht in Suche“) erscheinen nicht in den Suchergebnissen.</helpText>
+        </component>
+
+        <input-field type="text">
+            <name>excludeCustomField</name>
+            <label>Exclude by custom field (technical name)</label>
+            <label lang="de-DE">Ausschluss per Zusatzfeld (technischer Name)</label>
+            <helpText lang="de-DE">Technischer Name eines Ja/Nein-Zusatzfelds am Produkt. Ist es bei einem Produkt eingeschaltet, erscheint das Produkt nicht in den Suchergebnissen. So lassen sich bestehende Ausschluss-Markierungen weiterverwenden.</helpText>
+            <placeholder>z. B. search_exclude</placeholder>
+        </input-field>
+    </card>
 </config>

@@ -38,6 +38,7 @@
             "5": "Fri",
             "6": "Sat",
             "7": "Sun"
-        }
+        },
+        "redirectHint": "Go straight to “%term%” – press Enter or click here"
     }
 }
