@@ -289,23 +289,80 @@ Shopware 6.7.x (geprüft gegen 6.7.15).
 
 Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetreten sind. **Neue Probleme bitte ergänzen** (oder als Issue melden), damit andere nicht lange suchen müssen.
 
-| Problem | Ursache | Lösung |
-|---|---|---|
-| Nach der Installation ändert sich nichts | Das Suchfenster ist **standardmäßig aus** | *Erweiterungen → Nova Suche → Konfigurieren* → oben den Verkaufskanal wählen → „Sofortsuche verwenden“ einschalten |
-| Suchfenster ohne Gestaltung | Styles noch nicht im Theme | `bin/console theme:compile` und `bin/console cache:clear` |
-| Zwei Suchfenster gehen auf | Eine andere Such-Erweiterung mit eigenem Overlay ist im selben Verkaufskanal aktiv | Die andere Such-Erweiterung in diesem Verkaufskanal deaktivieren |
-| Installation bricht bei Composer ab / „Class Anthropic\Client not found“ im Log | Shopware lädt das Anthropic-SDK bei der Installation per Composer nach; auf manchen Hostern fehlt Composer oder Schreibrecht | Im Shop-Hauptverzeichnis `composer require anthropic-ai/sdk` ausführen. Ohne SDK funktioniert alles außer der Claude-Stufe (im Log steht dann ein klarer Hinweis) |
-| Claude verbessert nichts | Claude ist aus, kein API-Schlüssel, oder **Scheduled Tasks / Message Queue laufen nicht** | Schlüssel aus der Anthropic Console eintragen, Claude einschalten; prüfen, dass `bin/console scheduled-task:run` und `bin/console messenger:consume` laufen (Cron/Supervisor). Sofort testen: `bin/console nova-search:rewrite` |
-| „Ergebnisse für …“ erscheint erst später | Begriffe ohne Treffer werden gesammelt und **stündlich** gebündelt ausgewertet | Gewollt (spart Kosten). Sofort: `bin/console nova-search:rewrite`. Optional „Neue Begriffe auf der Suchergebnisseite sofort auswerten“ einschalten |
-| Claude stoppt mitten im Monat | **Monatliches Kostenlimit erreicht** (Hinweis im Shopware-Log „Monatliches Claude-Kostenlimit erreicht“) | Verbrauch prüfen mit `bin/console nova-search:claude-usage`; ggf. Limit unter „Alle Verkaufskanäle“ erhöhen. Offene Begriffe werden danach bzw. im nächsten Monat automatisch ausgewertet |
-| Limit pro Shop eingestellt, wirkt aber nicht wie erwartet | Das Limit gilt für alle Verkaufskanäle zusammen und wird global gelesen | Wert unter „Alle Verkaufskanäle“ eintragen |
-| Kosten im Plugin weichen von der Anthropic-Rechnung ab | Der Plugin-Zähler ist eine Schätzung anhand der gemeldeten Tokens und der hinterlegten Preise | Maßgeblich ist die Console; zusätzlich dort ein Workspace-Ausgabenlimit setzen |
-| Tippfehler werden nicht gefunden | Shopwares MySQL-Suche kennt keine Tippfehler-Toleranz | Mit OpenSearch/Elasticsearch deutlich besser; sonst fängt die Claude-Stufe viele Fälle ab |
-| Beliebte Suchanfragen sind leer | Automatische Liste braucht erst echte Suchen (Mindestanzahl, letzte 90 Tage) | Anfangs Begriffe in der Konfiguration von Hand eintragen |
-| Ranking ändert sich nicht | Boost greift erst ab einem Schwellenwert (Klicks/Käufe) und nur bei Sortierung „Relevanz“ | Gewollt, damit Einzelklicks nichts verzerren |
-| „Zuletzt angesehen“ fehlt im Suchfenster | Nur mit Zustimmung „Komfortfunktionen“ im Cookie-Dialog | Cookie-Einstellungen prüfen |
-| Export enthält keine Daten | Daten werden erst gesammelt, seit das Suchfenster aktiv ist | Einige Tage nach dem Einschalten erneut exportieren |
-| Die App sucht nicht mit der Nova Suche | Store-API-Routen erst ab dieser Version; die App fällt bei 404 auf die Shopware-Suche zurück | Plugin aktualisieren, App neu starten |
+### Nach der Installation ändert sich nichts
+
+**Ursache:** Das Suchfenster ist **standardmäßig aus**  
+**Lösung:** *Erweiterungen → Nova Suche → Konfigurieren* → oben den Verkaufskanal wählen → „Sofortsuche verwenden“ einschalten
+
+### Suchfenster ohne Gestaltung
+
+**Ursache:** Styles noch nicht im Theme  
+**Lösung:** `bin/console theme:compile` und `bin/console cache:clear`
+
+### Zwei Suchfenster gehen auf
+
+**Ursache:** Eine andere Such-Erweiterung mit eigenem Overlay ist im selben Verkaufskanal aktiv  
+**Lösung:** Die andere Such-Erweiterung in diesem Verkaufskanal deaktivieren
+
+### Installation bricht bei Composer ab / „Class Anthropic\Client not found“ im Log
+
+**Ursache:** Shopware lädt das Anthropic-SDK bei der Installation per Composer nach; auf manchen Hostern fehlt Composer oder Schreibrecht  
+**Lösung:** Im Shop-Hauptverzeichnis `composer require anthropic-ai/sdk` ausführen. Ohne SDK funktioniert alles außer der Claude-Stufe (im Log steht dann ein klarer Hinweis)
+
+### Claude verbessert nichts
+
+**Ursache:** Claude ist aus, kein API-Schlüssel, oder **Scheduled Tasks / Message Queue laufen nicht**  
+**Lösung:** Schlüssel aus der Anthropic Console eintragen, Claude einschalten; prüfen, dass `bin/console scheduled-task:run` und `bin/console messenger:consume` laufen (Cron/Supervisor). Sofort testen: `bin/console nova-search:rewrite`
+
+### „Ergebnisse für …“ erscheint erst später
+
+**Ursache:** Begriffe ohne Treffer werden gesammelt und **stündlich** gebündelt ausgewertet  
+**Lösung:** Gewollt (spart Kosten). Sofort: `bin/console nova-search:rewrite`. Optional „Neue Begriffe auf der Suchergebnisseite sofort auswerten“ einschalten
+
+### Claude stoppt mitten im Monat
+
+**Ursache:** **Monatliches Kostenlimit erreicht** (Hinweis im Shopware-Log „Monatliches Claude-Kostenlimit erreicht“)  
+**Lösung:** Verbrauch prüfen mit `bin/console nova-search:claude-usage`; ggf. Limit unter „Alle Verkaufskanäle“ erhöhen. Offene Begriffe werden danach bzw. im nächsten Monat automatisch ausgewertet
+
+### Limit pro Shop eingestellt, wirkt aber nicht wie erwartet
+
+**Ursache:** Das Limit gilt für alle Verkaufskanäle zusammen und wird global gelesen  
+**Lösung:** Wert unter „Alle Verkaufskanäle“ eintragen
+
+### Kosten im Plugin weichen von der Anthropic-Rechnung ab
+
+**Ursache:** Der Plugin-Zähler ist eine Schätzung anhand der gemeldeten Tokens und der hinterlegten Preise  
+**Lösung:** Maßgeblich ist die Console; zusätzlich dort ein Workspace-Ausgabenlimit setzen
+
+### Tippfehler werden nicht gefunden
+
+**Ursache:** Shopwares MySQL-Suche kennt keine Tippfehler-Toleranz  
+**Lösung:** Mit OpenSearch/Elasticsearch deutlich besser; sonst fängt die Claude-Stufe viele Fälle ab
+
+### Beliebte Suchanfragen sind leer
+
+**Ursache:** Automatische Liste braucht erst echte Suchen (Mindestanzahl, letzte 90 Tage)  
+**Lösung:** Anfangs Begriffe in der Konfiguration von Hand eintragen
+
+### Ranking ändert sich nicht
+
+**Ursache:** Boost greift erst ab einem Schwellenwert (Klicks/Käufe) und nur bei Sortierung „Relevanz“  
+**Lösung:** Gewollt, damit Einzelklicks nichts verzerren
+
+### „Zuletzt angesehen“ fehlt im Suchfenster
+
+**Ursache:** Nur mit Zustimmung „Komfortfunktionen“ im Cookie-Dialog  
+**Lösung:** Cookie-Einstellungen prüfen
+
+### Export enthält keine Daten
+
+**Ursache:** Daten werden erst gesammelt, seit das Suchfenster aktiv ist  
+**Lösung:** Einige Tage nach dem Einschalten erneut exportieren
+
+### Die App sucht nicht mit der Nova Suche
+
+**Ursache:** Store-API-Routen erst ab dieser Version; die App fällt bei 404 auf die Shopware-Suche zurück  
+**Lösung:** Plugin aktualisieren, App neu starten
 
 ## Lizenz
 
