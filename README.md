@@ -267,6 +267,25 @@ Serverseitig: Eine gespeicherte Umschreibung hängt an der Criteria als Extensio
 
 Shopware 6.7.x (geprüft gegen 6.7.15).
 
+## Häufige Probleme und Lösungen
+
+Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetreten sind. **Neue Probleme bitte ergänzen** (oder als Issue melden), damit andere nicht lange suchen müssen.
+
+| Problem | Ursache | Lösung |
+|---|---|---|
+| Nach der Installation ändert sich nichts | Das Suchfenster ist **standardmäßig aus** | *Erweiterungen → Nova Suche → Konfigurieren* → oben den Verkaufskanal wählen → „Sofortsuche verwenden“ einschalten |
+| Suchfenster ohne Gestaltung | Styles noch nicht im Theme | `bin/console theme:compile` und `bin/console cache:clear` |
+| Zwei Suchfenster gehen auf | Eine andere Such-Erweiterung mit eigenem Overlay ist im selben Verkaufskanal aktiv | Die andere Such-Erweiterung in diesem Verkaufskanal deaktivieren |
+| Installation bricht bei Composer ab / „Class Anthropic\Client not found“ im Log | Shopware lädt das Anthropic-SDK bei der Installation per Composer nach; auf manchen Hostern fehlt Composer oder Schreibrecht | Im Shop-Hauptverzeichnis `composer require anthropic-ai/sdk` ausführen. Ohne SDK funktioniert alles außer der Claude-Stufe (im Log steht dann ein klarer Hinweis) |
+| Claude verbessert nichts | Claude ist aus, kein API-Schlüssel, oder **Scheduled Tasks / Message Queue laufen nicht** | Schlüssel aus der Anthropic Console eintragen, Claude einschalten; prüfen, dass `bin/console scheduled-task:run` und `bin/console messenger:consume` laufen (Cron/Supervisor). Sofort testen: `bin/console nova-search:rewrite` |
+| „Ergebnisse für …“ erscheint erst später | Begriffe ohne Treffer werden gesammelt und **stündlich** gebündelt ausgewertet | Gewollt (spart Kosten). Sofort: `bin/console nova-search:rewrite`. Optional „Neue Begriffe auf der Suchergebnisseite sofort auswerten“ einschalten |
+| Tippfehler werden nicht gefunden | Shopwares MySQL-Suche kennt keine Tippfehler-Toleranz | Mit OpenSearch/Elasticsearch deutlich besser; sonst fängt die Claude-Stufe viele Fälle ab |
+| Beliebte Suchanfragen sind leer | Automatische Liste braucht erst echte Suchen (Mindestanzahl, letzte 90 Tage) | Anfangs Begriffe in der Konfiguration von Hand eintragen |
+| Ranking ändert sich nicht | Boost greift erst ab einem Schwellenwert (Klicks/Käufe) und nur bei Sortierung „Relevanz“ | Gewollt, damit Einzelklicks nichts verzerren |
+| „Zuletzt angesehen“ fehlt im Suchfenster | Nur mit Zustimmung „Komfortfunktionen“ im Cookie-Dialog | Cookie-Einstellungen prüfen |
+| Export enthält keine Daten | Daten werden erst gesammelt, seit das Suchfenster aktiv ist | Einige Tage nach dem Einschalten erneut exportieren |
+| Die App sucht nicht mit der Nova Suche | Store-API-Routen erst ab dieser Version; die App fällt bei 404 auf die Shopware-Suche zurück | Plugin aktualisieren, App neu starten |
+
 ## Lizenz
 
 MIT

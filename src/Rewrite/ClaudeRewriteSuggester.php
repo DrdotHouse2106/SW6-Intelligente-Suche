@@ -57,6 +57,8 @@ PROMPT;
         'additionalProperties' => false,
     ];
 
+    private bool $sdkWarningLogged = false;
+
     /**
      * @param ClientInterface|null $transporter nur für Tests (eigener HTTP-Client)
      */
@@ -69,8 +71,22 @@ PROMPT;
 
     public function isAvailable(string $salesChannelId): bool
     {
-        return $this->config->getBool('NovaSearch.config.claudeActive', $salesChannelId)
-            && $this->apiKey($salesChannelId) !== '';
+        if (!$this->config->getBool('NovaSearch.config.claudeActive', $salesChannelId)
+            || $this->apiKey($salesChannelId) === '') {
+            return false;
+        }
+
+        // Das SDK wird bei der Installation per Composer nachgeladen – das kann auf manchen Servern scheitern
+        if (!class_exists(Client::class)) {
+            if (!$this->sdkWarningLogged) {
+                $this->sdkWarningLogged = true;
+                $this->logger->error('Nova Suche: Claude ist eingeschaltet, aber das Anthropic-PHP-SDK fehlt. Im Shop-Hauptverzeichnis ausführen: composer require anthropic-ai/sdk');
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     public function suggest(string $salesChannelId, array $terms, array $shop, float $timeout): array

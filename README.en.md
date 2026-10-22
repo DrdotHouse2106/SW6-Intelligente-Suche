@@ -56,3 +56,15 @@ With the "Dynamic monthly delivery dates" plugin and its "show in listings" opti
 ## Compatibility
 
 Shopware 6.7.x (checked against 6.7.15). License: MIT.
+
+## Troubleshooting
+
+Known pitfalls from real installations. **Please add new ones** (or open an issue).
+
+- **Nothing changes after install:** the search window is off by default – enable it per sales channel.
+- **No styling:** run `theme:compile` and `cache:clear`.
+- **Two search overlays:** disable other search extensions in that sales channel.
+- **Composer / "Class Anthropic\Client not found":** run `composer require anthropic-ai/sdk` in the shop root; everything except the Claude stage works without it.
+- **Claude does nothing:** API key, Claude switch, scheduled tasks and message queue must run; test with `bin/console nova-search:rewrite`.
+- **No typo tolerance:** use OpenSearch, or rely on the Claude stage.
+
