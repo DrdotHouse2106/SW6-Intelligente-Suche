@@ -26,7 +26,7 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 
 - ✅ Produktkarten mit Bild, Preis, Streichpreis, Rabatt-Markierung
 - ✅ Filter Marken + Preis, Sortierung, passende Kategorien, Nachladen beim Scrollen
-- ⬜ **Suche nach Artikel-, Hersteller- und OE-Nummern** inkl. Schreibweisen mit/ohne
+- ✅ **Suche nach Artikel-, Hersteller- und OE-Nummern** (1.3.0) inkl. Schreibweisen mit/ohne
   Leerzeichen, Punkt, Bindestrich (z. B. `12345 678` / `12345678`)
 - ⬜ Mindestanzahl Zeichen, ab der gesucht wird (einstellbar)
 - ⬜ „In den Warenkorb“-Button direkt auf der Karte (Menge 1, Varianten → Produktseite)

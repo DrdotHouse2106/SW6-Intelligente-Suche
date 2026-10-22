@@ -148,6 +148,16 @@ Antwort immer `204`. Es gelten dieselben Regeln wie im Suchfenster: max. 20 Erei
 
 Auch Shopwares Standard-Route `/store-api/search` nutzt das gelernte Ranking und gespeicherte Umschreibungen (die Plugin-Logik sitzt im Such-Builder). Dort wird nichts gezählt – die App kann bei Fehlern also gefahrlos darauf zurückfallen.
 
+## Nummernsuche (Artikel-, Hersteller-, OE-Nummern)
+
+Sieht der Suchbegriff wie eine Nummer aus (mindestens 3 Ziffern, keine weiteren Wörter), sucht die Nova Suche zuerst im **Nummern-Index** – und zeigt genau die Produkte mit dieser Nummer, inklusive Varianten. Gibt es keine passende Nummer, wird ganz normal gesucht.
+
+- Schreibweise egal: `25043 25031`, `25043-25031`, `25.043.250/31` und `2504325031` finden dasselbe Produkt; vorangestellte Bezeichnungen wie `OE 5461234` oder `Nr. 5461234` werden erkannt.
+- Durchsucht werden standardmäßig **Artikelnummer, Herstellernummer und EAN**. Zusätzlich wählbar: **Zusatzfelder** (technischer Name, z. B. `oe_nummer`) und **Eigenschaften** (z. B. „OE-Nummer“, „Vergleichsnummer“). Mehrere Nummern in einem Feld dürfen durch Komma, Semikolon, Zeilenumbruch oder Leerzeichen getrennt sein.
+- **Anfang genügt** (abschaltbar): Gibt es keine exakte Nummer, werden Nummern gefunden, die so beginnen (ab 6 Zeichen).
+- Der Index wird beim Speichern von Produkten automatisch aktualisiert. Komplett aufgebaut wird er beim ersten stündlichen Lauf nach der Installation und nach geänderten Einstellungen – sofort mit `bin/console nova-search:numbers`.
+- Einstellungen unter *Konfigurieren → Nummernsuche*, am besten unter „Alle Verkaufskanäle“ (der Index gilt für alle Shops; was ein Shop zeigen darf, prüft weiterhin Shopware).
+
 ## Suchregeln: Synonyme und Weiterleitungen
 
 *Erweiterungen → Nova Suche → Konfigurieren → Suchregeln.* Am besten unter **„Alle Verkaufskanäle“** pflegen; einzelne Shops können eigene Regeln bekommen. Gilt für Suchfenster, Suchergebnisseite und App.
@@ -336,6 +346,18 @@ Geplante Funktionen (Synonyme, Weiterleitungen, Auswertungen in der Administrati
 ## Häufige Probleme und Lösungen
 
 Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetreten sind. **Neue Probleme bitte ergänzen** (oder als Issue melden), damit andere nicht lange suchen müssen.
+
+### Nummer wird nicht gefunden
+
+**Ursache:** Der Nummern-Index ist noch nicht aufgebaut (direkt nach Installation/Update oder geänderten Einstellungen), oder die Nummer steht in einem Feld, das nicht ausgewählt ist (z. B. Beschreibung statt Zusatzfeld)
+
+**Lösung:** Einmal `bin/console nova-search:numbers` ausführen (oder bis zum nächsten stündlichen Lauf warten). Steht die Nummer in einem Zusatzfeld oder einer Eigenschaft, diese unter *Nummernsuche* eintragen. Geplante Aufgaben müssen laufen (Cron)
+
+### Nummernsuche zeigt zu viele Produkte
+
+**Ursache:** „Nummern auch über den Anfang finden“ – kurze Nummernanfänge passen zu mehreren Produkten
+
+**Lösung:** Einstellung abschalten; dann zählt nur die exakte Nummer
 
 ### Synonym wirkt nicht
 

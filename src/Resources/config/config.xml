@@ -187,6 +187,55 @@
     </card>
 
     <card>
+        <title>Number search</title>
+        <title lang="de-DE">Nummernsuche (Artikel-, Hersteller-, OE-Nummern)</title>
+
+        <input-field type="bool">
+            <name>numberSearch</name>
+            <label>Find products by their numbers</label>
+            <label lang="de-DE">Produkte über ihre Nummern finden</label>
+            <helpText lang="de-DE">Sieht der Suchbegriff wie eine Nummer aus (mind. 3 Ziffern), werden genau die Produkte mit dieser Nummer gezeigt – egal ob mit oder ohne Leerzeichen, Punkte, Bindestriche oder Schrägstriche („25043 25031“ = „2504325031“ = „25043-25031“). Findet sich keine Nummer, wird normal gesucht.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="multi-select">
+            <name>numberSources</name>
+            <label>Numbers to search</label>
+            <label lang="de-DE">Durchsuchte Nummern</label>
+            <helpText lang="de-DE">Leer = alle drei. Gilt für alle Verkaufskanäle – bitte unter „Alle Verkaufskanäle“ einstellen. Änderungen werden innerhalb einer Stunde übernommen (sofort: bin/console nova-search:numbers).</helpText>
+            <options>
+                <option><id>productNumber</id><name>Product number</name><name lang="de-DE">Artikelnummer</name></option>
+                <option><id>manufacturerNumber</id><name>Manufacturer number</name><name lang="de-DE">Herstellernummer</name></option>
+                <option><id>ean</id><name>EAN / GTIN</name><name lang="de-DE">EAN / GTIN</name></option>
+            </options>
+        </input-field>
+
+        <input-field type="text">
+            <name>numberCustomFields</name>
+            <label>Additional custom fields with numbers</label>
+            <label lang="de-DE">Zusatzfelder mit Nummern (z. B. OE-Nummern)</label>
+            <helpText lang="de-DE">Technische Namen von Produkt-Zusatzfeldern, mit Komma getrennt. Mehrere Nummern in einem Feld dürfen durch Komma, Semikolon, Zeilenumbruch oder Leerzeichen getrennt sein.</helpText>
+            <placeholder>z. B. oe_nummer, vergleichsnummern</placeholder>
+        </input-field>
+
+        <component name="sw-entity-multi-id-select">
+            <name>numberPropertyGroups</name>
+            <entity>property_group</entity>
+            <label>Properties with numbers</label>
+            <label lang="de-DE">Eigenschaften mit Nummern</label>
+            <helpText lang="de-DE">Eigenschaften, deren Werte Nummern enthalten (z. B. „OE-Nummer“, „Vergleichsnummer“).</helpText>
+        </component>
+
+        <input-field type="bool">
+            <name>numberPrefix</name>
+            <label>Also find numbers by their beginning</label>
+            <label lang="de-DE">Nummern auch über den Anfang finden</label>
+            <helpText lang="de-DE">Gibt es keine exakte Nummer, werden Nummern gefunden, die so beginnen (ab 6 Zeichen), z. B. „250432“ → „2504325031“.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+    </card>
+
+    <card>
         <title>Search rules</title>
         <title lang="de-DE">Suchregeln</title>
 

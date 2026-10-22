@@ -3,6 +3,7 @@
 namespace Nova\Search\ScheduledTask;
 
 use Nova\Search\Rewrite\RewriteService;
+use Nova\Search\Service\NumberIndex;
 use Nova\Search\Service\SearchStatistics;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -21,12 +22,18 @@ final class SearchLearningTaskHandler extends ScheduledTaskHandler
         LoggerInterface $logger,
         private readonly RewriteService $rewriteService,
         private readonly SearchStatistics $statistics,
+        private readonly NumberIndex $numberIndex,
     ) {
         parent::__construct($scheduledTaskRepository, $logger);
     }
 
     public function run(): void
     {
+        // Nummern-Index: beim ersten Lauf und nach geänderten Einstellungen komplett neu aufbauen
+        if ($this->numberIndex->needsRebuild()) {
+            $this->numberIndex->rebuild();
+        }
+
         $this->rewriteService->run();
         $this->statistics->cleanup();
     }

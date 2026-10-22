@@ -2,6 +2,7 @@
 
 namespace Nova\Search\Search;
 
+use Nova\Search\Service\NumberIndex;
 use Nova\Search\Service\RewriteStore;
 use Nova\Search\Service\SearchStatistics;
 use Nova\Search\Service\TermNormalizer;
@@ -14,6 +15,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\Filter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\NotFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\OrFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Query\ScoreQuery;
 use Shopware\Core\Framework\Struct\ArrayStruct;
@@ -38,6 +40,8 @@ use Symfony\Component\HttpFoundation\Request;
 class LearningProductSearchBuilder implements ProductSearchBuilderInterface
 {
     public const EXTENSION = 'novaSearchRewrite';
+    /** Criteria-Extension, wenn per Nummernsuche gefunden wurde */
+    public const NUMBER_EXTENSION = 'novaSearchNumber';
     /** Request-Attribut, um Umschreibungen gezielt zu umgehen (z. B. beim erneuten Prüfen) */
     public const SKIP_REWRITE = 'nova-search-skip-rewrite';
 
@@ -47,6 +51,7 @@ class LearningProductSearchBuilder implements ProductSearchBuilderInterface
         private readonly SearchStatistics $statistics,
         private readonly SystemConfigService $config,
         private readonly LoggerInterface $logger,
+        private readonly ?NumberIndex $numberIndex = null,
     ) {
     }
 
@@ -55,6 +60,12 @@ class LearningProductSearchBuilder implements ProductSearchBuilderInterface
         $search = RequestParamHelper::get($request, 'search');
         $original = \is_array($search) ? implode(' ', $search) : (string) $search;
         $salesChannelId = $context->getSalesChannelId();
+
+        if ($this->buildNumberSearch($original, $criteria, $salesChannelId)) {
+            $this->addExclusions($criteria, $salesChannelId);
+
+            return;
+        }
 
         $rewrite = null;
         if (!$request->attributes->getBoolean(self::SKIP_REWRITE) && trim($original) !== '') {
@@ -81,6 +92,45 @@ class LearningProductSearchBuilder implements ProductSearchBuilderInterface
 
         $this->addExclusions($criteria, $salesChannelId);
         $this->addLearnedBoost($original, $criteria, $context);
+    }
+
+    /**
+     * Nummernsuche: Sieht der Begriff wie eine Artikel-, Hersteller- oder OE-Nummer aus und gibt es
+     * dazu Produkte im Nummern-Index, werden genau diese gezeigt (inkl. Varianten). Sonst normale Suche.
+     */
+    private function buildNumberSearch(string $term, Criteria $criteria, string $salesChannelId): bool
+    {
+        if ($this->numberIndex === null || $this->config->get('NovaSearch.config.numberSearch', $salesChannelId) === false) {
+            return false;
+        }
+
+        $candidates = NumberIndex::candidates($term);
+        if ($candidates === []) {
+            return false;
+        }
+
+        try {
+            $ids = $this->numberIndex->find($candidates, $this->config->get('NovaSearch.config.numberPrefix', $salesChannelId) !== false);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Nova Suche: Nummern-Index konnte nicht gelesen werden', ['exception' => $e]);
+
+            return false;
+        }
+
+        if ($ids === []) {
+            return false;
+        }
+
+        $criteria->addFilter(new OrFilter([
+            new EqualsAnyFilter('product.id', $ids),
+            new EqualsAnyFilter('product.parentId', $ids),
+        ]));
+        // Bewertung für die Sortierung „Relevanz“: exakter Produkttreffer vor Varianten
+        $criteria->addQuery(new ScoreQuery(new EqualsAnyFilter('product.id', $ids), 1000));
+        $criteria->addQuery(new ScoreQuery(new EqualsAnyFilter('product.parentId', $ids), 500));
+        $criteria->addExtension(self::NUMBER_EXTENSION, new ArrayStruct(['term' => trim($term)]));
+
+        return true;
     }
 
     /**

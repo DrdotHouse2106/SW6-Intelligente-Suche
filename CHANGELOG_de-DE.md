@@ -1,3 +1,7 @@
+# 1.3.0
+- Neu: Nummernsuche – Artikel-, Hersteller-, EAN- und OE-Nummern (Zusatzfelder, Eigenschaften) unabhängig von Leerzeichen, Punkten, Bindestrichen und Schrägstrichen; auch über den Nummernanfang
+- Nummern-Index wird beim Speichern von Produkten aktualisiert, komplett im stündlichen Lauf bzw. mit bin/console nova-search:numbers
+
 # 1.2.0
 - Neu: Synonyme (eine Gruppe pro Zeile) – gelten in Suchfenster, Suchergebnisseite und App; Mehrwortsuchen bleiben genau
 - Neu: Weiterleitungen für Suchbegriffe (z. B. „kundenkonto“ → Konto) – Enter führt direkt zum Ziel, im Suchfenster erscheint ein Link, die Store-API liefert das Feld `redirect`

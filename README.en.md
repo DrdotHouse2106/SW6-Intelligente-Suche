@@ -79,6 +79,10 @@ Known pitfalls from real installations. **Please add new ones** (or open an issu
 
 *Configure → Search rules:* **synonyms** (one group per line, comma-separated, e.g. `brake pads, brake shoes`) and **redirects** (`term = /path` or `term = https://…`). Multi-word searches keep Shopware's AND logic. *Excluded products:* closeout products without stock, products (incl. variants), categories, tags or a yes/no custom field. Applies to the search layer, search page and Store API (`redirect` field).
 
+## Number search (1.3.0)
+
+Terms that look like a number (at least 3 digits, no other words) are looked up in a normalized **number index** first: product number, manufacturer number, EAN and optionally custom fields and properties (e.g. OE numbers). Spaces, dots, dashes and slashes are ignored (`25043 25031` = `2504325031`). If nothing matches, the regular search runs. Rebuild: `bin/console nova-search:numbers` (also hourly after settings changed).
+
 ## Roadmap
 
 Planned features (synonyms, redirects, admin analytics, recommendations, product finder, shopping assistant …) are listed in [ROADMAP.md](ROADMAP.md) (German).

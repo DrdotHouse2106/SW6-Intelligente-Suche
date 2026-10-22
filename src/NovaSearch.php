@@ -36,5 +36,6 @@ class NovaSearch extends Plugin
         $connection->executeStatement('DROP TABLE IF EXISTS `nova_search_rewrite`');
         $connection->executeStatement('DROP TABLE IF EXISTS `nova_search_claude_usage`');
         $connection->executeStatement('DROP TABLE IF EXISTS `nova_search_claude_notice`');
+        $connection->executeStatement('DROP TABLE IF EXISTS `nova_search_number`');
     }
 }

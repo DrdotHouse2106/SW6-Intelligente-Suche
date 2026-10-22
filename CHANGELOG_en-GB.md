@@ -1,3 +1,7 @@
+# 1.3.0
+- New: number search – product, manufacturer, EAN and OE numbers (custom fields, properties) regardless of spaces, dots, dashes and slashes; also by prefix
+- Number index is updated when products are saved, fully rebuilt hourly or via bin/console nova-search:numbers
+
 # 1.2.0
 - New: synonyms (one group per line) for search layer, search page and app; multi-word searches stay precise
 - New: redirects for search terms – Enter goes straight to the target, the layer shows a link, the Store API returns `redirect`
