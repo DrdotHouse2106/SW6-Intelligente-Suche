@@ -49,6 +49,12 @@ Shopware's own `/store-api/search` also uses the learned ranking and rewrites (n
 
 With the "Dynamic monthly delivery dates" plugin and its "show in listings" option enabled, search cards show the next shipping date.
 
+## Claude cost limit
+
+Monthly cost limit for the Claude stage (default **5 USD**, `0` = Claude off). It applies to **all sales channels together** – set it under "All sales channels". Token usage reported by the API is converted with the model prices (USD per 1M tokens: haiku-5-5 0.10/0.50, above 100K prompt tokens 0.50/2.50; sonnet-5-5 2/10; opus-5-5 4/20; fable-5-1 10/50; unknown models at the highest price) and stored per calendar month (UTC). Before every call the maximum cost of the call must fit into the remaining budget; once the limit is reached no further requests are made and open terms wait for the next month (also for the immediate evaluation on the search page). A warning threshold (default 80 %) and the limit are logged once per month. Show usage: `bin/console nova-search:claude-usage`; export: `nova-search:export --type=claude-usage`.
+
+Recommendation: create a dedicated **workspace with a spend limit** in the Anthropic Console and create the API key there (limits apply per workspace). The plugin counter is an estimate – the Console bill is authoritative.
+
 ## Exporting search data
 
 `bin/console nova-search:export` writes `suchbegriffe.csv` (terms with searches, hits, clicks, carts, orders, CTR), `suchbegriffe-produkte.csv` (term × product) and `claude-umschreibungen.csv` (Claude rewrites). Options: `--type=terms|products|rewrites`, `--sales-channel=<id>`, `--days=N`, `--min-searches=N`, `--output=<dir>`, `--delimiter=;`. UTF-8 with BOM, formula-like values are escaped, no customer data.
@@ -65,6 +71,7 @@ Known pitfalls from real installations. **Please add new ones** (or open an issu
 - **No styling:** run `theme:compile` and `cache:clear`.
 - **Two search overlays:** disable other search extensions in that sales channel.
 - **Composer / "Class Anthropic\Client not found":** run `composer require anthropic-ai/sdk` in the shop root; everything except the Claude stage works without it.
+- **Claude stops mid-month:** monthly cost limit reached – check `bin/console nova-search:claude-usage`, raise the limit under "All sales channels".
 - **Claude does nothing:** API key, Claude switch, scheduled tasks and message queue must run; test with `bin/console nova-search:rewrite`.
 - **No typo tolerance:** use OpenSearch, or rely on the Claude stage.
 

@@ -1,3 +1,9 @@
+# 1.1.0
+- Monatliches Kostenlimit für die Claude-Stufe (Standard 5 USD, 0 = aus) mit Warnschwelle (Standard 80 %)
+- Verbrauch wird je Monat und Modell aus den gemeldeten Tokens berechnet und gespeichert
+- Vor jedem Aufruf wird geprüft, ob die Höchstkosten noch ins Restbudget passen; bei erreichtem Limit bleiben Begriffe offen
+- Neuer Befehl bin/console nova-search:claude-usage, Export-Typ claude-usage
+
 # 1.0.0
 - Erste Version: Suchfenster mit Bildern, Filtern (Marken, Preis), Sortierung und automatischem Nachladen
 - Lernt aus Suchen, Klicks, Warenkorb und Käufen (ohne personenbezogene Daten)

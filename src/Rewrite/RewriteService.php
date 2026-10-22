@@ -86,6 +86,9 @@ class RewriteService
         try {
             $context ??= $this->context($salesChannelId);
             $suggestions = $this->suggester->suggest($salesChannelId, $terms, $this->safeShop($salesChannelId), $timeout);
+        } catch (ClaudeBudgetExceededException) {
+            // Kostenlimit erreicht: Begriffe bleiben offen und werden später ausgewertet
+            return 0;
         } catch (\Throwable $e) {
             foreach ($terms as $term) {
                 $this->store->markFailed($salesChannelId, $term);

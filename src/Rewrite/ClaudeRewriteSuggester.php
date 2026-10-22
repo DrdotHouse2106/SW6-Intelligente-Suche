@@ -7,6 +7,7 @@ use Anthropic\Core\Exceptions\APIConnectionException;
 use Anthropic\Core\Exceptions\APIStatusException;
 use Anthropic\Core\Exceptions\RateLimitException;
 use Anthropic\Messages\TextBlock;
+use Anthropic\Messages\Usage;
 use Anthropic\RequestOptions;
 use Nova\Search\Service\TermNormalizer;
 use Psr\Http\Client\ClientInterface;
@@ -22,6 +23,9 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
 class ClaudeRewriteSuggester implements RewriteSuggesterInterface
 {
     public const DEFAULT_MODEL = 'claude-haiku-5-5';
+
+    /** Obergrenze der Antwortlänge – geht in die Kostenschätzung vor dem Aufruf ein */
+    private const MAX_TOKENS = 4000;
 
     private const SYSTEM_PROMPT = <<<'PROMPT'
 Du verbesserst die Produktsuche eines Online-Shops. Kunden haben Suchbegriffe eingegeben, die in der
@@ -65,6 +69,7 @@ PROMPT;
     public function __construct(
         private readonly SystemConfigService $config,
         private readonly LoggerInterface $logger,
+        private readonly ClaudeBudget $budget,
         private readonly ?ClientInterface $transporter = null,
     ) {
     }
@@ -86,7 +91,8 @@ PROMPT;
             return false;
         }
 
-        return true;
+        // Monatliches Kostenlimit (0 = Claude aus)
+        return $this->budget->canSpend();
     }
 
     public function suggest(string $salesChannelId, array $terms, array $shop, float $timeout): array
@@ -96,6 +102,13 @@ PROMPT;
         }
 
         $model = trim($this->config->getString('NovaSearch.config.claudeModel', $salesChannelId)) ?: self::DEFAULT_MODEL;
+        $userPrompt = $this->userPrompt($terms, $shop);
+
+        // Höchstkosten dieses Aufrufs schätzen: Prompt grob mit 1 Token je 2 Byte (eher zu hoch) + volle Antwortlänge
+        $estimatedInput = (int) ceil((\strlen(self::SYSTEM_PROMPT) + \strlen($userPrompt) + \strlen((string) json_encode(self::SCHEMA))) / 2);
+        if (!$this->budget->canSpend(ClaudePricing::costMicro($model, $estimatedInput, self::MAX_TOKENS))) {
+            throw new ClaudeBudgetExceededException('Monatliches Claude-Kostenlimit erreicht');
+        }
 
         $client = new Client(
             apiKey: $this->apiKey($salesChannelId),
@@ -104,8 +117,8 @@ PROMPT;
 
         try {
             $message = $client->messages->create(
-                maxTokens: 4000,
-                messages: [['role' => 'user', 'content' => $this->userPrompt($terms, $shop)]],
+                maxTokens: self::MAX_TOKENS,
+                messages: [['role' => 'user', 'content' => $userPrompt]],
                 model: $model,
                 outputConfig: [
                     'effort' => 'low',
@@ -123,6 +136,9 @@ PROMPT;
             $this->logger->warning('Nova Suche: Claude nicht erreichbar', ['exception' => $e]);
             throw $e;
         }
+
+        // Verbrauch speichern – auch abgelehnte oder abgeschnittene Antworten werden abgerechnet
+        $this->recordUsage($message->model ?: $model, $message->usage);
 
         // Abgelehnt oder abgeschnitten → nichts verwerten
         if ($message->stopReason !== 'end_turn') {
@@ -184,6 +200,22 @@ PROMPT;
             'Suchbegriffe ohne Treffer (JSON-Liste):',
             json_encode($terms, \JSON_UNESCAPED_UNICODE | \JSON_THROW_ON_ERROR),
         ]);
+    }
+
+    private function recordUsage(string $model, Usage $usage): void
+    {
+        try {
+            $this->budget->record(
+                $model,
+                $usage->inputTokens,
+                $usage->outputTokens,
+                $usage->cacheReadInputTokens ?? 0,
+                $usage->cacheCreationInputTokens ?? 0,
+            );
+        } catch (\Throwable $e) {
+            // Zähler-Fehler dürfen die Auswertung nicht abbrechen
+            $this->logger->error('Nova Suche: Claude-Verbrauch konnte nicht gespeichert werden', ['exception' => $e]);
+        }
     }
 
     private function apiKey(string $salesChannelId): string

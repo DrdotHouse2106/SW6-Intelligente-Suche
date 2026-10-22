@@ -39,9 +39,26 @@
         </service>
 
         <!-- Claude -->
+        <service id="Nova\Search\Service\ClaudeUsage">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Nova\Search\Rewrite\ClaudeBudget">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Nova\Search\Service\ClaudeUsage"/>
+            <argument type="service" id="logger"/>
+        </service>
+
         <service id="Nova\Search\Rewrite\ClaudeRewriteSuggester">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="logger"/>
+            <argument type="service" id="Nova\Search\Rewrite\ClaudeBudget"/>
+        </service>
+
+        <service id="Nova\Search\Command\ClaudeUsageCommand">
+            <argument type="service" id="Nova\Search\Rewrite\ClaudeBudget"/>
+            <argument type="service" id="Nova\Search\Service\ClaudeUsage"/>
+            <tag name="console.command"/>
         </service>
 
         <service id="Nova\Search\Rewrite\RewriteSuggesterInterface" alias="Nova\Search\Rewrite\ClaudeRewriteSuggester"/>

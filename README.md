@@ -65,6 +65,21 @@ Die Suche **lernt dabei mit**: Was Kunden suchen, anklicken, in den Warenkorb le
 
 **Kosten (Schätzung):** Claude Haiku 5.5 kostet 0,10 $ je 1 Mio. Eingabe- und 0,50 $ je 1 Mio. Ausgabe-Tokens. Eine gebündelte Anfrage mit 30 Begriffen braucht grob 1.500 Eingabe- und 1.000 Ausgabe-Tokens – also deutlich unter 0,1 Cent. **1.000 neue Begriffe ohne Treffer kosten damit rund 2–3 Cent.**
 
+### Kostenlimit
+
+Damit die Claude-Stufe nie teurer wird als geplant, gibt es ein **monatliches Kostenlimit** (Standard **5 USD**):
+
+- Das Limit gilt **für alle Verkaufskanäle zusammen** – in der Regel nutzen alle denselben API-Schlüssel. Bitte unter *Erweiterungen → Nova Suche → Konfigurieren* mit der Auswahl **„Alle Verkaufskanäle“** einstellen. `0` schaltet Claude komplett ab.
+- Nach jeder Antwort werden die von der API gemeldeten Tokens (Eingabe, Ausgabe, ggf. Cache) mit den Modellpreisen umgerechnet und je **Kalendermonat (UTC)** gespeichert.
+- **Vor jedem Aufruf** wird geprüft, ob die geschätzten **Höchstkosten** des Aufrufs (Prompt + volle Antwortlänge) noch ins Restbudget passen. Ein einzelner Aufruf kann das Limit deshalb nicht nennenswert überschreiten. Bei Haiku 5.5 sind das höchstens ca. 0,2 Cent je Aufruf.
+- Ist das Limit erreicht, werden **keine Anfragen mehr gestellt**. Offene Begriffe bleiben vorgemerkt und werden im nächsten Monat (oder nach Erhöhung des Limits) ausgewertet – auch die Sofort-Auswertung auf der Suchergebnisseite hält sich daran. Die Suche selbst läuft normal weiter.
+- Beim Erreichen der **Warnschwelle** (Standard 80 %) und des Limits steht **einmal pro Monat** ein Hinweis im Shopware-Log.
+- Verbrauch ansehen: `bin/console nova-search:claude-usage` (aktueller Monat mit Anfragen, Tokens, Kosten, Limit, Rest sowie die letzten 12 Monate) oder Export mit `bin/console nova-search:export --type=claude-usage`.
+
+Preise in der Berechnung (USD je 1 Mio. Tokens, Eingabe/Ausgabe): `claude-haiku-5-5` 0,10/0,50 (bei Prompts über 100.000 Tokens 0,50/2,50), `claude-sonnet-5-5` 2/10, `claude-opus-5-5` 4/20, `claude-fable-5-1` 10/50. Unbekannte Modelle werden mit den teuersten bekannten Preisen gerechnet. Prompt-Caching nutzt das Plugin nicht; meldet die API trotzdem Cache-Tokens, zählen Cache-Lesezugriffe wie Eingabe und Cache-Schreibzugriffe doppelt (bewusst eher zu hoch).
+
+> **Empfehlung – zweite Sicherung in der Anthropic Console:** Lege in der [Anthropic Console](https://console.anthropic.com) einen **eigenen Workspace** (z. B. „Shop-Suche“) mit einem **Ausgabenlimit** an und erstelle den API-Schlüssel in diesem Workspace. Ausgabenlimits gelten pro Workspace, nicht pro einzelnem Schlüssel. Der Zähler im Plugin ist eine Schätzung auf Basis der gemeldeten Tokens – **maßgeblich ist immer die Abrechnung in der Console**.
+
 **Fehlerfest:** Fehlt der API-Schlüssel, ist Claude nicht erreichbar oder antwortet nicht verwertbar, läuft die Suche ganz normal weiter. Fehlversuche werden gezählt; nach drei Versuchen wird ein Begriff nicht mehr angefragt.
 
 ## Store-API für Apps
@@ -148,10 +163,11 @@ bin/console nova-search:export --sales-channel=<ID> --output=/tmp/export
 | `suchbegriffe.csv` | Begriff, Suchen, Treffer (zuletzt), Klicks, Warenkorb, Käufe, Klickrate, erstmals/zuletzt gesucht |
 | `suchbegriffe-produkte.csv` | Begriff × Produkt (Nummer, Name) mit Klicks, Warenkorb, Käufen |
 | `claude-umschreibungen.csv` | Begriffe ohne Treffer, Umschreibung durch Claude, Status, Treffer |
+| `claude-kosten.csv` | Claude-Verbrauch je Monat und Modell: Anfragen, Tokens, Kosten in USD (für alle Verkaufskanäle zusammen) |
 
 | Option | Bedeutung |
 |---|---|
-| `--type` | `terms`, `products`, `rewrites` (mehrfach möglich, Standard: alle) |
+| `--type` | `terms`, `products`, `rewrites`, `claude-usage` (mehrfach möglich, Standard: alle) |
 | `--sales-channel` | nur diese Verkaufskanal-ID(s) |
 | `--days` | nur Einträge der letzten N Tage |
 | `--min-searches` | Suchbegriffe erst ab N Suchen |
@@ -211,6 +227,8 @@ bin/console cache:clear
 | Suchbegriffe ohne Treffer mit Claude verbessern | aus | |
 | Anthropic-API-Schlüssel | – | Aus der Anthropic Console |
 | Modell | `claude-haiku-5-5` | |
+| Monatliches Kostenlimit (USD) | 5 | Für alle Verkaufskanäle zusammen – unter „Alle Verkaufskanäle“ einstellen. 0 = Claude aus |
+| Warnschwelle (% des Limits) | 80 | Einmaliger Hinweis im Log pro Monat |
 | Neue Begriffe auf der Suchergebnisseite sofort auswerten | aus | |
 
 Die Mindestlänge des Suchbegriffs kommt aus Shopwares Sucheinstellungen (*Einstellungen → Suche*).
@@ -279,6 +297,9 @@ Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetre
 | Installation bricht bei Composer ab / „Class Anthropic\Client not found“ im Log | Shopware lädt das Anthropic-SDK bei der Installation per Composer nach; auf manchen Hostern fehlt Composer oder Schreibrecht | Im Shop-Hauptverzeichnis `composer require anthropic-ai/sdk` ausführen. Ohne SDK funktioniert alles außer der Claude-Stufe (im Log steht dann ein klarer Hinweis) |
 | Claude verbessert nichts | Claude ist aus, kein API-Schlüssel, oder **Scheduled Tasks / Message Queue laufen nicht** | Schlüssel aus der Anthropic Console eintragen, Claude einschalten; prüfen, dass `bin/console scheduled-task:run` und `bin/console messenger:consume` laufen (Cron/Supervisor). Sofort testen: `bin/console nova-search:rewrite` |
 | „Ergebnisse für …“ erscheint erst später | Begriffe ohne Treffer werden gesammelt und **stündlich** gebündelt ausgewertet | Gewollt (spart Kosten). Sofort: `bin/console nova-search:rewrite`. Optional „Neue Begriffe auf der Suchergebnisseite sofort auswerten“ einschalten |
+| Claude stoppt mitten im Monat | **Monatliches Kostenlimit erreicht** (Hinweis im Shopware-Log „Monatliches Claude-Kostenlimit erreicht“) | Verbrauch prüfen mit `bin/console nova-search:claude-usage`; ggf. Limit unter „Alle Verkaufskanäle“ erhöhen. Offene Begriffe werden danach bzw. im nächsten Monat automatisch ausgewertet |
+| Limit pro Shop eingestellt, wirkt aber nicht wie erwartet | Das Limit gilt für alle Verkaufskanäle zusammen und wird global gelesen | Wert unter „Alle Verkaufskanäle“ eintragen |
+| Kosten im Plugin weichen von der Anthropic-Rechnung ab | Der Plugin-Zähler ist eine Schätzung anhand der gemeldeten Tokens und der hinterlegten Preise | Maßgeblich ist die Console; zusätzlich dort ein Workspace-Ausgabenlimit setzen |
 | Tippfehler werden nicht gefunden | Shopwares MySQL-Suche kennt keine Tippfehler-Toleranz | Mit OpenSearch/Elasticsearch deutlich besser; sonst fängt die Claude-Stufe viele Fälle ab |
 | Beliebte Suchanfragen sind leer | Automatische Liste braucht erst echte Suchen (Mindestanzahl, letzte 90 Tage) | Anfangs Begriffe in der Konfiguration von Hand eintragen |
 | Ranking ändert sich nicht | Boost greift erst ab einem Schwellenwert (Klicks/Käufe) und nur bei Sortierung „Relevanz“ | Gewollt, damit Einzelklicks nichts verzerren |

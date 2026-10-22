@@ -157,6 +157,26 @@
             <defaultValue>claude-haiku-5-5</defaultValue>
         </input-field>
 
+        <input-field type="float">
+            <name>claudeMonthlyLimitUsd</name>
+            <label>Monthly cost limit (USD)</label>
+            <label lang="de-DE">Monatliches Kostenlimit (USD)</label>
+            <helpText>Applies to all sales channels together – set it under "All sales channels". 0 = Claude off. Estimate based on the token usage reported by the API; the bill in the Anthropic Console is authoritative.</helpText>
+            <helpText lang="de-DE">Gilt für alle Verkaufskanäle zusammen – bitte unter „Alle Verkaufskanäle“ einstellen. 0 = Claude aus. Schätzung anhand der von der API gemeldeten Tokens; maßgeblich ist die Abrechnung in der Anthropic Console. Ist das Limit erreicht, bleiben Begriffe offen und werden im nächsten Monat ausgewertet.</helpText>
+            <defaultValue>5</defaultValue>
+            <min>0</min>
+        </input-field>
+
+        <input-field type="int">
+            <name>claudeWarnPercent</name>
+            <label>Warning threshold (% of the limit)</label>
+            <label lang="de-DE">Warnschwelle (% des Limits)</label>
+            <helpText lang="de-DE">Beim Erreichen wird einmal im Monat ein Hinweis ins Shopware-Log geschrieben.</helpText>
+            <defaultValue>80</defaultValue>
+            <min>1</min>
+            <max>100</max>
+        </input-field>
+
         <input-field type="bool">
             <name>claudeSyncOnSearchPage</name>
             <label>Evaluate new terms immediately on the search result page</label>

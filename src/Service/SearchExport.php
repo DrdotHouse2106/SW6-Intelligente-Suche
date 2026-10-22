@@ -18,7 +18,8 @@ class SearchExport
     public const TYPE_TERMS = 'terms';
     public const TYPE_PRODUCTS = 'products';
     public const TYPE_REWRITES = 'rewrites';
-    public const TYPES = [self::TYPE_TERMS, self::TYPE_PRODUCTS, self::TYPE_REWRITES];
+    public const TYPE_CLAUDE_USAGE = 'claude-usage';
+    public const TYPES = [self::TYPE_TERMS, self::TYPE_PRODUCTS, self::TYPE_REWRITES, self::TYPE_CLAUDE_USAGE];
 
     public function __construct(private readonly Connection $connection)
     {
@@ -35,6 +36,7 @@ class SearchExport
             self::TYPE_TERMS => $this->terms($salesChannelIds, $days, $minSearches),
             self::TYPE_PRODUCTS => $this->products($salesChannelIds, $days),
             self::TYPE_REWRITES => $this->rewrites($salesChannelIds, $days),
+            self::TYPE_CLAUDE_USAGE => $this->claudeUsage($days),
             default => throw new \InvalidArgumentException(\sprintf('Unbekannter Export-Typ „%s“', $type)),
         };
     }
@@ -136,6 +138,38 @@ class SearchExport
         );
 
         return ['columns' => $this->columns($rows, ['verkaufskanal', 'verkaufskanal_id', 'suchbegriff', 'umschreibung', 'status', 'treffer', 'versuche', 'erstmals', 'zuletzt']), 'rows' => $rows];
+    }
+
+    /**
+     * Claude-Verbrauch je Monat und Modell. Gilt für alle Verkaufskanäle zusammen (ein Kostenlimit).
+     *
+     * @return array{columns: list<string>, rows: list<array<string, mixed>>}
+     */
+    private function claudeUsage(?int $days): array
+    {
+        $where = '';
+        $params = [];
+        if ($days !== null && $days > 0) {
+            $where = 'WHERE `month` >= :since';
+            $params['since'] = (new \DateTimeImmutable(\sprintf('-%d days', $days), new \DateTimeZone('UTC')))->format('Y-m');
+        }
+
+        $rows = $this->connection->fetchAllAssociative(
+            'SELECT `month` AS monat,
+                    `model` AS modell,
+                    `requests` AS anfragen,
+                    `input_tokens` AS input_tokens,
+                    `output_tokens` AS output_tokens,
+                    `cache_read_tokens` AS cache_lesen_tokens,
+                    `cache_write_tokens` AS cache_schreiben_tokens,
+                    ROUND(`cost_micro_usd` / 1000000, 6) AS kosten_usd
+             FROM `nova_search_claude_usage`
+             ' . $where . '
+             ORDER BY `month` DESC, `cost_micro_usd` DESC',
+            $params
+        );
+
+        return ['columns' => $this->columns($rows, ['monat', 'modell', 'anfragen', 'input_tokens', 'output_tokens', 'cache_lesen_tokens', 'cache_schreiben_tokens', 'kosten_usd']), 'rows' => $rows];
     }
 
     private function salesChannelColumns(string $alias): string
