@@ -6,7 +6,8 @@
  # so lädt Shopware sein eigenes Vorschlags-Plugin nicht zusätzlich.
  #}
 {% block layout_header_search_form %}
-    {% if config('NovaSearch.config.active') is same as(false) %}
+    {# Nur wenn ausdrücklich eingeschaltet – ein fehlender Wert gilt als „aus“ #}
+    {% if not config('NovaSearch.config.active') %}
         {{ parent() }}
     {% else %}
         {% set novaSearchOptions = {

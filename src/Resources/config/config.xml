@@ -10,8 +10,9 @@
             <name>active</name>
             <label>Use instant search</label>
             <label lang="de-DE">Sofortsuche verwenden</label>
-            <helpText lang="de-DE">Aus = Shopwares Standard-Suchvorschläge.</helpText>
-            <defaultValue>true</defaultValue>
+            <helpText lang="de-DE">Standardmäßig aus, damit nach der Installation nicht sofort alle Shops umgestellt werden. Oben den Verkaufskanal wählen und gezielt einschalten. Aus = Shopwares Standard-Suchvorschläge.</helpText>
+            <helpText>Off by default so that installing does not switch all shops at once. Select the sales channel at the top and enable it there.</helpText>
+            <defaultValue>false</defaultValue>
         </input-field>
 
         <input-field type="int">

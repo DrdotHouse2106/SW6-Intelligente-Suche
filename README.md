@@ -185,6 +185,7 @@ bin/console cache:clear
 
 - `plugin:install` installiert automatisch das offizielle **Anthropic-PHP-SDK** (`anthropic-ai/sdk`) per Composer und legt die Tabellen `nova_search_term`, `nova_search_term_product` und `nova_search_rewrite` an.
 - `theme:compile` ist nötig, damit die Styles des Suchfensters ins Theme übernommen werden.
+- **Danach ist das Suchfenster noch aus.** Unter *Erweiterungen → Meine Erweiterungen → Nova Suche → Konfigurieren* oben den Verkaufskanal wählen und „Sofortsuche verwenden“ einschalten – so lässt sich die Suche zuerst in einem Shop testen.
 - Für die stündliche Auswertung müssen Shopwares **Scheduled Tasks und die Message Queue** laufen (Standard bei Shopware: `bin/console scheduled-task:run` und `bin/console messenger:consume` als Dienst/Cronjob oder der Admin-Worker). Alternativ `bin/console nova-search:rewrite` per Cronjob.
 
 ## Einstellungen
@@ -193,7 +194,7 @@ bin/console cache:clear
 
 | Einstellung | Standard | Bedeutung |
 |---|---|---|
-| Sofortsuche verwenden | an | Aus = Shopwares Standard-Suchvorschläge |
+| Sofortsuche verwenden | **aus** | Nach der Installation pro Verkaufskanal gezielt einschalten (oben den Verkaufskanal wählen). Aus = Shopwares Standard-Suchvorschläge |
 | Produkte pro Ladeschritt | 24 | Beim Scrollen wird automatisch nachgeladen |
 | Passende Kategorien anzeigen | an | |
 | Filter „Marken“ anzeigen | an | |
