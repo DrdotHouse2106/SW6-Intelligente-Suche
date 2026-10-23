@@ -87,7 +87,7 @@ Known pitfalls from real installations. **Please add new ones** (or open an issu
 
 - **Sister shops** (config, per sales channel): with 0 results the search window also searches up to 3 other sales channels of the same installation and shows their products linking to that shop's domain.
 - **Hints** (*Extensions → Nova Search → Hints*): if one of the words appears in the search term, a hint with optional link is shown (`{term}` in the link is replaced by the search term).
-- **"Request this part"**: path of the contact page; with 0 results a button opens it with subject and search term pre-filled.
+- **"Request this part"** (1.10.0): with 0 results a small form opens right in the search window – email or phone is enough, the request is mailed to the shop, the customer stays in the search. Optional link to the contact page with pre-filled subject and search term.
 
 ## Number search (1.3.0)
 

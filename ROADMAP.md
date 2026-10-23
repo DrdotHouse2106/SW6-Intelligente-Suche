@@ -49,7 +49,7 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
   und Link „Teil anfragen“
 - ✅ **Schwestershops**: bei 0 Treffern Treffer aus anderen Shops derselben Installation (1.9.0)
 - ✅ **Hinweise** nach Wörtern im Suchbegriff (z. B. Fabrikat/Modell → anderer Shop) (1.9.0)
-- ✅ Knopf „Teil anfragen“ mit vorausgefülltem Kontaktformular (1.9.0)
+- ✅ „Teil anfragen“ direkt im Suchfenster (E-Mail oder Telefon, 1.10.0), Kontaktformular vorausgefüllt (1.9.0)
 - ⬜ Hinweise und Schwestershop-Treffer auch auf der Suchergebnisseite und in der Store-API (App)
 
 ### 1.4 Regeln (Merchandising)

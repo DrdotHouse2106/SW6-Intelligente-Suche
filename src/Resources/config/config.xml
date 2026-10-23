@@ -199,11 +199,26 @@
             <placeholder>Wir suchen das Teil gern für Sie: &lt;a href="/kontakt"&gt;Teil anfragen&lt;/a&gt; oder rufen Sie uns an.</placeholder>
         </input-field>
 
+        <input-field type="bool">
+            <name>requestPartForm</name>
+            <label>"Request part" form in the search window</label>
+            <label lang="de-DE">„Teil anfragen“ im Suchfenster</label>
+            <helpText lang="de-DE">Bei 0 Treffern kann der Kunde direkt im Suchfenster eine Anfrage schicken – E-Mail-Adresse oder Telefonnummer genügt, der Suchbegriff ist schon eingetragen. Die Anfrage kommt per Mail; gespeichert wird nichts.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="text">
+            <name>requestPartEmail</name>
+            <label>Recipient for part requests</label>
+            <label lang="de-DE">Empfänger für Anfragen</label>
+            <helpText lang="de-DE">E-Mail-Adresse, an die Anfragen gehen. Leer = Shop-E-Mail aus Einstellungen → Stammdaten.</helpText>
+        </input-field>
+
         <input-field type="text">
             <name>requestPartUrl</name>
-            <label>"Request part" page</label>
-            <label lang="de-DE">Seite für „Teil anfragen“</label>
-            <helpText lang="de-DE">Pfad Ihrer Kontaktseite (z. B. /kontakt) oder vollständige Adresse. Bei 0 Treffern erscheint ein Knopf „Teil anfragen“; im Kontaktformular stehen Betreff und Suchbegriff schon drin. Leer = kein Knopf.</helpText>
+            <label>Link to contact page (optional)</label>
+            <label lang="de-DE">Link zum Kontaktformular (optional)</label>
+            <helpText lang="de-DE">Pfad Ihrer Kontaktseite (z. B. /kontakt). Erscheint unter dem Anfrageformular als „Lieber zum Kontaktformular“ – dort sind Betreff und Suchbegriff vorausgefüllt. Ist das Anfrageformular aus, erscheint stattdessen ein Knopf „Teil anfragen“ mit diesem Link.</helpText>
             <placeholder>/kontakt</placeholder>
         </input-field>
 

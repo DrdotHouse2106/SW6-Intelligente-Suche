@@ -172,7 +172,20 @@ export default class NovaSearchPlugin extends PluginBaseClass {
             if (event.target.matches('[data-nova-search-buy]')) {
                 window.setTimeout(() => this.close(), 0);
             }
+            if (event.target.matches('[data-nova-search-request]')) {
+                event.preventDefault();
+                this._sendRequest(event.target);
+            }
         });
+        // „Teil anfragen“ aufgeklappt → Fokus ins erste Kontaktfeld
+        this._body.addEventListener('toggle', (event) => {
+            if (event.target.matches('.nova-search-request') && event.target.open) {
+                const field = event.target.querySelector('input[name="email"]');
+                if (field) {
+                    field.focus();
+                }
+            }
+        }, true);
 
         // Weitere Produkte laden, sobald das Ende der Liste sichtbar wird
         this._observer = 'IntersectionObserver' in window
@@ -620,6 +633,60 @@ export default class NovaSearchPlugin extends PluginBaseClass {
                 }
             });
         }, true);
+    }
+
+    /** „Teil anfragen“ aus dem Suchfenster senden – ohne das Fenster zu verlassen */
+    async _sendRequest(form) {
+        const status = form.querySelector('[data-nova-search-request-status]');
+        const button = form.querySelector('button[type="submit"]');
+        const value = (name) => ((form.elements[name] && form.elements[name].value) || '').trim();
+        const show = (text, type) => {
+            status.textContent = text;
+            status.classList.toggle('is-error', type === 'error');
+            status.classList.toggle('is-success', type === 'success');
+        };
+
+        if (value('email') === '' && value('phone') === '') {
+            show(form.querySelector('.nova-search-request-note').textContent, 'error');
+            form.elements.email.focus();
+            return;
+        }
+        const privacy = form.elements.acceptedDataProtection;
+        if (privacy && !privacy.checked) {
+            privacy.focus();
+            privacy.reportValidity();
+            return;
+        }
+
+        const label = button.textContent;
+        button.disabled = true;
+        button.textContent = '…';
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            });
+            const result = await response.json().catch(() => ({}));
+            if (response.ok && result.success) {
+                const details = form.closest('.nova-search-request');
+                const done = document.createElement('p');
+                done.className = 'nova-search-request-status is-success';
+                done.setAttribute('role', 'status');
+                done.textContent = result.message || '';
+                (details || form).replaceWith(done);
+                return;
+            }
+            show(result.message || label, 'error');
+        } catch (e) {
+            show(form.dataset.errorText || '⚠', 'error');
+        } finally {
+            if (button.isConnected) {
+                button.disabled = false;
+                button.textContent = label;
+            }
+        }
     }
 
     _productInfo(element) {

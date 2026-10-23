@@ -348,6 +348,7 @@ class InstantSearchController extends StorefrontController
             ),
             'partners' => $partners,
             'requestPartUrl' => $requestPartUrl,
+            'requestPartForm' => $total === 0 && $this->config->get('NovaSearch.config.requestPartForm', $salesChannelId) !== false,
             'sortings' => $result?->getAvailableSortings(),
             'currentSorting' => $result?->getSorting(),
             'categories' => !$exactNumber && $this->config->get('NovaSearch.config.showCategories', $salesChannelId) !== false

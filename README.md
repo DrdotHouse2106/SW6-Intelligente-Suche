@@ -234,7 +234,14 @@ Betreiben Sie mehrere Shops in derselben Shopware-Installation, kann das Suchfen
 
 Die Wörter müssen als ganzes Wort vorkommen („t2“ passt bei „spiegel t2“, nicht bei „t25“). Ohne Verkaufskanal gilt ein Hinweis für alle Shops.
 
-**„Teil anfragen“** (*Konfigurieren → Suchfenster: Treffer → Seite für „Teil anfragen“*): Pfad der Kontaktseite, z. B. `/kontakt`. Bei 0 Treffern erscheint ein Knopf; im Kontaktformular stehen Betreff („Teileanfrage“) und „Ich suche: …“ schon drin. Bereits ausgefüllte Felder werden nicht überschrieben.
+**„Teil anfragen“** (*Konfigurieren → Suchfenster: Treffer*): Bei 0 Treffern klappt ein Knopf „Teil anfragen“ ein kleines Formular **direkt im Suchfenster** auf:
+
+- „Ich suche: …“ ist schon eingetragen; **E-Mail-Adresse oder Telefonnummer genügt**, Name ist optional – absenden, fertig. Der Kunde bleibt in der Suche.
+- Die Anfrage geht als Mail an den Shop (*Empfänger für Anfragen*, leer = Shop-E-Mail aus den Stammdaten); bei angegebener E-Mail-Adresse geht „Antworten“ direkt an den Kunden. Gespeichert wird nichts.
+- Datenschutzhinweis bzw. -Häkchen wie im Shopware-Kontaktformular (*Einstellungen → Login & Registrierung*).
+- Schutz vor Spam: unsichtbares Feld für Bots und höchstens 5 Anfragen pro IP-Adresse und Stunde.
+- **Link zum Kontaktformular (optional)**, z. B. `/kontakt`: erscheint darunter als „Lieber zum Kontaktformular“; dort sind Betreff („Teileanfrage“) und „Ich suche: …“ vorausgefüllt. Ist das Formular im Suchfenster ausgeschaltet, erscheint nur ein Knopf mit diesem Link.
+- Auch bei „Nur exakte Teilenummer“ ohne Treffer verfügbar.
 
 ## Ausgeschlossene Produkte
 
@@ -458,6 +465,12 @@ Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetre
 **Ursache:** Der Begriff muss genau passen (nur Groß-/Kleinschreibung und Leerzeichen am Rand sind egal), oder das Ziel ist ungültig (z. B. ohne `/` am Anfang bzw. ohne `https://`)
 
 **Lösung:** Eintrag unter *Nova Suche → Weiterleitungen* prüfen (Aktiv, Verkaufskanal, Ziel z. B. `/account`). Beim Tippen im Suchfenster erscheint der Link erst bei genau diesem Begriff
+
+### Teileanfrage kommt nicht an
+
+**Ursache:** Mailversand des Shops nicht eingerichtet, Empfänger fehlt oder die Mail landet im Spam
+
+**Lösung:** *Einstellungen → Mailer* prüfen (eine Testbestellung o. Ä. muss ankommen), *Empfänger für Anfragen* oder die Shop-E-Mail unter *Stammdaten* setzen. Fehler stehen im Shopware-Log („Nova Suche: Teileanfrage …“)
 
 ### Schwestershop zeigt keine Treffer
 

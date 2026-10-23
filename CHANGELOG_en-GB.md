@@ -1,3 +1,6 @@
+# 1.10.0
+- "Request this part" form right in the search window (email or phone, sent by mail, customer stays in the search)
+
 # 1.9.0
 - New: sister shop results with 0 hits, hint rules (word → hint with link), "Request this part" button with pre-filled contact form
 

@@ -1,3 +1,8 @@
+# 1.10.0
+- „Teil anfragen“ direkt im Suchfenster: E-Mail oder Telefon genügt, Anfrage per Mail an den Shop, der Kunde bleibt in der Suche; Kontaktformular weiter als Link
+- Neue Einstellungen: „Teil anfragen“ im Suchfenster, Empfänger für Anfragen
+- Shopware-Modals (z. B. Datenschutzhinweis) erscheinen über dem Suchfenster
+
 # 1.9.0
 - Neu: Schwestershops – bei 0 Treffern Treffer aus anderen Verkaufskanälen derselben Installation, mit Link in den anderen Shop
 - Neu: Hinweise – Wort im Suchbegriff (z. B. „t2“) → Hinweis mit Link, z. B. auf die Suche im anderen Shop; neuer Reiter unter Erweiterungen → Nova Suche

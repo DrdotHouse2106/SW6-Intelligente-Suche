@@ -656,6 +656,100 @@ a.nova-search-hint:focus-visible {
     margin-top: 1rem;
 }
 
+// Shopware-Modals (z. B. Datenschutzhinweis) liegen sonst unter dem Suchfenster
+.modal-open {
+    .nova-search-backdrop {
+        z-index: 1040;
+    }
+
+    .nova-search-layer {
+        z-index: 1041;
+    }
+}
+
+.nova-search-request {
+    margin-top: 1rem;
+
+    > summary {
+        display: inline-block;
+        list-style: none;
+
+        &::-webkit-details-marker {
+            display: none;
+        }
+    }
+
+    &[open] > summary {
+        display: none;
+    }
+}
+
+.nova-search-request-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1rem;
+    max-width: 36rem;
+    margin: 0 auto;
+    text-align: left;
+
+    .is-wide,
+    .nova-search-request-intro {
+        grid-column: 1 / -1;
+    }
+
+    @media (max-width: 575.98px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.nova-search-request-intro {
+    margin: 0;
+    font-weight: 600;
+}
+
+.nova-search-request-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.nova-search-request-note,
+.nova-search-request-privacy {
+    margin: 0;
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.8125rem;
+}
+
+.nova-search-request-hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.nova-search-request-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+}
+
+.nova-search-request-status {
+    margin: 0;
+    font-weight: 600;
+
+    &.is-error {
+        color: var(--bs-danger, #dc3545);
+    }
+
+    &.is-success {
+        color: var(--bs-success, #198754);
+    }
+}
+
 .nova-search-partner {
     margin-top: 1.5rem;
 }

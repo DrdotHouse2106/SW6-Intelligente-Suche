@@ -36,16 +36,70 @@
                         {% else %}
                             <p class="nova-search-empty-hint">{{ 'novaSearch.noResultsHint'|trans }}</p>
                         {% endif %}
-                        {% if requestPartUrl|default(null) %}
-                            {% block nova_search_request_part %}
-                                {% set novaRequestQuery = 'nova-anfrage=' ~ ('novaSearch.requestPartMessage'|trans({ '%term%': term })|striptags|url_encode)
-                                    ~ '&nova-betreff=' ~ ('novaSearch.requestPartSubject'|trans|striptags|url_encode) %}
-                                <a class="btn btn-primary nova-search-request-part nova-search-focusable"
-                                   href="{{ requestPartUrl }}{{ '?' in requestPartUrl ? '&' : '?' }}{{ novaRequestQuery }}">
-                                    {{ 'novaSearch.requestPart'|trans }}
-                                </a>
-                            {% endblock %}
-                        {% endif %}
+                    {% endif %}
+
+                    {# „Teil anfragen“: Formular im Suchfenster und/oder Link zum Kontaktformular #}
+                    {% set novaContactUrl = null %}
+                    {% if requestPartUrl|default(null) %}
+                        {% set novaContactUrl = requestPartUrl ~ ('?' in requestPartUrl ? '&' : '?')
+                            ~ 'nova-anfrage=' ~ ('novaSearch.requestPartMessage'|trans({ '%term%': term })|striptags|url_encode)
+                            ~ '&nova-betreff=' ~ ('novaSearch.requestPartSubject'|trans|striptags|url_encode) %}
+                    {% endif %}
+                    {% if requestPartForm|default(false) %}
+                        {% block nova_search_request_form %}
+                            <details class="nova-search-request">
+                                <summary class="btn btn-primary nova-search-focusable">{{ 'novaSearch.requestPart'|trans }}</summary>
+                                <form class="nova-search-request-form" action="{{ path('frontend.nova-search.request') }}" method="post" data-nova-search-request data-error-text="{{ 'novaSearch.requestError'|trans|striptags }}" novalidate>
+                                    <p class="nova-search-request-intro">{{ 'novaSearch.requestIntro'|trans }}</p>
+                                    <input type="hidden" name="term" value="{{ term }}">
+                                    {# Für Menschen unsichtbar – Bots füllen es aus #}
+                                    <div class="nova-search-request-hp" aria-hidden="true">
+                                        <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+                                    </div>
+                                    <label class="nova-search-request-field is-wide">
+                                        <span>{{ 'novaSearch.requestMessage'|trans }}</span>
+                                        <textarea name="message" rows="2" maxlength="1000" class="form-control">{{ 'novaSearch.requestPartMessage'|trans({ '%term%': term })|striptags }}</textarea>
+                                    </label>
+                                    <label class="nova-search-request-field">
+                                        <span>{{ 'novaSearch.requestEmail'|trans }}</span>
+                                        <input type="email" name="email" maxlength="200" autocomplete="email" class="form-control">
+                                    </label>
+                                    <label class="nova-search-request-field">
+                                        <span>{{ 'novaSearch.requestPhone'|trans }}</span>
+                                        <input type="tel" name="phone" maxlength="40" autocomplete="tel" class="form-control">
+                                    </label>
+                                    <label class="nova-search-request-field is-wide">
+                                        <span>{{ 'novaSearch.requestName'|trans }} <small>({{ 'novaSearch.requestOptional'|trans }})</small></span>
+                                        <input type="text" name="name" maxlength="100" autocomplete="name" class="form-control">
+                                    </label>
+                                    <p class="nova-search-request-note is-wide">{{ 'novaSearch.requestContactHint'|trans }}</p>
+                                    {% set novaPrivacyOpen = '<button type="button" class="btn btn-link-inline" data-ajax-modal="true" data-url="' ~ path('frontend.cms.page', { id: config('core.basicInformation.privacyPage') }) ~ '">' %}
+                                    <div class="nova-search-request-privacy is-wide">
+                                        {% if config('core.loginRegistration.requireDataProtectionCheckbox') == 1 %}
+                                            <label class="form-check">
+                                                <input type="checkbox" name="acceptedDataProtection" value="1" class="form-check-input" required>
+                                                <span class="form-check-label">{{ 'contact.privacyNoticeTextModal'|trans({ '%privacyModalTagOpen%': novaPrivacyOpen, '%privacyModalTagClose%': '</button>' })|raw }}</span>
+                                            </label>
+                                        {% else %}
+                                            {{ 'contact.privacyNoticeInformation'|trans({ '%privacyModalTagOpen%': novaPrivacyOpen, '%privacyModalTagClose%': '</button>' })|raw }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="nova-search-request-actions is-wide">
+                                        <button type="submit" class="btn btn-primary">{{ 'novaSearch.requestSend'|trans }}</button>
+                                        {% if novaContactUrl %}
+                                            <a href="{{ novaContactUrl }}" class="nova-search-request-contact">{{ 'novaSearch.requestContactLink'|trans }}</a>
+                                        {% endif %}
+                                    </div>
+                                    <p class="nova-search-request-status is-wide" role="status" aria-live="polite" data-nova-search-request-status></p>
+                                </form>
+                            </details>
+                        {% endblock %}
+                    {% elseif novaContactUrl %}
+                        {% block nova_search_request_part %}
+                            <a class="btn btn-primary nova-search-request-part nova-search-focusable" href="{{ novaContactUrl }}">
+                                {{ 'novaSearch.requestPart'|trans }}
+                            </a>
+                        {% endblock %}
                     {% endif %}
                 </div>
 
