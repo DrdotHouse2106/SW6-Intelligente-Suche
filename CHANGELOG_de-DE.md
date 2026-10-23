@@ -1,3 +1,6 @@
+# 1.10.4
+- Hinweis zur Umschreibung steht direkt über den eigenen Treffern (unter den Schwestershop-Treffern), mit passendem Text: „Hier im Shop gibt es nichts zu … – ähnliche Treffer für …“
+
 # 1.10.3
 - Schwestershops werden auch gefragt, wenn die Treffer nur über eine Umschreibung kamen (z. B. „lichtmaschine cx“ → „lichtmaschine“); ihre Treffer stehen dann über den umgeschriebenen
 

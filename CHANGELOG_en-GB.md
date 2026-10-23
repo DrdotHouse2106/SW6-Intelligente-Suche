@@ -1,3 +1,6 @@
+# 1.10.4
+- Rewrite notice placed directly above the own (rewritten) results, below sister shop hits, with adjusted wording
+
 # 1.10.3
 - Sister shops are also searched when results only came from a rewrite; their hits are shown above the rewritten results
 

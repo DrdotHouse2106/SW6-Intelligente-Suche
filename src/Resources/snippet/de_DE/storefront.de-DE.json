@@ -77,6 +77,7 @@
         "requestMailSubject": "Teileanfrage aus der Suche: %term%",
         "requestMailIntro": "Ein Kunde hat über die Suche ein Teil angefragt, das nicht gefunden wurde.",
         "requestMailTerm": "Suchbegriff",
-        "requestMailShop": "Shop"
+        "requestMailShop": "Shop",
+        "rewriteHintPartner": "Hier im Shop gibt es nichts zu „%original%“ – ähnliche Treffer für „%rewrite%“:"
     }
 }

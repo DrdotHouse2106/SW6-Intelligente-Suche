@@ -77,6 +77,7 @@
         "requestMailSubject": "Part request from search: %term%",
         "requestMailIntro": "A customer requested a part via the search that was not found.",
         "requestMailTerm": "Search term",
-        "requestMailShop": "Shop"
+        "requestMailShop": "Shop",
+        "rewriteHintPartner": "Nothing for “%original%” in this shop – similar results for “%rewrite%”:"
     }
 }

@@ -218,16 +218,17 @@
 
                 {% block nova_search_main %}
                     <div class="nova-search-main">
+                        {# Zum eingegebenen Begriff gab es hier nichts – Treffer aus Schwestershops zuerst #}
+                        {% sw_include '@NovaSearch/storefront/nova-search/partners.html.twig' %}
+
+                        {# Hinweis zur Umschreibung direkt über den eigenen (umgeschriebenen) Treffern #}
                         {% if rewrite %}
                             {% block nova_search_rewrite_hint %}
                                 <p class="nova-search-rewrite">
-                                    {{ 'novaSearch.rewriteHint'|trans({ '%rewrite%': rewrite.rewrite, '%original%': rewrite.original }) }}
+                                    {{ (partners|default([])|length > 0 ? 'novaSearch.rewriteHintPartner' : 'novaSearch.rewriteHint')|trans({ '%rewrite%': rewrite.rewrite, '%original%': rewrite.original }) }}
                                 </p>
                             {% endblock %}
                         {% endif %}
-
-                        {# Zum eingegebenen Begriff gab es hier nichts – Treffer aus Schwestershops zuerst #}
-                        {% sw_include '@NovaSearch/storefront/nova-search/partners.html.twig' %}
 
                         <div class="nova-search-meta">
                             <p class="nova-search-count" role="status">
