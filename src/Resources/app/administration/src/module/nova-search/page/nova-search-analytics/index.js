@@ -17,6 +17,7 @@ Component.register('nova-search-analytics', {
             days: 30,
             data: null,
             tab: 'terms',
+            importModal: null,
         };
     },
 
@@ -170,6 +171,47 @@ Component.register('nova-search-analytics', {
                 return this.$t('nova-search.analytics.rewriteDone', { rewrite: row.rewrite });
             }
             return row.rewriteStatus ? this.$tc(`nova-search.analytics.rewriteStatus.${row.rewriteStatus}`) : '–';
+        },
+
+        openImport() {
+            this.importModal = { salesChannelId: this.salesChannelId, files: [], results: [], isRunning: false, changed: false };
+        },
+
+        closeImport() {
+            const changed = this.importModal?.changed;
+            this.importModal = null;
+            if (changed) {
+                this.load();
+            }
+        },
+
+        async onImportFiles(event) {
+            this.importModal.files = await Promise.all(Array.from(event.target.files || []).map(async (file) => ({
+                name: file.name,
+                text: await file.text(),
+            })));
+            this.importModal.results = [];
+        },
+
+        async runImport() {
+            const modal = this.importModal;
+            modal.isRunning = true;
+            try {
+                const httpClient = Shopware.Application.getContainer('init').httpClient;
+                const response = await httpClient.post('_action/nova-search/import-stats', {
+                    salesChannelId: modal.salesChannelId,
+                    files: modal.files,
+                }, { headers: this.headers() });
+                modal.results = response.data.results;
+                modal.changed = true;
+                this.createNotificationSuccess({ message: this.$tc('nova-search.import.done') });
+            } catch (error) {
+                modal.results = error?.response?.data?.results || [];
+                modal.changed = modal.results.length > 0;
+                this.createNotificationError({ message: error?.response?.data?.message || this.$tc('nova-search.import.error') });
+            } finally {
+                modal.isRunning = false;
+            }
         },
 
         /** „Beheben“: Synonym- bzw. Weiterleitungsliste mit vorbelegtem Begriff öffnen */

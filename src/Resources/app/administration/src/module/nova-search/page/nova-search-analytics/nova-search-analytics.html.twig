@@ -5,6 +5,9 @@
     </template>
 
     <template #smart-bar-actions>
+        <mt-button variant="secondary" @click="openImport">
+            {{ $tc('nova-search.import.button') }}
+        </mt-button>
         <mt-button variant="secondary" @click="openSettings">
             {{ $tc('nova-search.analytics.settings') }}
         </mt-button>
@@ -191,6 +194,46 @@
                 </mt-card>
             </template>
         </div>
+
+        {# Daten aus einem bisherigen Suchdienst übernehmen #}
+        <sw-modal
+            v-if="importModal"
+            :title="$tc('nova-search.import.title')"
+            variant="small"
+            @modal-close="closeImport"
+        >
+            <p class="nova-search-analytics__hint">{{ $tc('nova-search.import.intro') }}</p>
+            <sw-entity-single-select
+                v-model:value="importModal.salesChannelId"
+                entity="sales_channel"
+                :label="$tc('nova-search.analytics.salesChannel')"
+                :placeholder="$tc('nova-search.import.chooseSalesChannel')"
+            />
+            <label class="nova-search-analytics__file">
+                <span>{{ $tc('nova-search.import.files') }}</span>
+                <input type="file" accept=".csv,text/csv" multiple @change="onImportFiles">
+            </label>
+            <ul v-if="importModal.results.length" class="nova-search-analytics__import-results">
+                <li v-for="result in importModal.results" :key="result.name">
+                    <strong>{{ result.name }}</strong>:
+                    <template v-if="result.duplicate">{{ $tc('nova-search.import.duplicate') }}</template>
+                    <template v-else>{{ $t(`nova-search.import.result.${result.type}`, result) }}</template>
+                </li>
+            </ul>
+            <template #modal-footer>
+                <mt-button variant="secondary" @click="closeImport">
+                    {{ $tc('global.default.close') }}
+                </mt-button>
+                <mt-button
+                    variant="primary"
+                    :disabled="!importModal.salesChannelId || importModal.files.length === 0"
+                    :is-loading="importModal.isRunning"
+                    @click="runImport"
+                >
+                    {{ $tc('nova-search.import.start') }}
+                </mt-button>
+            </template>
+        </sw-modal>
     </template>
 </sw-page>
 {% endblock %}

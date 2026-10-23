@@ -61,8 +61,8 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 ### 1.5 Übernahme der bestehenden Daten
 
 - ✅ Import vorhandener Synonym-Gruppen und Weiterleitungen als CSV (1.7.0)
-- ⬜ Import von Suchbegriffen und Klickdaten der letzten Monate (CSV), damit „Beliebte
-  Suchanfragen“ und das Lernen nicht bei null starten
+- ✅ Import von Suchbegriffen und Klickdaten der letzten Monate (CSV), damit „Beliebte
+  Suchanfragen“ und das Lernen nicht bei null starten (1.8.0)
 - ✅ Umstiegs-Checkliste in der README (altes Plugin deaktivieren, Skript entfernen)
 
 ---

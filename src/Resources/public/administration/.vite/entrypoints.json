@@ -3,11 +3,11 @@
   "entryPoints": {
     "nova-search": {
       "css": [
-        "/bundles/novasearch/administration/assets/nova-search-Bojm9JnA.css"
+        "/bundles/novasearch/administration/assets/nova-search-BuXMu6FV.css"
       ],
       "dynamic": [],
       "js": [
-        "/bundles/novasearch/administration/assets/nova-search-DwfkCwgS.js"
+        "/bundles/novasearch/administration/assets/nova-search-B6HtB3mQ.js"
       ],
       "legacy": false,
       "preload": []

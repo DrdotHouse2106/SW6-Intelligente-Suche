@@ -136,6 +136,15 @@
             <argument type="service" id="Doctrine\DBAL\Connection"/>
         </service>
 
+        <service id="Nova\Search\Service\StatsImport">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Nova\Search\Command\ImportStatsCommand">
+            <argument type="service" id="Nova\Search\Service\StatsImport"/>
+            <tag name="console.command"/>
+        </service>
+
         <service id="Nova\Search\Command\ExportCommand">
             <argument type="service" id="Nova\Search\Service\SearchExport"/>
             <tag name="console.command"/>
@@ -179,6 +188,7 @@
             <argument type="service" id="Nova\Search\Service\SearchAnalytics"/>
             <argument type="service" id="Nova\Search\Service\SearchExport"/>
             <argument type="service" id="Nova\Search\Rewrite\ClaudeBudget"/>
+            <argument type="service" id="Nova\Search\Service\StatsImport"/>
             <argument type="service" id="logger"/>
             <tag name="controller.service_arguments"/>
         </service>

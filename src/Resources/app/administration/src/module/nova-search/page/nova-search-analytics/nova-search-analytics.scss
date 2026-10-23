@@ -192,3 +192,19 @@
     flex-wrap: wrap;
     gap: 6px;
 }
+
+.nova-search-analytics__file {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 16px 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.nova-search-analytics__import-results {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.6;
+}

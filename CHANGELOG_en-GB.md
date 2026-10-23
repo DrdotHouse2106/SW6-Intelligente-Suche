@@ -1,3 +1,6 @@
+# 1.8.0
+- New: import search terms and clicks from CSV exports of a previous search service ("Import data" button in analytics, bin/console nova-search:import-stats)
+
 # 1.7.2
 - Bestseller highlights count orders instead of quantity
 

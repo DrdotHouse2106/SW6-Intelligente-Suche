@@ -5,6 +5,7 @@ namespace Nova\Search\Controller;
 use Nova\Search\Rewrite\ClaudeBudget;
 use Nova\Search\Service\SearchAnalytics;
 use Nova\Search\Service\SearchExport;
+use Nova\Search\Service\StatsImport;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Api\Context\AdminApiSource;
 use Shopware\Core\Framework\Context;
@@ -24,6 +25,7 @@ class AdminAnalyticsController
         private readonly SearchAnalytics $analytics,
         private readonly SearchExport $export,
         private readonly ClaudeBudget $budget,
+        private readonly StatsImport $import,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -72,6 +74,44 @@ class AdminAnalyticsController
         $response->headers->set('Content-Disposition', \sprintf('attachment; filename="nova-suche-%s-%s.csv"', $type, date('Y-m-d')));
 
         return $response;
+    }
+
+    /**
+     * Statistik-Dateien eines bisherigen Suchdienstes übernehmen.
+     * Body: { salesChannelId, files: [{ name, text }] }
+     */
+    #[Route(path: '/api/_action/nova-search/import-stats', name: 'api.action.nova_search.import_stats', methods: ['POST'])]
+    public function importStats(Request $request, Context $context): JsonResponse
+    {
+        if (!$this->isAdminUser($context)) {
+            return new JsonResponse(['message' => 'Nur für Benutzer der Administration.'], 403);
+        }
+
+        $salesChannelId = $request->request->getString('salesChannelId');
+        $files = $request->request->all()['files'] ?? null;
+        if (!\is_array($files) || $files === [] || \count($files) > 20) {
+            return new JsonResponse(['message' => 'Bitte 1 bis 20 CSV-Dateien wählen.'], 400);
+        }
+
+        $results = [];
+        try {
+            foreach ($files as $file) {
+                $name = \is_array($file) && \is_string($file['name'] ?? null) ? $file['name'] : '';
+                $text = \is_array($file) && \is_string($file['text'] ?? null) ? $file['text'] : '';
+                if (\strlen($text) > 10 * 1024 * 1024) {
+                    throw new \InvalidArgumentException(\sprintf('„%s“ ist zu groß (max. 10 MB).', $name));
+                }
+                $results[] = ['name' => $name] + $this->import->import($text, $salesChannelId, $name);
+            }
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['message' => $e->getMessage(), 'results' => $results], 400);
+        } catch (\Throwable $e) {
+            $this->logger->error('Nova Suche: Import fehlgeschlagen', ['exception' => $e]);
+
+            return new JsonResponse(['message' => 'Import fehlgeschlagen. Details stehen im Shopware-Log.', 'results' => $results], 500);
+        }
+
+        return new JsonResponse(['results' => $results]);
     }
 
     private function salesChannelId(Request $request): ?string

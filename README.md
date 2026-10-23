@@ -167,6 +167,20 @@ Auch Shopwares Standard-Route `/store-api/search` nutzt das gelernte Ranking und
 
 Tageswerte werden ab Version 1.6.0 gezählt; frühere Zeiträume sind leer (Gesamtzahlen gibt es weiter im CSV-Export). Gespeichert werden nur Begriffe und Zähler, keine personenbezogenen Daten; Tageswerte werden nach 2 Jahren gelöscht.
 
+## Suchdaten aus einem bisherigen Suchdienst übernehmen
+
+Damit „Beliebte Suchanfragen“, das gelernte Ranking und „Beliebt in der Suche“ nicht bei null starten, lassen sich die CSV-Exporte eines bisherigen Suchdienstes einlesen: *Erweiterungen → Nova Suche → Auswertung → **Daten importieren***, Verkaufskanal wählen, Dateien auswählen. Alternativ per Konsole:
+
+```
+bin/console nova-search:import-stats --sales-channel=<ID> suchbegriffe.csv produkte.csv
+```
+
+- **Suchbegriffe** (Spalten `search_term`, `total_searches`, `total_clicks`) → Suchen und Klicks je Begriff
+- **Produkte** (Spalten `clicked_product_link`, `search_query`, `total_searches_clicks`) → welches Produkt bei welchem Begriff angeklickt wurde. Das Produkt wird über die **Produktnummer am Ende des Links** gefunden (Shopwares Standard-URL `…/Produktname/Produktnummer`); nicht gefundene Produkte werden übersprungen.
+- Die Werte werden zu vorhandenen Zählern addiert. **Dieselbe Datei wird nur einmal übernommen** (je Verkaufskanal) – ein versehentlicher zweiter Import zählt nichts doppelt.
+- Die Exporte enthalten nur Summen, keine Tageswerte: Kennzahlen, Grafik und Tabellen der Auswertung bleiben für die Zeit davor leer; im CSV-Export sind die Daten enthalten.
+- Eigene Testsuchen (z. B. „test“) danach über die Sperrliste bei „Beliebte Suchanfragen“ ausblenden.
+
 ## Nummernsuche (Artikel-, Hersteller-, OE-Nummern)
 
 Sieht der Suchbegriff wie eine Nummer aus (mindestens 3 Ziffern, keine weiteren Wörter), sucht die Nova Suche zuerst im **Nummern-Index** – und zeigt genau die Produkte mit dieser Nummer, inklusive Varianten. Gibt es keine passende Nummer, wird ganz normal gesucht.

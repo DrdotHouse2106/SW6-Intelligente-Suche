@@ -41,5 +41,6 @@ class NovaSearch extends Plugin
         $connection->executeStatement('DROP TABLE IF EXISTS `nova_search_product_day`');
         $connection->executeStatement('DROP TABLE IF EXISTS `nova_search_synonym`');
         $connection->executeStatement('DROP TABLE IF EXISTS `nova_search_redirect`');
+        $connection->executeStatement('DROP TABLE IF EXISTS `nova_search_import`');
     }
 }

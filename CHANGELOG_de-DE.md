@@ -1,3 +1,6 @@
+# 1.8.0
+- Neu: Suchbegriffe und Klicks aus CSV-Exporten eines bisherigen Suchdienstes übernehmen – Knopf „Daten importieren“ in der Auswertung bzw. bin/console nova-search:import-stats; Produkte über die Produktnummer im Link, jede Datei nur einmal
+
 # 1.7.2
 - Bestseller-Highlights zählen Bestellungen statt Stückzahl – Kleinteile in großer Menge (z. B. 100 Schrauben) drängen sich nicht mehr vor
 

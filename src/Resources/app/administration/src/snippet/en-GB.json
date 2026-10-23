@@ -100,6 +100,21 @@
             "col": {
                 "target": "Target"
             }
+        },
+        "import": {
+            "button": "Import data",
+            "title": "Import search data",
+            "intro": "Imports search terms and clicks from the CSV export of a previous search service (\"search terms\" and \"products\" files – detected automatically). They take effect immediately for popular searches, learned ranking and \"popular in search\" and appear in the CSV export – not in the KPIs and tables on this page, because the exports contain no daily values. The same file is only imported once.",
+            "chooseSalesChannel": "Choose sales channel",
+            "files": "CSV files",
+            "start": "Import",
+            "duplicate": "already imported – skipped",
+            "done": "Import finished.",
+            "error": "Import failed.",
+            "result": {
+                "terms": "{imported} search terms imported, {skipped} skipped",
+                "products": "{imported} term/product clicks imported, {skipped} products not found"
+            }
         }
     }
 }

@@ -100,6 +100,21 @@
             "col": {
                 "target": "Ziel"
             }
+        },
+        "import": {
+            "button": "Daten importieren",
+            "title": "Suchdaten importieren",
+            "intro": "Übernimmt Suchbegriffe und Klicks aus dem CSV-Export eines bisherigen Suchdienstes (Dateien „Suchbegriffe“ und „Produkte“ – die Art wird automatisch erkannt). Die Werte wirken sofort auf „Beliebte Suchanfragen“, das gelernte Ranking und „Beliebt in der Suche“ und stehen im CSV-Export. In Kennzahlen und Tabellen dieser Seite erscheinen sie nicht, weil die Exporte keine Tageswerte enthalten. Dieselbe Datei wird nur einmal übernommen.",
+            "chooseSalesChannel": "Verkaufskanal wählen",
+            "files": "CSV-Dateien",
+            "start": "Importieren",
+            "duplicate": "wurde bereits importiert – übersprungen",
+            "done": "Import abgeschlossen.",
+            "error": "Import fehlgeschlagen.",
+            "result": {
+                "terms": "{imported} Suchbegriffe übernommen, {skipped} übersprungen",
+                "products": "{imported} Begriff-Produkt-Klicks übernommen, {skipped} Produkte nicht gefunden"
+            }
         }
     }
 }
