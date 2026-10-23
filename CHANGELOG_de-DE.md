@@ -1,3 +1,6 @@
+# 1.10.2
+- Startansicht ohne Highlights: beliebte Suchanfragen in bis zu 4 Spalten nebeneinander statt einer langen Liste – das Fenster wird deutlich niedriger
+
 # 1.10.1
 - Nummernsuche: Nummern mit Gruppen-Vorsatz (z. B. „281-281569“) sind auch über den hinteren Teil auffindbar („281569“, „28 15 69“); der Index baut sich nach dem Update automatisch neu auf
 

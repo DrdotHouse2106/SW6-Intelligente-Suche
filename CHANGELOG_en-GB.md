@@ -1,3 +1,6 @@
+# 1.10.2
+- Start view without highlights: popular searches in up to 4 columns instead of one long list
+
 # 1.10.1
 - Number search: numbers with a group prefix (e.g. "281-281569") are also found by the part after the prefix ("281569"); the index is rebuilt automatically after the update
 

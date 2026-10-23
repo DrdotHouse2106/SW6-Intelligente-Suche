@@ -204,6 +204,12 @@ $nova-search-gap: 1rem;
         }
     }
 
+    // Nur beliebte Suchen (keine Highlights, nichts angesehen): Begriffe in Spalten nebeneinander,
+    // damit das Fenster nicht unnötig hoch wird
+    &:not(:has(.nova-search-highlights, .nova-search-recent)) .nova-search-popular ul {
+        columns: 4 10rem;
+    }
+
     @media (max-width: 767.98px) {
         grid-template-columns: minmax(0, 1fr);
         gap: 1.5rem;
@@ -221,6 +227,7 @@ $nova-search-gap: 1rem;
 
 .nova-search-popular ul {
     margin: 0;
+    column-gap: 2rem;
 
     @media (max-width: 767.98px) {
         display: flex;
