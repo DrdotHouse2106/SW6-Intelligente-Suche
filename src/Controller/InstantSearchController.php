@@ -288,7 +288,7 @@ class InstantSearchController extends StorefrontController
         // in Schwestershops mit dem ursprünglichen Begriff nachsehen – nicht, wenn nur die Filter alles ausschließen
         $filterCount = \count($manufacturerIds) + \count($propertyIds) + ($minPrice !== null || $maxPrice !== null ? 1 : 0);
         $partners = [];
-        if (($total === 0 || $rewrite instanceof ArrayStruct) && !$exactNumber && $filterCount === 0 && $page === 1) {
+        if (($total === 0 || $rewrite instanceof ArrayStruct) && !$exactNumber && $filterCount === 0) {
             $partnerIds = $this->idConfig('NovaSearch.config.partnerSalesChannels', $salesChannelId);
             if ($partnerIds !== []) {
                 $partners = $this->partnerSearch->search($term, $context, $partnerIds);
