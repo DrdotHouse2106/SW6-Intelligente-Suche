@@ -21,6 +21,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\AggregationResult\Metric
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\NotFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\HttpException;
 use Shopware\Core\Framework\Struct\ArrayStruct;
@@ -130,8 +131,9 @@ class InstantSearchController extends StorefrontController
             return new ProductCollection();
         }
 
-        // Etwas mehr laden, weil nicht sichtbare/nicht verfügbare Produkte herausfallen
-        $products = $this->loadProducts(\array_slice($ids, 0, $limit * 2), $context);
+        // Etwas mehr laden, weil nicht sichtbare/nicht verfügbare (und ggf. Produkte ohne Bild) herausfallen
+        $requireImage = $this->config->getBool('NovaSearch.config.highlightsRequireImage', $salesChannelId);
+        $products = $this->loadProducts(\array_slice($ids, 0, $limit * ($requireImage ? 3 : 2)), $context, $requireImage);
 
         return new ProductCollection(\array_slice($products->getElements(), 0, $limit));
     }
@@ -141,13 +143,17 @@ class InstantSearchController extends StorefrontController
      *
      * @param list<string> $ids
      */
-    private function loadProducts(array $ids, SalesChannelContext $context): ProductCollection
+    private function loadProducts(array $ids, SalesChannelContext $context, bool $requireImage = false): ProductCollection
     {
         $criteria = new Criteria($ids);
         $criteria->setTitle('nova-search::products');
         $criteria->addAssociation('cover.media');
         $criteria->addAssociation('manufacturer');
         $criteria->addFilter(new ProductAvailableFilter($context->getSalesChannelId(), ProductVisibilityDefinition::VISIBILITY_ALL));
+        if ($requireImage) {
+            // Varianten erben das Bild vom Hauptprodukt
+            $criteria->addFilter(new NotFilter(NotFilter::CONNECTION_AND, [new EqualsFilter('coverId', null)]));
+        }
 
         $products = $this->productRepository->search($criteria, $context)->getEntities();
 

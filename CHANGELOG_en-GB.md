@@ -1,3 +1,6 @@
+# 1.7.1
+- New: switch "Only products with image" for highlights and no-results recommendations (default: on)
+
 # 1.7.0
 - New: synonyms and redirects as manageable lists under "Extensions → Nova Search" (search, active switch, edit, delete, sales channel per entry), CSV import/export, fix buttons in the "No results" table
 - Entries from the former config text fields are migrated on update

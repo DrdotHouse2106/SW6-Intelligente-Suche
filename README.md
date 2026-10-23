@@ -12,7 +12,7 @@ Die Suche **lernt dabei mit**: Was Kunden suchen, anklicken, in den Warenkorb le
 - **Zuletzt gesucht** – die letzten Suchbegriffe des Besuchers als Chips, einzeln entfernbar oder „Alles löschen“ (nur im Browser gespeichert, mit derselben Zustimmung wie „Zuletzt angesehen“)
 - **Beliebte Suchanfragen** – automatisch aus echten Suchen ermittelt (und/oder von Hand gepflegt); ein Klick startet die Suche
 - **Zuletzt angesehen** – die Produkte, die der Besucher zuletzt angeschaut hat
-- **Aktuelle Highlights** – von Hand gewählt oder automatisch: **Bestseller**, **beliebt in der Suche** oder **neu** (jeweils 90 Tage, stündlich aktualisiert; gewählte Produkte stehen vorne)
+- **Aktuelle Highlights** – von Hand gewählt oder automatisch: **Bestseller**, **beliebt in der Suche** oder **neu** (jeweils 90 Tage, stündlich aktualisiert; gewählte Produkte stehen vorne). Produkte ohne Bild werden ausgeblendet (Schalter „Nur Produkte mit Bild“)
 
 **Beim Tippen**
 - **Produktkarten mit Bild**, Name, Variante, Preis (inkl. „Ab“-Preis, Streichpreis und Rabatt-Markierung)
@@ -295,6 +295,7 @@ bin/console cache:clear
 | Mindestanzahl Suchen für „beliebt“ | 5 | |
 | Sperrliste | – | Begriffe mit diesen Wörtern werden nie als „beliebt“ angezeigt |
 | Highlight-Produkte | – | Produkte für „Aktuelle Highlights“ |
+| Nur Produkte mit Bild | an | Highlights und Empfehlungen ohne Treffer nur mit Produktbild |
 | „Zuletzt angesehen“ anzeigen | an | |
 | Nur mit Zustimmung (Komfortfunktionen) | an | |
 | Aus Suchen, Klicks und Käufen lernen | an | |

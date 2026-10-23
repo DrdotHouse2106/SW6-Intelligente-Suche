@@ -1,3 +1,6 @@
+# 1.7.1
+- Neu: Schalter „Nur Produkte mit Bild“ für Aktuelle Highlights und Empfehlungen ohne Treffer (Standard: an)
+
 # 1.7.0
 - Neu: Synonyme und Weiterleitungen als eigene Listen unter „Erweiterungen → Nova Suche“ (Reiter neben der Auswertung) – Suche, Aktiv-Schalter, Bearbeiten, Löschen, Verkaufskanal je Eintrag
 - Neu: CSV-Import (auch Exporte anderer Suchdienste) und CSV-Export

@@ -108,6 +108,14 @@
         </input-field>
 
         <input-field type="bool">
+            <name>highlightsRequireImage</name>
+            <label>Only products with image</label>
+            <label lang="de-DE">Nur Produkte mit Bild</label>
+            <helpText lang="de-DE">Produkte ohne Bild erscheinen nicht in „Aktuelle Highlights“ und bei den Empfehlungen ohne Treffer – auch nicht, wenn sie von Hand gewählt sind. Varianten zählen mit dem Bild des Hauptprodukts.</helpText>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
             <name>recentSearches</name>
             <label>Show recent searches</label>
             <label lang="de-DE">„Zuletzt gesucht“ anzeigen</label>

@@ -19,7 +19,7 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 - ✅ Zuletzt angesehene Produkte
 - ✅ **Zuletzt gesucht**: eigene letzte Suchbegriffe des Besuchers als Chips, einzeln
   entfernbar (✕) und „Alles löschen“. Nur im Browser gespeichert, nur mit Komfort-Einwilligung
-- 🟡 Highlights wahlweise automatisch: „am beliebtesten“, „Bestseller“, „neu“ (1.5.0) – Produktstream folgt
+- 🟡 Highlights wahlweise automatisch: „am beliebtesten“, „Bestseller“, „neu“ (1.5.0), nur mit Bild (1.7.1) – Produktstream folgt
 - ⬜ **Persönliche Vorschläge beim Öffnen**: Produkte passend zu dem, was der Besucher zuletzt
   angesehen oder gesucht hat (gleiche Kategorie, gleiches Fahrzeugmodell bzw. gleiche Eigenschaft),
   bei angemeldeten Kunden auch aus früheren Bestellungen („Passt zu Ihrem Fahrzeug“) – nur mit Einwilligung
