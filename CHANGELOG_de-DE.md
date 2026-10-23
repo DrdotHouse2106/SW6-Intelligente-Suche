@@ -1,3 +1,8 @@
+# 1.9.0
+- Neu: Schwestershops – bei 0 Treffern Treffer aus anderen Verkaufskanälen derselben Installation, mit Link in den anderen Shop
+- Neu: Hinweise – Wort im Suchbegriff (z. B. „t2“) → Hinweis mit Link, z. B. auf die Suche im anderen Shop; neuer Reiter unter Erweiterungen → Nova Suche
+- Neu: Knopf „Teil anfragen“ bei 0 Treffern – Kontaktformular mit Betreff und Suchbegriff vorausgefüllt
+
 # 1.8.0
 - Neu: Suchbegriffe und Klicks aus CSV-Exporten eines bisherigen Suchdienstes übernehmen – Knopf „Daten importieren“ in der Auswertung bzw. bin/console nova-search:import-stats; Produkte über die Produktnummer im Link, jede Datei nur einmal
 

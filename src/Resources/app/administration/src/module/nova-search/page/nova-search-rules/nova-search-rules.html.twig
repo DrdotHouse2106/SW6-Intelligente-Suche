@@ -36,12 +36,14 @@
                         @input="onSearch"
                     >
                     <span class="nova-search-rules__count">{{ $tc('nova-search.rules.count', items.length, { count: items.length }) }}</span>
-                    <mt-button size="small" variant="secondary" @click="pickImport">
-                        {{ $tc('nova-search.rules.import') }}
-                    </mt-button>
-                    <mt-button size="small" variant="secondary" @click="exportCsv">
-                        {{ $tc('nova-search.analytics.exportCsv') }}
-                    </mt-button>
+                    <template v-if="!isHint">
+                        <mt-button size="small" variant="secondary" @click="pickImport">
+                            {{ $tc('nova-search.rules.import') }}
+                        </mt-button>
+                        <mt-button size="small" variant="secondary" @click="exportCsv">
+                            {{ $tc('nova-search.analytics.exportCsv') }}
+                        </mt-button>
+                    </template>
                     <input
                         ref="importFile"
                         type="file"
@@ -58,6 +60,10 @@
                     <thead>
                         <tr>
                             <th v-if="isSynonym">{{ $tc('nova-search.synonyms.col.terms') }}</th>
+                            <template v-else-if="isHint">
+                                <th>{{ $tc('nova-search.hints.col.words') }}</th>
+                                <th>{{ $tc('nova-search.hints.col.text') }}</th>
+                            </template>
                             <template v-else>
                                 <th>{{ $tc('nova-search.analytics.col.term') }}</th>
                                 <th>{{ $tc('nova-search.redirects.col.target') }}</th>
@@ -72,6 +78,15 @@
                             <td v-if="isSynonym">
                                 <span v-for="term in item.terms" :key="term" class="nova-search-rules__chip">{{ term }}</span>
                             </td>
+                            <template v-else-if="isHint">
+                                <td>
+                                    <span v-for="word in item.words" :key="word" class="nova-search-rules__chip">{{ word }}</span>
+                                </td>
+                                <td class="nova-search-rules__target">
+                                    {{ item.text }}
+                                    <small v-if="item.url" class="nova-search-rules__url">→ {{ item.url }}</small>
+                                </td>
+                            </template>
                             <template v-else>
                                 <td><strong>{{ item.term }}</strong></td>
                                 <td class="nova-search-rules__target">{{ item.target }}</td>
@@ -115,7 +130,38 @@
             @modal-close="editItem = null"
         >
             <div class="nova-search-rules__form">
-                <template v-if="isSynonym">
+                <template v-if="isHint">
+                    <label class="nova-search-rules__label" for="nova-search-words">{{ $tc('nova-search.hints.col.words') }}</label>
+                    <input
+                        id="nova-search-words"
+                        v-model="editItem.termsText"
+                        type="text"
+                        class="nova-search-rules__input"
+                        :placeholder="$tc('nova-search.hints.wordsPlaceholder')"
+                    >
+                    <div class="nova-search-rules__preview">
+                        <span v-for="term in editTerms" :key="term" class="nova-search-rules__chip">{{ term }}</span>
+                    </div>
+                    <label class="nova-search-rules__label" for="nova-search-text">{{ $tc('nova-search.hints.col.text') }}</label>
+                    <textarea
+                        id="nova-search-text"
+                        v-model="editItem.text"
+                        rows="2"
+                        maxlength="500"
+                        class="nova-search-rules__input"
+                        :placeholder="$tc('nova-search.hints.textPlaceholder')"
+                    ></textarea>
+                    <label class="nova-search-rules__label" for="nova-search-url">{{ $tc('nova-search.hints.col.url') }}</label>
+                    <input
+                        id="nova-search-url"
+                        v-model="editItem.url"
+                        type="text"
+                        class="nova-search-rules__input"
+                        :placeholder="$tc('nova-search.hints.urlPlaceholder')"
+                    >
+                    <p class="nova-search-rules__help">{{ $tc('nova-search.hints.help') }}</p>
+                </template>
+                <template v-else-if="isSynonym">
                     <label class="nova-search-rules__label" for="nova-search-terms">{{ $tc('nova-search.synonyms.col.terms') }}</label>
                     <textarea
                         id="nova-search-terms"
@@ -173,7 +219,7 @@
             variant="small"
             @modal-close="deleteItem = null"
         >
-            <p>{{ $tc('nova-search.rules.confirmDelete', 0, { name: isSynonym ? deleteItem.terms.join(', ') : deleteItem.term }) }}</p>
+            <p>{{ $tc('nova-search.rules.confirmDelete', 0, { name: isSynonym ? deleteItem.terms.join(', ') : (isHint ? deleteItem.words.join(', ') : deleteItem.term) }) }}</p>
             <template #modal-footer>
                 <mt-button variant="secondary" @click="deleteItem = null">
                     {{ $tc('global.default.cancel') }}

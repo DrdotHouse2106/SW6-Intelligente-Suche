@@ -1,4 +1,4 @@
-{# Produktkarte im Suchfenster – Variable: product #}
+{# Produktkarte im Suchfenster – Variablen: product, externalUrl (Basisadresse eines Schwestershops; dann ohne Warenkorb und Tracking) #}
 {% block nova_search_card %}
     {% set name = product.translated.name %}
     {% set price = product.calculatedPrice %}
@@ -17,8 +17,9 @@
         sku: product.productNumber
     } %}
 
-    <li class="nova-search-card-item" data-product-information="{{ productInformation|json_encode }}">
-        <a class="nova-search-card nova-search-focusable" href="{{ seoUrl('frontend.detail.page', { productId: product.id }) }}">
+    {% set novaExternal = externalUrl|default(null) %}
+    <li class="nova-search-card-item"{% if not novaExternal %} data-product-information="{{ productInformation|json_encode }}"{% endif %}>
+        <a class="nova-search-card nova-search-focusable" href="{{ novaExternal ? novaExternal ~ '/detail/' ~ product.id : seoUrl('frontend.detail.page', { productId: product.id }) }}">
             <span class="nova-search-card-media">
                 {% if product.cover.media %}
                     {% sw_thumbnails 'nova-search-thumbnail' with {
@@ -84,7 +85,7 @@
         </a>
 
         {# „In den Warenkorb“ direkt im Suchfenster – wie Shopwares Produktbox (nur ohne Varianten-Auswahl) #}
-        {% set novaBuy = config('NovaSearch.config.cardBuyButton') is not same as(false)
+        {% set novaBuy = not novaExternal and config('NovaSearch.config.cardBuyButton') is not same as(false)
             and novaAvailable and product.calculatedPrices|length <= 1 and product.childCount <= 0 %}
         {% if novaBuy %}
             {% block nova_search_card_buy %}

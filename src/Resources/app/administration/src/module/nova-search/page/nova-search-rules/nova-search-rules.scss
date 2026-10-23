@@ -147,3 +147,9 @@
     align-items: center;
     gap: 8px;
 }
+
+.nova-search-rules__url {
+    display: block;
+    margin-top: 2px;
+    color: var(--color-text-secondary-default, #52667a);
+}

@@ -220,6 +220,22 @@ Sieht der Suchbegriff wie eine Nummer aus (mindestens 3 Ziffern, keine weiteren 
 
 **Update von 1.6.0 oder älter:** Die bisherigen Textfelder unter *Konfigurieren → Suchregeln* werden beim Update automatisch in die Listen übernommen und danach aus der Konfiguration entfernt.
 
+## Wenn dieser Shop nichts hat: Schwestershops, Hinweise, „Teil anfragen“
+
+Betreiben Sie mehrere Shops in derselben Shopware-Installation, kann das Suchfenster Kunden zum passenden Shop führen.
+
+**Schwestershops** (*Konfigurieren → Suchfenster: Treffer → Schwestershops*, pro Verkaufskanal): Findet dieser Shop nichts, sucht die Nova Suche in den gewählten Shops (max. 3) und zeigt deren Treffer als Karten – „In unserem Shop … gefunden“, mit Link „Alle … Treffer ansehen“. Preise, Sichtbarkeit und Verfügbarkeit kommen aus dem anderen Shop, Links führen auf dessen Domain; dort gibt es keinen „In den Warenkorb“-Knopf, und Klicks zählen nicht fürs Lernen dieses Shops. Gesucht wird nur bei 0 Treffern (nicht bei „Nur exakte Teilenummer“ oder wenn nur Filter alles ausschließen).
+
+**Hinweise** (*Erweiterungen → Nova Suche → Hinweise*): Kommt eines der Wörter im Suchbegriff vor, erscheint oben im Suchfenster ein Hinweis – auch wenn der andere Shop das Teil gerade nicht hat. Beispiel:
+
+- Wörter: `t2, t3, vw, golf, käfer`
+- Hinweis: „Teile für VW finden Sie in unserem Shop …“
+- Link: `https://www.anderer-shop.de/search?search={term}` – `{term}` wird durch den Suchbegriff ersetzt
+
+Die Wörter müssen als ganzes Wort vorkommen („t2“ passt bei „spiegel t2“, nicht bei „t25“). Ohne Verkaufskanal gilt ein Hinweis für alle Shops.
+
+**„Teil anfragen“** (*Konfigurieren → Suchfenster: Treffer → Seite für „Teil anfragen“*): Pfad der Kontaktseite, z. B. `/kontakt`. Bei 0 Treffern erscheint ein Knopf; im Kontaktformular stehen Betreff („Teileanfrage“) und „Ich suche: …“ schon drin. Bereits ausgefüllte Felder werden nicht überschrieben.
+
 ## Ausgeschlossene Produkte
 
 *Konfigurieren → Ausgeschlossene Produkte.* Ausgeschlossene Produkte erscheinen nicht in Suchfenster, Suchergebnisseite, Suchvorschlägen und App – über Kategorien und Direktlinks bleiben sie erreichbar.
@@ -442,6 +458,12 @@ Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetre
 **Ursache:** Der Begriff muss genau passen (nur Groß-/Kleinschreibung und Leerzeichen am Rand sind egal), oder das Ziel ist ungültig (z. B. ohne `/` am Anfang bzw. ohne `https://`)
 
 **Lösung:** Eintrag unter *Nova Suche → Weiterleitungen* prüfen (Aktiv, Verkaufskanal, Ziel z. B. `/account`). Beim Tippen im Suchfenster erscheint der Link erst bei genau diesem Begriff
+
+### Schwestershop zeigt keine Treffer
+
+**Ursache:** Der andere Verkaufskanal hat keine Domain mit http(s)-Adresse, ist inaktiv, oder das Produkt ist dort nicht sichtbar – oder dieser Shop hat selbst Treffer (dann wird nicht weitergesucht)
+
+**Lösung:** Unter *Verkaufskanäle* Domain und Status des anderen Shops prüfen; die Einstellung „Schwestershops“ im richtigen Verkaufskanal setzen (nicht nur unter „Alle Verkaufskanäle“, wenn Shops gegenseitig verweisen sollen)
 
 ### Ausgeschlossenes Produkt erscheint trotzdem
 

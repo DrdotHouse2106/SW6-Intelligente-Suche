@@ -56,7 +56,8 @@
         "tabs": {
             "analytics": "Auswertung",
             "synonyms": "Synonyme",
-            "redirects": "Weiterleitungen"
+            "redirects": "Weiterleitungen",
+            "hints": "Hinweise"
         },
         "rules": {
             "search": "Liste durchsuchen …",
@@ -114,6 +115,23 @@
             "result": {
                 "terms": "{imported} Suchbegriffe übernommen, {skipped} übersprungen",
                 "products": "{imported} Begriff-Produkt-Klicks übernommen, {skipped} Produkte nicht gefunden"
+            }
+        },
+        "hints": {
+            "add": "Hinweis anlegen",
+            "editTitle": "Hinweis bearbeiten",
+            "saved": "Hinweis gespeichert.",
+            "intro": "Kommt eines der Wörter im Suchbegriff vor, zeigt das Suchfenster oben einen Hinweis – z. B. „spiegel t2“ → „Teile für VW finden Sie in unserem Shop …“ mit Link dorthin. Die Suche läuft trotzdem normal weiter.",
+            "empty": "Noch keine Hinweise angelegt.",
+            "importHint": "Platzhalter {'{'}term{'}'} im Link wird durch den Suchbegriff ersetzt – so führt der Link direkt zur Suche im anderen Shop.",
+            "wordsPlaceholder": "z. B. t2, t3, vw, golf",
+            "textPlaceholder": "z. B. Teile für VW finden Sie in unserem Shop example.de",
+            "urlPlaceholder": "https://www.example.de/search?search={'{'}term{'}'}",
+            "help": "Wörter durch Komma getrennt; sie müssen als ganzes Wort im Suchbegriff vorkommen („t2“ passt bei „spiegel t2“, nicht bei „t25“). Link optional: Pfad im Shop oder https://-Adresse, {'{'}term{'}'} = Suchbegriff.",
+            "col": {
+                "words": "Wörter",
+                "text": "Hinweis",
+                "url": "Link (optional)"
             }
         }
     }

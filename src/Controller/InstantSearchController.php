@@ -6,6 +6,7 @@ use Nova\Search\Rules\SearchRules;
 use Nova\Search\Search\LearningProductSearchBuilder;
 use Nova\Search\Subscriber\SearchRedirectSubscriber;
 use Nova\Search\Service\HighlightProvider;
+use Nova\Search\Service\PartnerSearch;
 use Nova\Search\Service\PopularSearches;
 use Shopware\Core\Content\Category\CategoryCollection;
 use Shopware\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerEntity;
@@ -66,6 +67,7 @@ class InstantSearchController extends StorefrontController
         private readonly PopularSearches $popularSearches,
         private readonly SearchRules $rules,
         private readonly HighlightProvider $highlightProvider,
+        private readonly PartnerSearch $partnerSearch,
     ) {
     }
 
@@ -282,6 +284,23 @@ class InstantSearchController extends StorefrontController
             $recommendations = $this->highlights($context, 12, true);
         }
 
+        // Keine Treffer: in Schwestershops nachsehen (nicht, wenn nur die Filter alles ausschließen)
+        $filterCount = \count($manufacturerIds) + \count($propertyIds) + ($minPrice !== null || $maxPrice !== null ? 1 : 0);
+        $partners = [];
+        if ($total === 0 && !$exactNumber && $filterCount === 0) {
+            $partnerIds = $this->idConfig('NovaSearch.config.partnerSalesChannels', $salesChannelId);
+            if ($partnerIds !== []) {
+                $partners = $this->partnerSearch->search($term, $context, $partnerIds);
+            }
+        }
+
+        // „Teil anfragen“ – Kontaktseite mit vorausgefülltem Suchbegriff
+        $requestPartUrl = null;
+        $requestPath = SearchRules::validTarget($this->config->getString('NovaSearch.config.requestPartUrl', $salesChannelId));
+        if ($total === 0 && $requestPath !== null) {
+            $requestPartUrl = SearchRedirectSubscriber::absolute($requestPath, $request);
+        }
+
         // Hersteller mit Anzahl der Treffer
         $manufacturers = [];
         $counts = [];
@@ -323,12 +342,18 @@ class InstantSearchController extends StorefrontController
         return $this->renderStorefront('@NovaSearch/storefront/nova-search/results.html.twig', $variables + [
             'manufacturers' => $this->config->get('NovaSearch.config.showManufacturers', $salesChannelId) !== false ? $manufacturers : [],
             'priceRange' => $priceRange,
+            'hints' => $exactNumber ? [] : array_map(
+                static fn (array $hint): array => ['text' => $hint['text'], 'url' => $hint['url'] !== null ? SearchRedirectSubscriber::absolute($hint['url'], $request) : null],
+                $this->rules->hints($term, $salesChannelId)
+            ),
+            'partners' => $partners,
+            'requestPartUrl' => $requestPartUrl,
             'sortings' => $result?->getAvailableSortings(),
             'currentSorting' => $result?->getSorting(),
             'categories' => !$exactNumber && $this->config->get('NovaSearch.config.showCategories', $salesChannelId) !== false
                 ? $this->findCategories($term, $context)
                 : new CategoryCollection(),
-            'filterCount' => \count($manufacturerIds) + \count($propertyIds) + ($minPrice !== null || $maxPrice !== null ? 1 : 0),
+            'filterCount' => $filterCount,
             'properties' => $properties,
             'recommendations' => $recommendations,
             'noResultsText' => $exactNumber ? '' : trim($this->config->getString('NovaSearch.config.noResultsText', $salesChannelId)),

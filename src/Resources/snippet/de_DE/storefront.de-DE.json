@@ -50,6 +50,11 @@
         "recommendations": "Vielleicht passt eines davon",
         "soldOut": "Derzeit nicht lieferbar",
         "addToCart": "In den Warenkorb",
-        "addToCartAria": "%name% in den Warenkorb legen"
+        "addToCartAria": "%name% in den Warenkorb legen",
+        "requestPart": "Teil anfragen",
+        "requestPartSubject": "Teileanfrage",
+        "requestPartMessage": "Ich suche: %term%",
+        "partnerTitle": "In unserem Shop %shop% gefunden",
+        "partnerMore": "Alle %count% Treffer bei %shop% ansehen"
     }
 }

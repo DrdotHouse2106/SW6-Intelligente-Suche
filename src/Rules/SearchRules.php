@@ -67,6 +67,39 @@ class SearchRules
     }
 
     /**
+     * Hinweise, deren Wörter im Suchbegriff als ganze Wörter vorkommen (z. B. „t2“ in „spiegel t2“).
+     * {term} im Link wird durch den Suchbegriff ersetzt.
+     *
+     * @return list<array{text: string, url: ?string}>
+     */
+    public function hints(string $term, ?string $salesChannelId, int $limit = 2): array
+    {
+        $normalized = TermNormalizer::normalize($term);
+        if ($normalized === '') {
+            return [];
+        }
+        $padded = ' ' . $normalized . ' ';
+
+        $result = [];
+        foreach ($this->store->forSalesChannel($salesChannelId)['hints'] as $hint) {
+            foreach ($hint['words'] as $word) {
+                if (str_contains($padded, ' ' . $word . ' ')) {
+                    $result[] = [
+                        'text' => $hint['text'],
+                        'url' => $hint['url'] !== null ? str_replace('{term}', rawurlencode($normalized), $hint['url']) : null,
+                    ];
+                    break;
+                }
+            }
+            if (\count($result) >= $limit) {
+                break;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * @return list<list<string>>
      */
     public static function parseSynonyms(string $raw): array

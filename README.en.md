@@ -83,6 +83,12 @@ Known pitfalls from real installations. **Please add new ones** (or open an issu
 
 *Extensions → Nova Search → Analytics → Import data* (or `bin/console nova-search:import-stats --sales-channel=<ID> files…`) reads CSV exports with search terms (`search_term`, `total_searches`, `total_clicks`) and clicked products (`clicked_product_link`, `search_query`, `total_searches_clicks`; products are matched by the product number at the end of the link). Values are added to existing counters, each file is imported only once per sales channel.
 
+## When this shop has nothing (1.9.0)
+
+- **Sister shops** (config, per sales channel): with 0 results the search window also searches up to 3 other sales channels of the same installation and shows their products linking to that shop's domain.
+- **Hints** (*Extensions → Nova Search → Hints*): if one of the words appears in the search term, a hint with optional link is shown (`{term}` in the link is replaced by the search term).
+- **"Request this part"**: path of the contact page; with 0 results a button opens it with subject and search term pre-filled.
+
 ## Number search (1.3.0)
 
 Terms that look like a number (at least 3 digits, no other words) are looked up in a normalized **number index** first: product number, manufacturer number, EAN and optionally custom fields and properties (e.g. OE numbers). Spaces, dots, dashes and slashes are ignored (`25043 25031` = `2504325031`). If nothing matches, the regular search runs. A checkbox "Exact part number only" next to the search field restricts results to products with exactly this number (Store API: `exactNumber: true`). Rebuild: `bin/console nova-search:numbers` (also hourly after settings changed).

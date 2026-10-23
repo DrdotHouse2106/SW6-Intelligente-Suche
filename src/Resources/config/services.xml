@@ -200,6 +200,13 @@
         </service>
 
         <!-- Storefront -->
+        <service id="Nova\Search\Service\PartnerSearch">
+            <argument type="service" id="Shopware\Core\Content\Product\SalesChannel\Search\ProductSearchRoute"/>
+            <argument type="service" id="Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="logger"/>
+        </service>
+
         <service id="Nova\Search\Controller\InstantSearchController" public="true">
             <argument type="service" id="Shopware\Core\Content\Product\SalesChannel\Search\ProductSearchRoute"/>
             <argument type="service" id="sales_channel.category.repository"/>
@@ -208,6 +215,7 @@
             <argument type="service" id="Nova\Search\Service\PopularSearches"/>
             <argument type="service" id="Nova\Search\Rules\SearchRules"/>
             <argument type="service" id="Nova\Search\Service\HighlightProvider"/>
+            <argument type="service" id="Nova\Search\Service\PartnerSearch"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>

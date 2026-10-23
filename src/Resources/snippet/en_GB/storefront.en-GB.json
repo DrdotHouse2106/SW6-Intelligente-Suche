@@ -50,6 +50,11 @@
         "recommendations": "Maybe one of these fits",
         "soldOut": "Currently unavailable",
         "addToCart": "Add to cart",
-        "addToCartAria": "Add %name% to cart"
+        "addToCartAria": "Add %name% to cart",
+        "requestPart": "Request this part",
+        "requestPartSubject": "Part request",
+        "requestPartMessage": "I am looking for: %term%",
+        "partnerTitle": "Found in our shop %shop%",
+        "partnerMore": "See all %count% results at %shop%"
     }
 }

@@ -1,3 +1,6 @@
+# 1.9.0
+- New: sister shop results with 0 hits, hint rules (word → hint with link), "Request this part" button with pre-filled contact form
+
 # 1.8.0
 - New: import search terms and clicks from CSV exports of a previous search service ("Import data" button in analytics, bin/console nova-search:import-stats)
 

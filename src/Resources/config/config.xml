@@ -198,6 +198,22 @@
             <helpText lang="de-DE">Ersetzt den Standard-Hinweis. Einfaches HTML erlaubt (Links, fett), z. B. Telefonnummer und Link „Teil anfragen“. Pro Verkaufskanal einstellbar.</helpText>
             <placeholder>Wir suchen das Teil gern für Sie: &lt;a href="/kontakt"&gt;Teil anfragen&lt;/a&gt; oder rufen Sie uns an.</placeholder>
         </input-field>
+
+        <input-field type="text">
+            <name>requestPartUrl</name>
+            <label>"Request part" page</label>
+            <label lang="de-DE">Seite für „Teil anfragen“</label>
+            <helpText lang="de-DE">Pfad Ihrer Kontaktseite (z. B. /kontakt) oder vollständige Adresse. Bei 0 Treffern erscheint ein Knopf „Teil anfragen“; im Kontaktformular stehen Betreff und Suchbegriff schon drin. Leer = kein Knopf.</helpText>
+            <placeholder>/kontakt</placeholder>
+        </input-field>
+
+        <component name="sw-entity-multi-id-select">
+            <name>partnerSalesChannels</name>
+            <entity>sales_channel</entity>
+            <label>Sister shops</label>
+            <label lang="de-DE">Schwestershops</label>
+            <helpText lang="de-DE">Findet dieser Shop nichts, sucht die Nova Suche in diesen Verkaufskanälen (max. 3) und zeigt deren Treffer mit Link in den anderen Shop. Pro Verkaufskanal einstellen – z. B. in Shop A den Shop B wählen und umgekehrt.</helpText>
+        </component>
     </card>
 
     <card>

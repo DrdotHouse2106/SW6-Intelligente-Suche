@@ -4,7 +4,7 @@ import './nova-search-rules.scss';
 const { Component, Mixin } = Shopware;
 
 /**
- * Liste und Bearbeitung von Synonymen bzw. Weiterleitungen (Typ aus der Route).
+ * Liste und Bearbeitung von Synonymen, Weiterleitungen bzw. Hinweisen (Typ aus der Route).
  */
 Component.register('nova-search-rules', {
     template,
@@ -32,18 +32,22 @@ Component.register('nova-search-rules', {
 
     computed: {
         type() {
-            return this.$route.meta.ruleType === 'redirect' ? 'redirect' : 'synonym';
+            return ['redirect', 'hint'].includes(this.$route.meta.ruleType) ? this.$route.meta.ruleType : 'synonym';
         },
 
         isSynonym() {
             return this.type === 'synonym';
         },
 
-        prefix() {
-            return this.isSynonym ? 'nova-search.synonyms' : 'nova-search.redirects';
+        isHint() {
+            return this.type === 'hint';
         },
 
-        /** Wie im Backend: getrimmt, klein geschrieben, ohne Doppelte */
+        prefix() {
+            return { synonym: 'nova-search.synonyms', redirect: 'nova-search.redirects', hint: 'nova-search.hints' }[this.type];
+        },
+
+        /** Wie im Backend: getrimmt, klein geschrieben, ohne Doppelte (Synonym-Begriffe bzw. Hinweis-Wörter) */
         editTerms() {
             const terms = (this.editItem?.termsText || '').split(',').map((term) => term.trim().toLowerCase()).filter(Boolean);
             return [...new Set(terms)];
@@ -52,6 +56,9 @@ Component.register('nova-search-rules', {
         canSave() {
             if (!this.editItem || this.isSaving) {
                 return false;
+            }
+            if (this.isHint) {
+                return this.editTerms.length >= 1 && this.editItem.text.trim() !== '';
             }
             return this.isSynonym
                 ? this.editTerms.length >= 2
@@ -133,9 +140,11 @@ Component.register('nova-search-rules', {
                     id: item.id,
                     salesChannelId: item.salesChannelId,
                     active: item.active,
-                    termsText: (item.terms || []).join(', '),
+                    termsText: (item.terms || item.words || []).join(', '),
                     term: item.term || '',
                     target: item.target || '',
+                    text: item.text || '',
+                    url: item.url || '',
                 }
                 : {
                     id: null,
@@ -144,6 +153,8 @@ Component.register('nova-search-rules', {
                     termsText: presetTerm ? `${presetTerm}, ` : '',
                     term: presetTerm,
                     target: '',
+                    text: '',
+                    url: '',
                 };
         },
 
@@ -157,7 +168,11 @@ Component.register('nova-search-rules', {
                 salesChannelId: this.editItem.salesChannelId || null,
                 active: this.editItem.active,
             };
-            if (this.isSynonym) {
+            if (this.isHint) {
+                body.words = this.editTerms;
+                body.text = this.editItem.text;
+                body.url = this.editItem.url;
+            } else if (this.isSynonym) {
                 body.terms = this.editTerms;
             } else {
                 body.term = this.editItem.term;
@@ -179,7 +194,11 @@ Component.register('nova-search-rules', {
 
         async toggleActive(item) {
             const body = { id: item.id, salesChannelId: item.salesChannelId, active: !item.active };
-            if (this.isSynonym) {
+            if (this.isHint) {
+                body.words = item.words;
+                body.text = item.text;
+                body.url = item.url;
+            } else if (this.isSynonym) {
                 body.terms = item.terms;
             } else {
                 body.term = item.term;

@@ -4,7 +4,7 @@ import './page/nova-search-rules';
 import './nova-search.scss';
 
 /**
- * Erweiterungen → Nova Suche: Auswertung, Synonyme, Weiterleitungen und Weg zu den Einstellungen.
+ * Erweiterungen → Nova Suche: Auswertung, Synonyme, Weiterleitungen, Hinweise und Weg zu den Einstellungen.
  */
 Shopware.Module.register('nova-search', {
     type: 'plugin',
@@ -28,6 +28,11 @@ Shopware.Module.register('nova-search', {
             component: 'nova-search-rules',
             path: 'redirects',
             meta: { ruleType: 'redirect' },
+        },
+        hints: {
+            component: 'nova-search-rules',
+            path: 'hints',
+            meta: { ruleType: 'hint' },
         },
     },
 

@@ -14,9 +14,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 /**
  * Admin-API für Synonyme und Weiterleitungen (Erweiterungen → Nova Suche).
- * {type} ist „synonym“ oder „redirect“.
+ * {type} ist „synonym“, „redirect“ oder „hint“ (Hinweise haben keinen CSV-Import/-Export).
  */
-#[Route(defaults: ['_routeScope' => ['api']], requirements: ['type' => 'synonym|redirect'])]
+#[Route(defaults: ['_routeScope' => ['api']], requirements: ['type' => 'synonym|redirect|hint'])]
 class AdminRulesController
 {
     public function __construct(
@@ -31,7 +31,11 @@ class AdminRulesController
         return $this->handle($context, function () use ($type, $request): array {
             $search = $request->query->getString('search');
 
-            return ['items' => $type === 'redirect' ? $this->store->listRedirects($search) : $this->store->listSynonyms($search)];
+            return ['items' => match ($type) {
+                'redirect' => $this->store->listRedirects($search),
+                'hint' => $this->store->listHints($search),
+                default => $this->store->listSynonyms($search),
+            }];
         });
     }
 
@@ -44,7 +48,11 @@ class AdminRulesController
             $salesChannelId = \is_string($body['salesChannelId'] ?? null) ? $body['salesChannelId'] : null;
             $active = !\array_key_exists('active', $body) || (bool) $body['active'];
 
-            if ($type === 'redirect') {
+            if ($type === 'hint') {
+                $words = \is_array($body['words'] ?? null) ? array_map('strval', array_filter($body['words'], 'is_scalar')) : [];
+                $url = \is_string($body['url'] ?? null) ? $body['url'] : null;
+                $id = $this->store->saveHint($id, $salesChannelId, array_values($words), (string) ($body['text'] ?? ''), $url, $active);
+            } elseif ($type === 'redirect') {
                 $id = $this->store->saveRedirect($id, $salesChannelId, (string) ($body['term'] ?? ''), (string) ($body['target'] ?? ''), $active);
             } else {
                 $terms = \is_array($body['terms'] ?? null) ? array_map('strval', array_filter($body['terms'], 'is_scalar')) : [];
@@ -69,6 +77,9 @@ class AdminRulesController
     public function import(string $type, Request $request, Context $context): JsonResponse
     {
         return $this->handle($context, function () use ($type, $request): array {
+            if ($type === 'hint') {
+                throw new \InvalidArgumentException('Für Hinweise gibt es keinen CSV-Import.');
+            }
             $body = $request->request->all();
             $text = \is_string($body['text'] ?? null) ? $body['text'] : '';
             if (\strlen($text) > 2 * 1024 * 1024) {
@@ -85,6 +96,10 @@ class AdminRulesController
     {
         if (!$this->isAdminUser($context)) {
             return new JsonResponse(['message' => 'Nur für Benutzer der Administration.'], 403);
+        }
+
+        if ($type === 'hint') {
+            return new JsonResponse(['message' => 'Für Hinweise gibt es keinen CSV-Export.'], 400);
         }
 
         if ($type === 'redirect') {

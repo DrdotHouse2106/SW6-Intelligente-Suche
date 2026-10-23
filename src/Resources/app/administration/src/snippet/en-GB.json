@@ -56,7 +56,8 @@
         "tabs": {
             "analytics": "Analytics",
             "synonyms": "Synonyms",
-            "redirects": "Redirects"
+            "redirects": "Redirects",
+            "hints": "Hints"
         },
         "rules": {
             "search": "Search list …",
@@ -114,6 +115,23 @@
             "result": {
                 "terms": "{imported} search terms imported, {skipped} skipped",
                 "products": "{imported} term/product clicks imported, {skipped} products not found"
+            }
+        },
+        "hints": {
+            "add": "Add hint",
+            "editTitle": "Edit hint",
+            "saved": "Hint saved.",
+            "intro": "If one of the words appears in the search term, the search window shows a hint at the top – e.g. \"mirror t2\" → \"Parts for VW are in our shop …\" with a link. The search itself runs as usual.",
+            "empty": "No hints yet.",
+            "importHint": "The placeholder {'{'}term{'}'} in the link is replaced by the search term – so the link leads straight to the search in the other shop.",
+            "wordsPlaceholder": "e.g. t2, t3, vw, golf",
+            "textPlaceholder": "e.g. Parts for VW are in our shop example.com",
+            "urlPlaceholder": "https://www.example.com/search?search={'{'}term{'}'}",
+            "help": "Words separated by commas; they must appear as a whole word in the search term. Link optional: shop path or https:// URL, {'{'}term{'}'} = search term.",
+            "col": {
+                "words": "Words",
+                "text": "Hint",
+                "url": "Link (optional)"
             }
         }
     }

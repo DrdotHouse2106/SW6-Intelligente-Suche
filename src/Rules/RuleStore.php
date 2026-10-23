@@ -19,7 +19,7 @@ class RuleStore
     private const CACHE_VERSION_KEY = 'nova_search_rules_version';
     private const MAX_TARGET_LENGTH = 2000;
 
-    /** @var array<string, array{synonyms: list<list<string>>, redirects: array<string, string>}> */
+    /** @var array<string, array{synonyms: list<list<string>>, redirects: array<string, string>, hints: list<array{words: list<string>, text: string, url: ?string}>}> */
     private array $memo = [];
 
     public function __construct(
@@ -31,7 +31,7 @@ class RuleStore
     /**
      * Aktive Regeln für einen Verkaufskanal (inkl. der Regeln für alle Shops).
      *
-     * @return array{synonyms: list<list<string>>, redirects: array<string, string>}
+     * @return array{synonyms: list<list<string>>, redirects: array<string, string>, hints: list<array{words: list<string>, text: string, url: ?string}>}
      */
     public function forSalesChannel(?string $salesChannelId): array
     {
@@ -42,7 +42,7 @@ class RuleStore
 
         $item = $this->cache->getItem('nova_search_rules_' . $this->version() . '_' . $key);
         if ($item->isHit() && \is_array($item->get())) {
-            /** @var array{synonyms: list<list<string>>, redirects: array<string, string>} $rules */
+            /** @var array{synonyms: list<list<string>>, redirects: array<string, string>, hints: list<array{words: list<string>, text: string, url: ?string}>} $rules */
             $rules = $item->get();
 
             return $this->memo[$key] = $rules;
@@ -68,7 +68,29 @@ class RuleStore
             $redirects[(string) $row['term']] = (string) $row['target'];
         }
 
-        $rules = ['synonyms' => $synonyms, 'redirects' => $redirects];
+        // Hinweise: Kanal-Regeln zuerst
+        $hints = [];
+        try {
+            $rows = $this->connection->fetchAllAssociative(
+                'SELECT `words`, `text`, `url` FROM `nova_search_hint` WHERE `active` = 1 AND ' . $condition . ' ORDER BY (`sales_channel_id` IS NULL), `created_at`',
+                $params
+            );
+        } catch (\Throwable) {
+            // Tabelle fehlt (Migration noch nicht gelaufen) – Suche läuft ohne Hinweise weiter
+            $rows = [];
+        }
+        foreach ($rows as $row) {
+            $words = json_decode((string) $row['words'], true);
+            if (\is_array($words) && $words !== []) {
+                $hints[] = [
+                    'words' => array_values(array_map('strval', $words)),
+                    'text' => (string) $row['text'],
+                    'url' => $row['url'] !== null && $row['url'] !== '' ? (string) $row['url'] : null,
+                ];
+            }
+        }
+
+        $rules = ['synonyms' => $synonyms, 'redirects' => $redirects, 'hints' => $hints];
         $item->set($rules);
         $item->expiresAfter(86400);
         $this->cache->save($item);
@@ -125,6 +147,73 @@ class RuleStore
              FROM `nova_search_redirect` WHERE ' . $where . ' ORDER BY `term` LIMIT 5000',
             $params
         ));
+    }
+
+    /**
+     * @return list<array{id: string, salesChannelId: ?string, words: list<string>, text: string, url: ?string, active: bool, updatedAt: string}>
+     */
+    public function listHints(?string $search = null): array
+    {
+        $params = [];
+        $where = '1 = 1';
+        if ($search !== null && trim($search) !== '') {
+            $where = '(`words` LIKE :search OR `text` LIKE :search OR `url` LIKE :search)';
+            $params['search'] = '%' . addcslashes(mb_strtolower(trim($search)), '%_\\') . '%';
+        }
+
+        return array_map(static fn (array $row): array => [
+            'id' => (string) $row['id'],
+            'salesChannelId' => $row['sc'] !== null ? (string) $row['sc'] : null,
+            'words' => array_values(array_map('strval', (array) json_decode((string) $row['words'], true))),
+            'text' => (string) $row['text'],
+            'url' => $row['url'] !== null ? (string) $row['url'] : null,
+            'active' => (bool) $row['active'],
+            'updatedAt' => (string) $row['changed'],
+        ], $this->connection->fetchAllAssociative(
+            'SELECT LOWER(HEX(`id`)) AS id, LOWER(HEX(`sales_channel_id`)) AS sc, `words`, `text`, `url`, `active`, COALESCE(`updated_at`, `created_at`) AS changed
+             FROM `nova_search_hint` WHERE ' . $where . ' ORDER BY changed DESC LIMIT 1000',
+            $params
+        ));
+    }
+
+    /**
+     * Hinweis, wenn eines der Wörter im Suchbegriff vorkommt. {term} in der Adresse wird durch den Suchbegriff ersetzt.
+     *
+     * @param list<string> $words
+     *
+     * @return string ID (hex)
+     */
+    public function saveHint(?string $id, ?string $salesChannelId, array $words, string $text, ?string $url, bool $active): string
+    {
+        $normalized = [];
+        foreach ($words as $word) {
+            $word = TermNormalizer::normalize((string) $word);
+            if ($word !== '' && !\in_array($word, $normalized, true)) {
+                $normalized[] = $word;
+            }
+        }
+        $text = trim(strip_tags($text));
+        if ($normalized === []) {
+            throw new \InvalidArgumentException('Bitte mindestens ein Wort angeben.');
+        }
+        if ($text === '' || mb_strlen($text) > 500) {
+            throw new \InvalidArgumentException('Bitte einen Hinweistext angeben (max. 500 Zeichen).');
+        }
+        $url = $url !== null ? trim($url) : '';
+        if ($url !== '' && SearchRules::validTarget(str_replace('{term}', 'x', $url)) === null) {
+            throw new \InvalidArgumentException('Der Link muss ein Pfad im Shop (z. B. /kontakt) oder eine vollständige https://-Adresse sein.');
+        }
+
+        $id = $this->upsert('nova_search_hint', $id, [
+            'sales_channel_id' => $this->salesChannelBytes($salesChannelId),
+            'words' => json_encode(\array_slice($normalized, 0, 50), \JSON_UNESCAPED_UNICODE),
+            'text' => $text,
+            'url' => $url !== '' ? $url : null,
+            'active' => $active ? 1 : 0,
+        ]);
+        $this->invalidate();
+
+        return $id;
     }
 
     /**
@@ -188,7 +277,12 @@ class RuleStore
             throw new \InvalidArgumentException('Ungültige ID.');
         }
 
-        $this->connection->delete($type === 'redirect' ? 'nova_search_redirect' : 'nova_search_synonym', ['id' => Uuid::fromHexToBytes($id)]);
+        $table = match ($type) {
+            'redirect' => 'nova_search_redirect',
+            'hint' => 'nova_search_hint',
+            default => 'nova_search_synonym',
+        };
+        $this->connection->delete($table, ['id' => Uuid::fromHexToBytes($id)]);
         $this->invalidate();
     }
 
