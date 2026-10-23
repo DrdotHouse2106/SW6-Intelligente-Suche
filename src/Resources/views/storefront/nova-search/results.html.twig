@@ -1,6 +1,7 @@
 {# Trefferansicht des Suchfensters #}
 {% block nova_search_results %}
-    <div class="nova-search-results" data-nova-search-total="{{ total }}"{% if rewrite %} data-nova-search-rewritten="1"{% endif %}>
+    {# „rewritten“ auch bei Weiterleitung: dann wird der Begriff nicht für Claude vorgemerkt #}
+    <div class="nova-search-results" data-nova-search-total="{{ total }}"{% if rewrite or redirect|default(null) %} data-nova-search-rewritten="1"{% endif %}>
         {% if redirect|default(null) %}
             {% block nova_search_redirect %}
                 <a class="nova-search-redirect nova-search-focusable" href="{{ redirect }}" data-nova-search-redirect>
@@ -23,7 +24,9 @@
                 {% endfor %}
             {% endblock %}
         {% endif %}
-        {% if total == 0 and categories|length == 0 and filterCount == 0 %}
+        {% if redirect|default(null) and total == 0 and filterCount == 0 %}
+            {# Weiterleitung statt „Keine Treffer“ – der Link oben ist das Ergebnis #}
+        {% elseif total == 0 and categories|length == 0 and filterCount == 0 %}
             {% block nova_search_empty %}
                 <div class="nova-search-empty">
                     {% if exactNumber|default(false) %}

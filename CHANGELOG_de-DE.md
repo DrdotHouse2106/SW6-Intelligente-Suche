@@ -1,3 +1,6 @@
+# 1.10.6
+- Gibt es für den Begriff eine Weiterleitung und keine Treffer, zeigt das Suchfenster nur den Link – ohne „Keine Treffer“, „Teil anfragen“, Empfehlungen und Schwestershop; der Begriff wird nicht für Claude vorgemerkt
+
 # 1.10.5
 - Suchen werden ehrlicher gezählt: Bots, Prefetch und automatische Abrufe zählen nicht mehr, derselbe Begriff zählt pro Sitzung höchstens einmal in 30 Minuten (auch Suchfenster + Enter nur einmal)
 - Links in Schwestershops (Produktkarten, „Alle Treffer ansehen“, Hinweise auf andere Shops) öffnen sich in einem neuen Tab

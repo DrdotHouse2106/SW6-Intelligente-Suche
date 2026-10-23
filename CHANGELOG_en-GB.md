@@ -1,3 +1,6 @@
+# 1.10.6
+- With a redirect and no results, the search window only shows the redirect link (no "no results", request form, recommendations or sister shops); the term is not queued for Claude
+
 # 1.10.5
 - More accurate search counts: bots, prefetch and automated requests are ignored, the same term counts once per session within 30 minutes
 - Links to sister shops open in a new tab

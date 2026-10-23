@@ -280,7 +280,7 @@ class InstantSearchController extends StorefrontController
 
         // Keine Treffer: eigener Text und Produktempfehlungen (nicht bei „Nur exakte Teilenummer“)
         $recommendations = new ProductCollection();
-        if ($total === 0 && !$exactNumber && $this->config->get('NovaSearch.config.noResultsProducts', $salesChannelId) !== false) {
+        if ($total === 0 && !$exactNumber && $redirect === null && $this->config->get('NovaSearch.config.noResultsProducts', $salesChannelId) !== false) {
             $recommendations = $this->highlights($context, 12, true);
         }
 
@@ -288,7 +288,7 @@ class InstantSearchController extends StorefrontController
         // in Schwestershops mit dem ursprünglichen Begriff nachsehen – nicht, wenn nur die Filter alles ausschließen
         $filterCount = \count($manufacturerIds) + \count($propertyIds) + ($minPrice !== null || $maxPrice !== null ? 1 : 0);
         $partners = [];
-        if (($total === 0 || $rewrite instanceof ArrayStruct) && !$exactNumber && $filterCount === 0) {
+        if (($total === 0 || $rewrite instanceof ArrayStruct) && !$exactNumber && $filterCount === 0 && $redirect === null) {
             $partnerIds = $this->idConfig('NovaSearch.config.partnerSalesChannels', $salesChannelId);
             if ($partnerIds !== []) {
                 $partners = $this->partnerSearch->search($term, $context, $partnerIds);
@@ -298,7 +298,7 @@ class InstantSearchController extends StorefrontController
         // „Teil anfragen“ – Kontaktseite mit vorausgefülltem Suchbegriff
         $requestPartUrl = null;
         $requestPath = SearchRules::validTarget($this->config->getString('NovaSearch.config.requestPartUrl', $salesChannelId));
-        if ($total === 0 && $requestPath !== null) {
+        if ($total === 0 && $requestPath !== null && $redirect === null) {
             $requestPartUrl = SearchRedirectSubscriber::absolute($requestPath, $request);
         }
 
@@ -355,7 +355,7 @@ class InstantSearchController extends StorefrontController
             ),
             'partners' => $partners,
             'requestPartUrl' => $requestPartUrl,
-            'requestPartForm' => $total === 0 && $this->config->get('NovaSearch.config.requestPartForm', $salesChannelId) !== false,
+            'requestPartForm' => $total === 0 && $redirect === null && $this->config->get('NovaSearch.config.requestPartForm', $salesChannelId) !== false,
             'sortings' => $result?->getAvailableSortings(),
             'currentSorting' => $result?->getSorting(),
             'categories' => !$exactNumber && $this->config->get('NovaSearch.config.showCategories', $salesChannelId) !== false
