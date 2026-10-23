@@ -344,7 +344,13 @@ class InstantSearchController extends StorefrontController
             'manufacturers' => $this->config->get('NovaSearch.config.showManufacturers', $salesChannelId) !== false ? $manufacturers : [],
             'priceRange' => $priceRange,
             'hints' => $exactNumber ? [] : array_map(
-                static fn (array $hint): array => ['text' => $hint['text'], 'url' => $hint['url'] !== null ? SearchRedirectSubscriber::absolute($hint['url'], $request) : null],
+                static fn (array $hint): array => [
+                    'text' => $hint['text'],
+                    'url' => $hint['url'] !== null ? SearchRedirectSubscriber::absolute($hint['url'], $request) : null,
+                    // Link in einen anderen Shop → neuer Tab
+                    'external' => $hint['url'] !== null && !str_starts_with($hint['url'], '/')
+                        && strcasecmp((string) parse_url($hint['url'], \PHP_URL_HOST), $request->getHost()) !== 0,
+                ],
                 $this->rules->hints($term, $salesChannelId)
             ),
             'partners' => $partners,

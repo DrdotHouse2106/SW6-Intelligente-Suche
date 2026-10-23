@@ -9,7 +9,7 @@
                 {% endfor %}
             </ul>
             {% if partner.total > partner.products|length %}
-                <a class="nova-search-partner-more nova-search-focusable" href="{{ partner.searchUrl }}">
+                <a class="nova-search-partner-more nova-search-focusable" href="{{ partner.searchUrl }}" target="_blank" rel="noopener">
                     {{ 'novaSearch.partnerMore'|trans({ '%shop%': partner.name, '%count%': partner.total }) }} →
                 </a>
             {% endif %}

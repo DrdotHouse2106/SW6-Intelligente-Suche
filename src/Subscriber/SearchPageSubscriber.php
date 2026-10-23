@@ -5,6 +5,7 @@ namespace Nova\Search\Subscriber;
 use Nova\Search\Rewrite\RewriteService;
 use Nova\Search\Search\LearningProductSearchBuilder;
 use Nova\Search\Service\RewriteStore;
+use Nova\Search\Service\SearchCountGuard;
 use Nova\Search\Service\SearchStatistics;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Content\Product\SalesChannel\Search\AbstractProductSearchRoute;
@@ -15,7 +16,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Suchergebnisseite (Enter im Suchfeld):
- *  - zählt die Suche (die Seite wird nicht HTTP-gecacht, daher serverseitig zuverlässig)
+ *  - zählt die Suche (die Seite wird nicht HTTP-gecacht) – ohne Bots, je Begriff und Sitzung einmal in 30 Minuten
  *  - merkt Begriffe ohne Treffer für die Claude-Auswertung vor
  *  - optional: wertet einen neuen Begriff sofort aus (kurzer Timeout) und zeigt direkt passende Treffer
  */
@@ -54,7 +55,8 @@ class SearchPageSubscriber implements EventSubscriberInterface
         $rewritten = $listing->getCriteria()->hasExtension(LearningProductSearchBuilder::EXTENSION);
 
         try {
-            if ($this->config->get('NovaSearch.config.learningActive', $salesChannelId) !== false) {
+            if ($this->config->get('NovaSearch.config.learningActive', $salesChannelId) !== false
+                && SearchCountGuard::shouldCount($request, $term)) {
                 $this->statistics->recordSearch($salesChannelId, $term, $listing->getTotal());
             }
 

@@ -1,3 +1,7 @@
+# 1.10.5
+- More accurate search counts: bots, prefetch and automated requests are ignored, the same term counts once per session within 30 minutes
+- Links to sister shops open in a new tab
+
 # 1.10.4
 - Rewrite notice placed directly above the own (rewritten) results, below sister shop hits, with adjusted wording
 

@@ -3,6 +3,7 @@
 namespace Nova\Search\Controller;
 
 use Nova\Search\Service\EventRecorder;
+use Nova\Search\Service\SearchCountGuard;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
@@ -53,6 +54,9 @@ class TrackingController extends StorefrontController
         $events = EventRecorder::parse(\is_array($data) ? ($data['events'] ?? null) : null);
 
         $events = array_values(array_filter($events, fn (array $event): bool => $this->allow($request)));
+        // Suchen: je Begriff und Sitzung einmal in 30 Minuten, keine Bots (Klicks und Warenkorb zählen immer)
+        $events = array_values(array_filter($events, static fn (array $event): bool => ($event['type'] ?? '') !== EventRecorder::TYPE_SEARCH
+            || SearchCountGuard::shouldCount($request, \is_string($event['term'] ?? null) ? $event['term'] : '')));
         if ($events === []) {
             return new Response(null, Response::HTTP_NO_CONTENT);
         }

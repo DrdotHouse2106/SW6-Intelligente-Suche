@@ -19,7 +19,7 @@
 
     {% set novaExternal = externalUrl|default(null) %}
     <li class="nova-search-card-item"{% if not novaExternal %} data-product-information="{{ productInformation|json_encode }}"{% endif %}>
-        <a class="nova-search-card nova-search-focusable" href="{{ novaExternal ? novaExternal ~ '/detail/' ~ product.id : seoUrl('frontend.detail.page', { productId: product.id }) }}">
+        <a class="nova-search-card nova-search-focusable" href="{{ novaExternal ? novaExternal ~ '/detail/' ~ product.id : seoUrl('frontend.detail.page', { productId: product.id }) }}"{% if novaExternal %} target="_blank" rel="noopener"{% endif %}>
             <span class="nova-search-card-media">
                 {% if product.cover.media %}
                     {% sw_thumbnails 'nova-search-thumbnail' with {

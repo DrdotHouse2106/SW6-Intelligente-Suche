@@ -1,3 +1,7 @@
+# 1.10.5
+- Suchen werden ehrlicher gezählt: Bots, Prefetch und automatische Abrufe zählen nicht mehr, derselbe Begriff zählt pro Sitzung höchstens einmal in 30 Minuten (auch Suchfenster + Enter nur einmal)
+- Links in Schwestershops (Produktkarten, „Alle Treffer ansehen“, Hinweise auf andere Shops) öffnen sich in einem neuen Tab
+
 # 1.10.4
 - Hinweis zur Umschreibung steht direkt über den eigenen Treffern (unter den Schwestershop-Treffern), mit passendem Text: „Hier im Shop gibt es nichts zu … – ähnliche Treffer für …“
 

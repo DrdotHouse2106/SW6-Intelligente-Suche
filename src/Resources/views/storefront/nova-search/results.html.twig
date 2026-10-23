@@ -13,7 +13,7 @@
             {% block nova_search_hints %}
                 {% for hint in hints %}
                     {% if hint.url %}
-                        <a class="nova-search-hint nova-search-focusable" href="{{ hint.url }}">
+                        <a class="nova-search-hint nova-search-focusable" href="{{ hint.url }}"{% if hint.external|default(false) %} target="_blank" rel="noopener"{% endif %}>
                             <span>{{ hint.text }}</span>
                             <span class="nova-search-redirect-arrow" aria-hidden="true">→</span>
                         </a>
