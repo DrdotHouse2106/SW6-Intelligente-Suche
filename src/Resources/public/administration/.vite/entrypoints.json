@@ -1,0 +1,25 @@
+{
+  "base": "/bundles/novasearch/administration/",
+  "entryPoints": {
+    "nova-search": {
+      "css": [
+        "/bundles/novasearch/administration/assets/nova-search-Dx5Sd-WS.css"
+      ],
+      "dynamic": [],
+      "js": [
+        "/bundles/novasearch/administration/assets/nova-search-C_L_cKhj.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}

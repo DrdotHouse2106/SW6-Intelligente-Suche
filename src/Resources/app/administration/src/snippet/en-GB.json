@@ -1,0 +1,54 @@
+{
+    "nova-search": {
+        "general": {
+            "title": "Nova Search",
+            "description": "Search analytics and settings"
+        },
+        "analytics": {
+            "settings": "Settings",
+            "salesChannel": "Sales channel",
+            "allSalesChannels": "All sales channels",
+            "periodLabel": "Period",
+            "period": "Last {days} days",
+            "loadError": "Analytics could not be loaded.",
+            "exportError": "Export failed.",
+            "trackingHint": "Daily values are counted since version 1.6.0 – earlier days are empty. Older totals are available via CSV export.",
+            "kpi": {
+                "searches": "Searches",
+                "zeroRate": "No results",
+                "clickRate": "Click rate",
+                "carts": "Added to cart",
+                "orders": "Purchases",
+                "terms": "Distinct terms"
+            },
+            "noComparison": "no previous period",
+            "zeroShort": "no results",
+            "seriesTitle": "Searches per day",
+            "tabs": {
+                "terms": "Search terms",
+                "zeroResults": "No results",
+                "products": "Clicked products"
+            },
+            "exportCsv": "Export CSV",
+            "col": {
+                "term": "Search term",
+                "clicks": "Clicks",
+                "product": "Product",
+                "number": "Product number",
+                "claude": "Claude rewrite"
+            },
+            "zeroHint": "Fix: add a synonym or redirect under \"Settings → Search rules\". Terms marked ⚠ were searched often but never clicked.",
+            "rewriteDone": "→ \"{rewrite}\"",
+            "rewriteStatus": {
+                "pending": "waiting",
+                "none": "no rewrite found",
+                "error": "failed",
+                "done": "rewritten"
+            },
+            "empty": "No data in this period.",
+            "emptyZero": "No searches without results – great!",
+            "claudeTitle": "Claude costs this month",
+            "claudeSpent": "{spent} $ of {limit} $ used ({month})"
+        }
+    }
+}

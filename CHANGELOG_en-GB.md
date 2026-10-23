@@ -1,3 +1,6 @@
+# 1.6.0
+- New: menu entry "Extensions → Nova Search" with analytics (KPIs with comparison, daily chart, terms, no results, clicked products, Claude costs, CSV export, settings button)
+
 # 1.5.0
 - New: recent searches, automatic highlights, property filters, rating stars, availability hint and add-to-cart button on cards, own text and recommendations when nothing is found, minimum characters setting
 

@@ -1,0 +1,188 @@
+.nova-search-analytics {
+    .nova-search-analytics__content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 24px;
+    }
+
+    .nova-search-analytics__filters {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        margin-bottom: 8px;
+    }
+
+    .nova-search-analytics__hint {
+        margin: 0 0 16px;
+        font-size: 13px;
+        color: var(--color-text-secondary-default, #52667a);
+    }
+
+    .nova-search-analytics__kpis {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .nova-search-analytics__kpi {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 16px 18px;
+        border: 1px solid var(--color-border-primary-default, #d1d9e0);
+        border-radius: 8px;
+        background: var(--color-elevation-surface-raised, #fff);
+    }
+
+    .nova-search-analytics__kpi-label {
+        font-size: 12px;
+        color: var(--color-text-secondary-default, #52667a);
+    }
+
+    .nova-search-analytics__kpi-value {
+        font-size: 26px;
+        line-height: 1.2;
+    }
+
+    .nova-search-analytics__kpi-change {
+        font-size: 12px;
+        font-weight: 600;
+
+        &.is--good { color: var(--color-emerald-700, #0b7a43); }
+        &.is--bad { color: var(--color-crimson-700, #c0392b); }
+        &.is--neutral { color: var(--color-text-secondary-default, #52667a); font-weight: 400; }
+    }
+
+    .nova-search-analytics__chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 2px;
+        height: 160px;
+    }
+
+    .nova-search-analytics__bar {
+        display: flex;
+        flex: 1 1 0;
+        align-items: flex-end;
+        height: 100%;
+        min-width: 2px;
+    }
+
+    .nova-search-analytics__bar-total {
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        width: 100%;
+        border-radius: 3px 3px 0 0;
+        background: var(--color-interaction-primary-default, #0870ff);
+    }
+
+    .nova-search-analytics__bar-zero {
+        width: 100%;
+        background: #f5a623;
+    }
+
+    .nova-search-analytics__legend {
+        display: flex;
+        gap: 16px;
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--color-text-secondary-default, #52667a);
+
+        .is--total::before,
+        .is--zero::before {
+            content: '';
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin-right: 6px;
+            border-radius: 2px;
+            background: var(--color-interaction-primary-default, #0870ff);
+        }
+
+        .is--zero::before {
+            background: #f5a623;
+        }
+    }
+
+    .nova-search-analytics__range {
+        margin-left: auto;
+    }
+
+    .nova-search-analytics__tabs {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid var(--color-border-primary-default, #d1d9e0);
+    }
+
+    .nova-search-analytics__tab {
+        padding: 8px 14px;
+        margin-bottom: -1px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: none;
+        font-weight: 600;
+        color: var(--color-text-secondary-default, #52667a);
+        cursor: pointer;
+
+        &.is--active {
+            border-bottom-color: var(--color-interaction-primary-default, #0870ff);
+            color: var(--color-text-primary-default, #1c1c1c);
+        }
+    }
+
+    .nova-search-analytics__tabs-spacer {
+        flex: 1;
+    }
+
+    .nova-search-analytics__table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+
+        th,
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--color-border-secondary-default, #eef0f3);
+            text-align: left;
+        }
+
+        th {
+            font-size: 12px;
+            color: var(--color-text-secondary-default, #52667a);
+        }
+
+        .is--num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        tr.is--warning td:first-child::after {
+            content: ' ⚠';
+            color: #f5a623;
+        }
+    }
+
+    .nova-search-analytics__empty {
+        padding: 24px 10px;
+        text-align: center !important;
+        color: var(--color-text-secondary-default, #52667a);
+    }
+
+    .nova-search-analytics__meter {
+        height: 8px;
+        margin: 8px 0 16px;
+        border-radius: 4px;
+        background: var(--color-gray-100, #f0f2f5);
+        overflow: hidden;
+
+        span {
+            display: block;
+            height: 100%;
+            background: var(--color-interaction-primary-default, #0870ff);
+        }
+    }
+}

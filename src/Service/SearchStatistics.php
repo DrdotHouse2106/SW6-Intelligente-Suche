@@ -48,6 +48,14 @@ class SearchStatistics
                 'now' => $this->now(),
             ]
         );
+
+        // Tageswert für die Auswertung
+        $this->connection->executeStatement(
+            'INSERT INTO `nova_search_term_day` (`sales_channel_id`, `day`, `term`, `searches`, `zero_results`)
+             VALUES (:sc, :day, :term, 1, :zero)
+             ON DUPLICATE KEY UPDATE `searches` = `searches` + 1, `zero_results` = `zero_results` + VALUES(`zero_results`)',
+            ['sc' => Uuid::fromHexToBytes($salesChannelId), 'day' => $this->today(), 'term' => $term, 'zero' => $hits === 0 ? 1 : 0]
+        );
     }
 
     public function recordProduct(string $salesChannelId, string $term, string $productId, string $type): void
@@ -78,6 +86,21 @@ class SearchStatistics
              VALUES (:sc, :term, 1, :now, :now)
              ON DUPLICATE KEY UPDATE `{$column}` = `{$column}` + 1, `updated_at` = VALUES(`updated_at`)",
             $params
+        );
+
+        // Tageswerte für die Auswertung
+        $day = ['sc' => $params['sc'], 'day' => $this->today(), 'term' => $term, 'product' => $params['product']];
+        $this->connection->executeStatement(
+            "INSERT INTO `nova_search_term_day` (`sales_channel_id`, `day`, `term`, `{$column}`)
+             VALUES (:sc, :day, :term, 1)
+             ON DUPLICATE KEY UPDATE `{$column}` = `{$column}` + 1",
+            $day
+        );
+        $this->connection->executeStatement(
+            "INSERT INTO `nova_search_product_day` (`sales_channel_id`, `day`, `product_id`, `{$column}`)
+             VALUES (:sc, :day, :product, 1)
+             ON DUPLICATE KEY UPDATE `{$column}` = `{$column}` + 1",
+            $day
         );
     }
 
@@ -162,6 +185,10 @@ class SearchStatistics
         $before = (new \DateTimeImmutable('-365 days'))->format(Defaults::STORAGE_DATE_TIME_FORMAT);
         $this->connection->executeStatement('DELETE FROM `nova_search_term_product` WHERE `updated_at` < :before', ['before' => $before]);
         $this->connection->executeStatement('DELETE FROM `nova_search_term` WHERE `updated_at` < :before', ['before' => $before]);
+        // Tageswerte: 2 Jahre (für den Vorjahresvergleich)
+        $beforeDay = (new \DateTimeImmutable('-730 days'))->format('Y-m-d');
+        $this->connection->executeStatement('DELETE FROM `nova_search_term_day` WHERE `day` < :before', ['before' => $beforeDay]);
+        $this->connection->executeStatement('DELETE FROM `nova_search_product_day` WHERE `day` < :before', ['before' => $beforeDay]);
     }
 
     /**
@@ -223,6 +250,11 @@ class SearchStatistics
         );
 
         return $ids;
+    }
+
+    private function today(): string
+    {
+        return (new \DateTimeImmutable())->format('Y-m-d');
     }
 
     private function now(): string

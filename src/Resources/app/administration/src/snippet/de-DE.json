@@ -1,0 +1,54 @@
+{
+    "nova-search": {
+        "general": {
+            "title": "Nova Suche",
+            "description": "Auswertung und Einstellungen der Suche"
+        },
+        "analytics": {
+            "settings": "Einstellungen",
+            "salesChannel": "Verkaufskanal",
+            "allSalesChannels": "Alle Verkaufskanäle",
+            "periodLabel": "Zeitraum",
+            "period": "Letzte {days} Tage",
+            "loadError": "Die Auswertung konnte nicht geladen werden.",
+            "exportError": "Der Export ist fehlgeschlagen.",
+            "trackingHint": "Tageswerte werden seit Version 1.6.0 gezählt – frühere Tage erscheinen daher leer. Ältere Gesamtzahlen bekommst du über den CSV-Export.",
+            "kpi": {
+                "searches": "Suchen",
+                "zeroRate": "Ohne Treffer",
+                "clickRate": "Klickrate",
+                "carts": "In den Warenkorb",
+                "orders": "Käufe",
+                "terms": "Verschiedene Begriffe"
+            },
+            "noComparison": "kein Vorzeitraum",
+            "zeroShort": "ohne Treffer",
+            "seriesTitle": "Suchen pro Tag",
+            "tabs": {
+                "terms": "Suchbegriffe",
+                "zeroResults": "Ohne Treffer",
+                "products": "Geklickte Produkte"
+            },
+            "exportCsv": "CSV exportieren",
+            "col": {
+                "term": "Suchbegriff",
+                "clicks": "Klicks",
+                "product": "Produkt",
+                "number": "Produktnummer",
+                "claude": "Claude-Umschreibung"
+            },
+            "zeroHint": "Beheben: Synonym oder Weiterleitung unter „Einstellungen → Suchregeln“ anlegen. Begriffe mit ⚠ in „Suchbegriffe“ wurden oft gesucht, aber nie angeklickt.",
+            "rewriteDone": "→ „{rewrite}“",
+            "rewriteStatus": {
+                "pending": "wartet auf Auswertung",
+                "none": "keine Umschreibung gefunden",
+                "error": "fehlgeschlagen",
+                "done": "umgeschrieben"
+            },
+            "empty": "Keine Daten im gewählten Zeitraum.",
+            "emptyZero": "Keine Suchen ohne Treffer – sehr gut!",
+            "claudeTitle": "Claude-Kosten diesen Monat",
+            "claudeSpent": "{spent} $ von {limit} $ verbraucht ({month})"
+        }
+    }
+}

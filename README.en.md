@@ -87,6 +87,10 @@ Terms that look like a number (at least 3 digits, no other words) are looked up 
 
 Recent searches as chips (browser only, with consent), automatic highlights (bestsellers, popular in search, newest), property filters (e.g. vehicle model), rating stars, "currently unavailable" hint and an "add to cart" button on cards, own text and product recommendations when nothing is found, configurable minimum characters.
 
+## Analytics (1.6.0)
+
+*Extensions → Nova Search* shows KPIs with comparison to the previous period, searches per day, top terms, searches without results (with Claude rewrite status), clicked products, Claude costs and CSV export per table. Daily values are counted from version 1.6.0 on.
+
 ## Roadmap
 
 Planned features (synonyms, redirects, admin analytics, recommendations, product finder, shopping assistant …) are listed in [ROADMAP.md](ROADMAP.md) (German).

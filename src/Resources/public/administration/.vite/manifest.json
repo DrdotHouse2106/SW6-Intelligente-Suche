@@ -1,0 +1,11 @@
+{
+  "main.js": {
+    "file": "assets/nova-search-C_L_cKhj.js",
+    "name": "nova-search",
+    "src": "main.js",
+    "isEntry": true,
+    "css": [
+      "assets/nova-search-Dx5Sd-WS.css"
+    ]
+  }
+}

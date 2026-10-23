@@ -1,0 +1,186 @@
+{% block nova_search_analytics %}
+<sw-page class="nova-search-analytics">
+    <template #smart-bar-header>
+        <h2>{{ $tc('nova-search.general.title') }}</h2>
+    </template>
+
+    <template #smart-bar-actions>
+        <mt-button variant="secondary" @click="openSettings">
+            {{ $tc('nova-search.analytics.settings') }}
+        </mt-button>
+    </template>
+
+    <template #content>
+        <div class="nova-search-analytics__content">
+            <div class="nova-search-analytics__filters">
+                <sw-entity-single-select
+                    v-model:value="salesChannelId"
+                    entity="sales_channel"
+                    :label="$tc('nova-search.analytics.salesChannel')"
+                    :placeholder="$tc('nova-search.analytics.allSalesChannels')"
+                />
+                <sw-single-select
+                    v-model:value="days"
+                    :label="$tc('nova-search.analytics.periodLabel')"
+                    :options="periodOptions"
+                />
+            </div>
+
+            <sw-loader v-if="isLoading && !data" />
+
+            <template v-if="data">
+                <p
+                    v-if="data.trackingSince === null || data.trackingSince > data.from"
+                    class="nova-search-analytics__hint"
+                >
+                    {{ $tc('nova-search.analytics.trackingHint') }}
+                </p>
+
+                {# Kennzahlen mit Vergleich zum Vorzeitraum #}
+                <div class="nova-search-analytics__kpis">
+                    <div
+                        v-for="kpi in kpis"
+                        :key="kpi.key"
+                        class="nova-search-analytics__kpi"
+                    >
+                        <span class="nova-search-analytics__kpi-label">{{ $tc(`nova-search.analytics.kpi.${kpi.key}`) }}</span>
+                        <strong class="nova-search-analytics__kpi-value">{{ formatValue(kpi.value, kpi.format) }}</strong>
+                        <span class="nova-search-analytics__kpi-change" :class="changeClass(kpi)">{{ formatChange(kpi) }}</span>
+                    </div>
+                </div>
+
+                {# Verlauf #}
+                <mt-card :title="$tc('nova-search.analytics.seriesTitle')" position-identifier="nova-search-series">
+                    <div class="nova-search-analytics__chart">
+                        <div
+                            v-for="day in data.series"
+                            :key="day.day"
+                            class="nova-search-analytics__bar"
+                            :title="`${day.day}: ${day.searches} ${$tc('nova-search.analytics.kpi.searches')}, ${day.zeroResults} ${$tc('nova-search.analytics.zeroShort')}`"
+                        >
+                            <span class="nova-search-analytics__bar-total" :style="{ height: barHeight(day.searches) }">
+                                <span class="nova-search-analytics__bar-zero" :style="{ height: day.searches ? `${Math.round(day.zeroResults / day.searches * 100)}%` : '0' }"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nova-search-analytics__legend">
+                        <span class="is--total">{{ $tc('nova-search.analytics.kpi.searches') }}</span>
+                        <span class="is--zero">{{ $tc('nova-search.analytics.zeroShort') }}</span>
+                        <span class="nova-search-analytics__range">{{ data.from }} – {{ data.to }}</span>
+                    </div>
+                </mt-card>
+
+                {# Tabellen #}
+                <mt-card position-identifier="nova-search-tables">
+                    <div class="nova-search-analytics__tabs">
+                        <button
+                            v-for="name in ['terms', 'zeroResults', 'products']"
+                            :key="name"
+                            type="button"
+                            class="nova-search-analytics__tab"
+                            :class="{ 'is--active': tab === name }"
+                            @click="tab = name"
+                        >
+                            {{ $tc(`nova-search.analytics.tabs.${name}`) }}
+                        </button>
+                        <span class="nova-search-analytics__tabs-spacer"></span>
+                        <mt-button size="small" variant="secondary" @click="download(tab === 'products' ? 'products' : (tab === 'zeroResults' ? 'rewrites' : 'terms'))">
+                            {{ $tc('nova-search.analytics.exportCsv') }}
+                        </mt-button>
+                    </div>
+
+                    <table v-if="tab === 'terms'" class="nova-search-analytics__table">
+                        <thead>
+                            <tr>
+                                <th>{{ $tc('nova-search.analytics.col.term') }}</th>
+                                <th class="is--num">{{ $tc('nova-search.analytics.kpi.searches') }}</th>
+                                <th class="is--num">{{ $tc('nova-search.analytics.zeroShort') }}</th>
+                                <th class="is--num">{{ $tc('nova-search.analytics.col.clicks') }}</th>
+                                <th class="is--num">{{ $tc('nova-search.analytics.kpi.clickRate') }}</th>
+                                <th class="is--num">{{ $tc('nova-search.analytics.kpi.carts') }}</th>
+                                <th class="is--num">{{ $tc('nova-search.analytics.kpi.orders') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in data.terms" :key="row.term" :class="{ 'is--warning': row.searches >= 3 && row.clicks === 0 }">
+                                <td>{{ row.term }}</td>
+                                <td class="is--num">{{ row.searches }}</td>
+                                <td class="is--num">{{ row.zeroResults }}</td>
+                                <td class="is--num">{{ row.clicks }}</td>
+                                <td class="is--num">{{ formatValue(row.clickRate, 'percent') }}</td>
+                                <td class="is--num">{{ row.carts }}</td>
+                                <td class="is--num">{{ row.orders }}</td>
+                            </tr>
+                            <tr v-if="data.terms.length === 0">
+                                <td colspan="7" class="nova-search-analytics__empty">{{ $tc('nova-search.analytics.empty') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <template v-else-if="tab === 'zeroResults'">
+                        <p class="nova-search-analytics__hint">{{ $tc('nova-search.analytics.zeroHint') }}</p>
+                        <table class="nova-search-analytics__table">
+                            <thead>
+                                <tr>
+                                    <th>{{ $tc('nova-search.analytics.col.term') }}</th>
+                                    <th class="is--num">{{ $tc('nova-search.analytics.zeroShort') }}</th>
+                                    <th>{{ $tc('nova-search.analytics.col.claude') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="row in data.zeroResults" :key="row.term">
+                                    <td>{{ row.term }}</td>
+                                    <td class="is--num">{{ row.zeroResults }}</td>
+                                    <td>{{ rewriteLabel(row) }}</td>
+                                </tr>
+                                <tr v-if="data.zeroResults.length === 0">
+                                    <td colspan="3" class="nova-search-analytics__empty">{{ $tc('nova-search.analytics.emptyZero') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+
+                    <table v-else class="nova-search-analytics__table">
+                        <thead>
+                            <tr>
+                                <th>{{ $tc('nova-search.analytics.col.product') }}</th>
+                                <th>{{ $tc('nova-search.analytics.col.number') }}</th>
+                                <th class="is--num">{{ $tc('nova-search.analytics.col.clicks') }}</th>
+                                <th class="is--num">{{ $tc('nova-search.analytics.kpi.carts') }}</th>
+                                <th class="is--num">{{ $tc('nova-search.analytics.kpi.orders') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="row in data.products" :key="row.id">
+                                <td>
+                                    <router-link :to="{ name: 'sw.product.detail', params: { id: row.id } }">
+                                        {{ row.name || row.id }}
+                                    </router-link>
+                                </td>
+                                <td>{{ row.number }}</td>
+                                <td class="is--num">{{ row.clicks }}</td>
+                                <td class="is--num">{{ row.carts }}</td>
+                                <td class="is--num">{{ row.orders }}</td>
+                            </tr>
+                            <tr v-if="data.products.length === 0">
+                                <td colspan="5" class="nova-search-analytics__empty">{{ $tc('nova-search.analytics.empty') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </mt-card>
+
+                {# Claude #}
+                <mt-card :title="$tc('nova-search.analytics.claudeTitle')" position-identifier="nova-search-claude">
+                    <p>{{ $t('nova-search.analytics.claudeSpent', { spent: data.claude.spentUsd.toFixed(2), limit: data.claude.limitUsd.toFixed(2), month: data.claude.month }) }}</p>
+                    <div class="nova-search-analytics__meter">
+                        <span :style="{ width: `${claudePercent}%` }"></span>
+                    </div>
+                    <mt-button size="small" variant="secondary" @click="download('claude-usage')">
+                        {{ $tc('nova-search.analytics.exportCsv') }}
+                    </mt-button>
+                </mt-card>
+            </template>
+        </div>
+    </template>
+</sw-page>
+{% endblock %}

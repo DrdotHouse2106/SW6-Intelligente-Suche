@@ -165,6 +165,19 @@
             <tag name="kernel.event_listener" event="Shopware\Core\Content\Cookie\Event\CookieGroupCollectEvent"/>
         </service>
 
+        <!-- Administration: Auswertung -->
+        <service id="Nova\Search\Service\SearchAnalytics">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Nova\Search\Controller\AdminAnalyticsController" public="true">
+            <argument type="service" id="Nova\Search\Service\SearchAnalytics"/>
+            <argument type="service" id="Nova\Search\Service\SearchExport"/>
+            <argument type="service" id="Nova\Search\Rewrite\ClaudeBudget"/>
+            <argument type="service" id="logger"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
         <!-- Storefront -->
         <service id="Nova\Search\Controller\InstantSearchController" public="true">
             <argument type="service" id="Shopware\Core\Content\Product\SalesChannel\Search\ProductSearchRoute"/>

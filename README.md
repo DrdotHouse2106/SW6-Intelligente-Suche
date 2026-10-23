@@ -152,6 +152,21 @@ Antwort immer `204`. Es gelten dieselben Regeln wie im Suchfenster: max. 20 Erei
 
 Auch Shopwares Standard-Route `/store-api/search` nutzt das gelernte Ranking und gespeicherte Umschreibungen (die Plugin-Logik sitzt im Such-Builder). Dort wird nichts gezählt – die App kann bei Fehlern also gefahrlos darauf zurückfallen.
 
+## Auswertung in der Administration
+
+**Erweiterungen → Nova Suche** (eigener Menüpunkt) zeigt für einen Verkaufskanal oder alle Shops und einen Zeitraum (7, 30, 90 oder 365 Tage):
+
+- **Kennzahlen** mit Veränderung zum Vorzeitraum: Suchen, Anteil ohne Treffer, Klickrate, in den Warenkorb, Käufe nach einer Suche, verschiedene Begriffe
+- **Suchen pro Tag** als Balken (orange: ohne Treffer)
+- **Suchbegriffe** mit Suchen, Klicks, Klickrate, Warenkorb, Käufen – ⚠ markiert Begriffe, die oft gesucht, aber nie angeklickt wurden (Treffer passen nicht)
+- **Ohne Treffer** mit Stand der Claude-Umschreibung – Abhilfe über Synonyme/Weiterleitungen
+- **Geklickte Produkte** (Link zum Produkt in der Administration)
+- **Claude-Kosten** des laufenden Monats im Verhältnis zum Limit
+- **CSV-Export** je Tabelle (Excel-tauglich, gleiche Daten wie `nova-search:export`)
+- Knopf **„Einstellungen“** führt direkt zur Plugin-Konfiguration
+
+Tageswerte werden ab Version 1.6.0 gezählt; frühere Zeiträume sind leer (Gesamtzahlen gibt es weiter im CSV-Export). Gespeichert werden nur Begriffe und Zähler, keine personenbezogenen Daten; Tageswerte werden nach 2 Jahren gelöscht.
+
 ## Nummernsuche (Artikel-, Hersteller-, OE-Nummern)
 
 Sieht der Suchbegriff wie eine Nummer aus (mindestens 3 Ziffern, keine weiteren Wörter), sucht die Nova Suche zuerst im **Nummern-Index** – und zeigt genau die Produkte mit dieser Nummer, inklusive Varianten. Gibt es keine passende Nummer, wird ganz normal gesucht.
@@ -388,6 +403,18 @@ Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetre
 **Ursache:** Es werden nur Suchen mit Treffern gemerkt, und nur mit Zustimmung im Cookie-Banner (Komfortfunktionen)
 
 **Lösung:** Im Cookie-Banner zustimmen, etwas suchen und kurz warten (die Suche wird nach einer Tipp-Pause gemerkt)
+
+### Menüpunkt „Nova Suche“ unter Erweiterungen fehlt
+
+**Ursache:** Die Administration wurde nach dem Update noch nicht neu geladen, oder der Browser hält alte Dateien vor
+
+**Lösung:** Cache löschen und die Administration mit Strg+F5 neu laden
+
+### Auswertung zeigt nur Nullen
+
+**Ursache:** Tageswerte werden erst seit Version 1.6.0 gezählt, und „Aus Suchen, Klicks und Käufen lernen“ muss aktiv sein
+
+**Lösung:** Ein paar Tage abwarten; für ältere Gesamtzahlen den CSV-Export nutzen
 
 ### Synonym wirkt nicht
 

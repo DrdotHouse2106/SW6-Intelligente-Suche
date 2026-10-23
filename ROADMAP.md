@@ -66,33 +66,32 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 
 ## Phase 2 – Auswertungen in der Administration
 
-Heute nur per Konsole (`nova-search:export`). Geplant: eigener Bereich
-*Marketing → Nova Suche → Analysen*, je Verkaufskanal, Zeitraum und Gerät (Desktop/Mobil).
+Seit 1.6.0: *Erweiterungen → Nova Suche*, je Verkaufskanal und Zeitraum (Gerät noch nicht).
 
 ### 2.1 Kennzahlen mit Vergleich zum Vorzeitraum
 
-- ⬜ Anzahl Suchen und Veränderung in %
-- ⬜ Klickrate (Anteil der Suchen mit Klick)
+- ✅ Anzahl Suchen und Veränderung in %
+- ✅ Klickrate (Anteil der Suchen mit Klick)
 - ⬜ Umsatz über die Suche und Konversionsrate der Suchsitzungen
 - ⬜ Anteil der Sitzungen bzw. Käufer, die die Suche nutzen; Kaufwahrscheinlichkeit mit/ohne Suche
 - ⬜ Durchschnittliche Position geklickter Ergebnisse
 - ⬜ Anteil Suchen ohne Interaktion (Fenster geschlossen ohne Klick)
-- ⬜ Anteil Suchen ohne Treffer
-- ⬜ Verlaufsdiagramme (Suchen, Klickrate, Verkäufe)
+- ✅ Anteil Suchen ohne Treffer
+- 🟡 Verlaufsdiagramme (Suchen, Klickrate, Verkäufe)
 
 ### 2.2 Tabellen (sortierbar, durchsuchbar, CSV-Export)
 
-- ⬜ Suchbegriffe: Anzahl, Klickrate, Ø Klickposition
-- ⬜ Geklickte Produkte: Klicks, Klickrate, Ø Position
-- ⬜ **Suchen ohne Treffer** mit Button **„Beheben“** → direkt Synonym, Weiterleitung, Umschreibung
+- 🟡 Suchbegriffe: Anzahl, Klickrate, Ø Klickposition
+- 🟡 Geklickte Produkte: Klicks, Klickrate, Ø Position
+- 🟡 **Suchen ohne Treffer** mit Button **„Beheben“** → direkt Synonym, Weiterleitung, Umschreibung
   oder feste Produkte anlegen; Claude-Vorschlag mit einem Klick übernehmen
-- ⬜ Begriffe mit vielen Suchen, aber 0 % Klickrate (Treffer passen nicht)
+- ✅ Begriffe mit vielen Suchen, aber 0 % Klickrate (Treffer passen nicht)
 
 ### 2.3 Claude in der Administration
 
 - ✅ Kosten und Limit per Konsole (`nova-search:claude-usage`)
 - ⬜ Übersicht der gespeicherten Umschreibungen: prüfen, bearbeiten, löschen, sperren
-- ⬜ Verbrauch/Limit als Kachel
+- ✅ Verbrauch/Limit als Kachel
 - ⬜ **KI-Synonymvorschläge** aus dem Suchverhalten (Begriffe, nach denen nacheinander gesucht
   wird) – annehmen oder ablehnen
 

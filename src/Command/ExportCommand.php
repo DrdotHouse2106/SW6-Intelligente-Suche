@@ -99,34 +99,8 @@ class ExportCommand extends Command
      */
     private function writeCsv(string $file, array $columns, array $rows, string $delimiter): void
     {
-        $handle = fopen($file, 'wb');
-        if ($handle === false) {
+        if (@file_put_contents($file, SearchExport::toCsv($columns, $rows, $delimiter)) === false) {
             throw new \RuntimeException(\sprintf('Datei „%s“ kann nicht geschrieben werden.', $file));
         }
-
-        // UTF-8-BOM, damit Excel Umlaute korrekt anzeigt
-        fwrite($handle, "\xEF\xBB\xBF");
-        fputcsv($handle, $columns, $delimiter, '"', '');
-
-        foreach ($rows as $row) {
-            fputcsv($handle, array_map($this->cell(...), array_values($row)), $delimiter, '"', '');
-        }
-
-        fclose($handle);
-    }
-
-    /**
-     * Suchbegriffe sind Kundeneingaben: Werte, die Excel als Formel ausführen würde
-     * (=, +, -, @, Tab, CR), werden mit einem Apostroph entschärft.
-     */
-    private function cell(mixed $value): string
-    {
-        $value = (string) ($value ?? '');
-
-        if ($value !== '' && !is_numeric($value) && \in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
-            return "'" . $value;
-        }
-
-        return $value;
     }
 }

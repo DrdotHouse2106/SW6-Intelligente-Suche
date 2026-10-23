@@ -1,3 +1,7 @@
+# 1.6.0
+- Neu: Menüpunkt „Erweiterungen → Nova Suche“ mit Auswertung – Kennzahlen mit Vergleich zum Vorzeitraum, Suchen pro Tag, Suchbegriffe, ohne Treffer (inkl. Claude-Umschreibung), geklickte Produkte, Claude-Kosten, CSV-Export und Knopf zu den Einstellungen
+- Tageswerte je Suchbegriff und Produkt (nach 2 Jahren gelöscht)
+
 # 1.5.0
 - Neu: „Zuletzt gesucht“ als Chips in der Startansicht (einzeln entfernbar, „Alles löschen“; nur im Browser, mit Zustimmung)
 - Neu: Aktuelle Highlights automatisch – Bestseller, beliebt in der Suche oder neu

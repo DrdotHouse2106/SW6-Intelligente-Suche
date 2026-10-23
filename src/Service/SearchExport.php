@@ -26,6 +26,47 @@ class SearchExport
     }
 
     /**
+     * CSV mit UTF-8-BOM (Excel zeigt Umlaute korrekt); Kundeneingaben werden gegen Formel-Ausführung entschärft.
+     *
+     * @param list<string> $columns
+     * @param list<array<string, mixed>> $rows
+     */
+    public static function toCsv(array $columns, array $rows, string $delimiter = ';'): string
+    {
+        $handle = fopen('php://temp', 'w+b');
+        if ($handle === false) {
+            throw new \RuntimeException('Temporärer Speicher nicht verfügbar.');
+        }
+
+        fwrite($handle, "\xEF\xBB\xBF");
+        fputcsv($handle, $columns, $delimiter, '"', '');
+        foreach ($rows as $row) {
+            fputcsv($handle, array_map(self::cell(...), array_values($row)), $delimiter, '"', '');
+        }
+
+        rewind($handle);
+        $csv = (string) stream_get_contents($handle);
+        fclose($handle);
+
+        return $csv;
+    }
+
+    /**
+     * Suchbegriffe sind Kundeneingaben: Werte, die Excel als Formel ausführen würde
+     * (=, +, -, @, Tab, CR), werden mit einem Apostroph entschärft.
+     */
+    private static function cell(mixed $value): string
+    {
+        $value = \is_scalar($value) ? (string) $value : '';
+
+        if ($value !== '' && !is_numeric($value) && \in_array($value[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+            return "'" . $value;
+        }
+
+        return $value;
+    }
+
+    /**
      * @param list<string> $salesChannelIds Leer = alle Verkaufskanäle
      *
      * @return array{columns: list<string>, rows: list<array<string, mixed>>}
