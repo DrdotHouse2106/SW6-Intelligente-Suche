@@ -75,9 +75,9 @@ Known pitfalls from real installations. **Please add new ones** (or open an issu
 - **Claude does nothing:** API key, Claude switch, scheduled tasks and message queue must run; test with `bin/console nova-search:rewrite`.
 - **No typo tolerance:** use OpenSearch, or rely on the Claude stage.
 
-## Search rules and exclusions (1.2.0)
+## Search rules and exclusions
 
-*Configure → Search rules:* **synonyms** (one group per line, comma-separated, e.g. `brake pads, brake shoes`) and **redirects** (`term = /path` or `term = https://…`). Multi-word searches keep Shopware's AND logic. *Excluded products:* closeout products without stock, products (incl. variants), categories, tags or a yes/no custom field. Applies to the search layer, search page and Store API (`redirect` field).
+*Extensions → Nova Search → tabs **Synonyms** / **Redirects**:* each rule is a list entry with search, active switch, edit and delete, optionally limited to one sales channel. **Synonyms** are groups of equivalent terms (e.g. `brake pads, brake shoes`), **redirects** send an exact term to a shop path or `https://` URL. CSV import/export (exports of other search services are detected), and "Synonym"/"Redirect" buttons in the analytics "No results" table. Entries from the former config text fields (≤ 1.6.0) are migrated automatically. Multi-word searches keep Shopware's AND logic. *Excluded products:* closeout products without stock, products (incl. variants), categories, tags or a yes/no custom field. Applies to the search layer, search page and Store API (`redirect` field).
 
 ## Number search (1.3.0)
 

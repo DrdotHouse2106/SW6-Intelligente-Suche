@@ -3,16 +3,14 @@
 namespace Nova\Search\Rules;
 
 use Nova\Search\Service\TermNormalizer;
-use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 /**
- * Regeln aus der Plugin-Konfiguration (je Verkaufskanal, mit Vererbung von „Alle Verkaufskanäle“):
+ * Wendet Synonyme und Weiterleitungen an (gepflegt unter Erweiterungen → Nova Suche, gespeichert im
+ * RuleStore). Regeln ohne Verkaufskanal gelten für alle Shops.
  *
- *  - Synonyme: eine Gruppe je Zeile, Begriffe mit Komma getrennt
- *        bremsklötze, bremsbeläge
- *  - Weiterleitungen: ein Begriff je Zeile, Ziel nach „=“ oder „->“
- *        kundenkonto = /account
- *
+ * Die statischen parse…-Methoden lesen das Textformat für Import und Übernahme:
+ *  - Synonyme: eine Gruppe je Zeile, Begriffe mit Komma getrennt („bremsklötze, bremsbeläge“)
+ *  - Weiterleitungen: ein Begriff je Zeile, Ziel nach „=“, „->“ oder „;“ („kundenkonto = /account“)
  * Leere Zeilen und Zeilen mit „#“ am Anfang werden ignoriert.
  */
 class SearchRules
@@ -21,13 +19,7 @@ class SearchRules
     public const MAX_TERMS_PER_GROUP = 20;
     public const MAX_REDIRECTS = 1000;
 
-    /** @var array<string, list<list<string>>> */
-    private array $synonymMemo = [];
-
-    /** @var array<string, array<string, string>> */
-    private array $redirectMemo = [];
-
-    public function __construct(private readonly SystemConfigService $config)
+    public function __construct(private readonly RuleStore $store)
     {
     }
 
@@ -36,11 +28,7 @@ class SearchRules
      */
     public function synonymGroups(?string $salesChannelId): array
     {
-        $key = $salesChannelId ?? '';
-
-        return $this->synonymMemo[$key] ??= self::parseSynonyms(
-            (string) $this->config->getString('NovaSearch.config.synonyms', $salesChannelId)
-        );
+        return $this->store->forSalesChannel($salesChannelId)['synonyms'];
     }
 
     /**
@@ -75,12 +63,7 @@ class SearchRules
 
     public function redirect(string $term, ?string $salesChannelId): ?string
     {
-        $key = $salesChannelId ?? '';
-        $this->redirectMemo[$key] ??= self::parseRedirects(
-            (string) $this->config->getString('NovaSearch.config.redirects', $salesChannelId)
-        );
-
-        return $this->redirectMemo[$key][TermNormalizer::normalize($term)] ?? null;
+        return $this->store->forSalesChannel($salesChannelId)['redirects'][TermNormalizer::normalize($term)] ?? null;
     }
 
     /**

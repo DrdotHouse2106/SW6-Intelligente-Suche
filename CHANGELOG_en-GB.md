@@ -1,3 +1,7 @@
+# 1.7.0
+- New: synonyms and redirects as manageable lists under "Extensions → Nova Search" (search, active switch, edit, delete, sales channel per entry), CSV import/export, fix buttons in the "No results" table
+- Entries from the former config text fields are migrated on update
+
 # 1.6.0
 - New: menu entry "Extensions → Nova Search" with analytics (KPIs with comparison, daily chart, terms, no results, clicked products, Claude costs, CSV export, settings button)
 

@@ -1,7 +1,10 @@
+import './component/nova-search-tabs';
 import './page/nova-search-analytics';
+import './page/nova-search-rules';
+import './nova-search.scss';
 
 /**
- * Erweiterungen → Nova Suche: Auswertung und schneller Weg zu den Einstellungen.
+ * Erweiterungen → Nova Suche: Auswertung, Synonyme, Weiterleitungen und Weg zu den Einstellungen.
  */
 Shopware.Module.register('nova-search', {
     type: 'plugin',
@@ -15,6 +18,16 @@ Shopware.Module.register('nova-search', {
         index: {
             component: 'nova-search-analytics',
             path: 'index',
+        },
+        synonyms: {
+            component: 'nova-search-rules',
+            path: 'synonyms',
+            meta: { ruleType: 'synonym' },
+        },
+        redirects: {
+            component: 'nova-search-rules',
+            path: 'redirects',
+            meta: { ruleType: 'redirect' },
         },
     },
 

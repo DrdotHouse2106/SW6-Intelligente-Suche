@@ -1,0 +1,188 @@
+{% block nova_search_rules %}
+<sw-page class="nova-search-rules">
+    <template #smart-bar-header>
+        <h2>{{ $tc('nova-search.general.title') }}</h2>
+    </template>
+
+    <template #smart-bar-actions>
+        <mt-button variant="secondary" @click="openSettings">
+            {{ $tc('nova-search.analytics.settings') }}
+        </mt-button>
+        <mt-button variant="primary" @click="openEdit()">
+            {{ $tc(`${prefix}.add`) }}
+        </mt-button>
+    </template>
+
+    <template #content>
+        <div class="nova-search-rules__content">
+            <nova-search-tabs />
+
+            <p class="nova-search-rules__intro">{{ $tc(`${prefix}.intro`) }}</p>
+
+            <div v-if="changed" class="nova-search-rules__cache">
+                <span>{{ $tc('nova-search.rules.cacheHint') }}</span>
+                <mt-button size="small" variant="secondary" @click="clearCache">
+                    {{ $tc('nova-search.rules.clearCache') }}
+                </mt-button>
+            </div>
+
+            <mt-card position-identifier="nova-search-rules-list">
+                <div class="nova-search-rules__toolbar">
+                    <input
+                        v-model="search"
+                        type="search"
+                        class="nova-search-rules__search"
+                        :placeholder="$tc('nova-search.rules.search')"
+                        @input="onSearch"
+                    >
+                    <span class="nova-search-rules__count">{{ $tc('nova-search.rules.count', items.length, { count: items.length }) }}</span>
+                    <mt-button size="small" variant="secondary" @click="pickImport">
+                        {{ $tc('nova-search.rules.import') }}
+                    </mt-button>
+                    <mt-button size="small" variant="secondary" @click="exportCsv">
+                        {{ $tc('nova-search.analytics.exportCsv') }}
+                    </mt-button>
+                    <input
+                        ref="importFile"
+                        type="file"
+                        accept=".csv,.txt,text/csv,text/plain"
+                        class="nova-search-rules__file"
+                        @change="onImportFile"
+                    >
+                </div>
+
+                <sw-loader v-if="isLoading" />
+
+                <div class="nova-search-rules__scroll">
+                <table class="nova-search-rules__table">
+                    <thead>
+                        <tr>
+                            <th v-if="isSynonym">{{ $tc('nova-search.synonyms.col.terms') }}</th>
+                            <template v-else>
+                                <th>{{ $tc('nova-search.analytics.col.term') }}</th>
+                                <th>{{ $tc('nova-search.redirects.col.target') }}</th>
+                            </template>
+                            <th>{{ $tc('nova-search.analytics.salesChannel') }}</th>
+                            <th class="is--center">{{ $tc('nova-search.rules.active') }}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in items" :key="item.id" :class="{ 'is--inactive': !item.active }">
+                            <td v-if="isSynonym">
+                                <span v-for="term in item.terms" :key="term" class="nova-search-rules__chip">{{ term }}</span>
+                            </td>
+                            <template v-else>
+                                <td><strong>{{ item.term }}</strong></td>
+                                <td class="nova-search-rules__target">{{ item.target }}</td>
+                            </template>
+                            <td>{{ salesChannelName(item.salesChannelId) }}</td>
+                            <td class="is--center">
+                                <input
+                                    type="checkbox"
+                                    :checked="item.active"
+                                    :aria-label="$tc('nova-search.rules.active')"
+                                    @change="toggleActive(item)"
+                                >
+                            </td>
+                            <td class="nova-search-rules__actions">
+                                <mt-button size="small" variant="secondary" @click="openEdit(item)">
+                                    {{ $tc('nova-search.rules.edit') }}
+                                </mt-button>
+                                <mt-button size="small" variant="critical" @click="deleteItem = item">
+                                    {{ $tc('nova-search.rules.delete') }}
+                                </mt-button>
+                            </td>
+                        </tr>
+                        <tr v-if="!isLoading && items.length === 0">
+                            <td :colspan="isSynonym ? 4 : 5" class="nova-search-rules__empty">
+                                {{ $tc(search ? 'nova-search.rules.noMatch' : `${prefix}.empty`) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <p class="nova-search-rules__hint">{{ $tc(`${prefix}.importHint`) }}</p>
+            </mt-card>
+        </div>
+
+        {# Anlegen / Bearbeiten #}
+        <sw-modal
+            v-if="editItem"
+            :title="$tc(editItem.id ? `${prefix}.editTitle` : `${prefix}.add`)"
+            variant="small"
+            @modal-close="editItem = null"
+        >
+            <div class="nova-search-rules__form">
+                <template v-if="isSynonym">
+                    <label class="nova-search-rules__label" for="nova-search-terms">{{ $tc('nova-search.synonyms.col.terms') }}</label>
+                    <textarea
+                        id="nova-search-terms"
+                        v-model="editItem.termsText"
+                        rows="3"
+                        class="nova-search-rules__input"
+                        :placeholder="$tc('nova-search.synonyms.placeholder')"
+                    ></textarea>
+                    <div class="nova-search-rules__preview">
+                        <span v-for="term in editTerms" :key="term" class="nova-search-rules__chip">{{ term }}</span>
+                    </div>
+                    <p class="nova-search-rules__help">{{ $tc('nova-search.synonyms.help') }}</p>
+                </template>
+                <template v-else>
+                    <label class="nova-search-rules__label" for="nova-search-term">{{ $tc('nova-search.analytics.col.term') }}</label>
+                    <input id="nova-search-term" v-model="editItem.term" type="text" class="nova-search-rules__input">
+                    <label class="nova-search-rules__label" for="nova-search-target">{{ $tc('nova-search.redirects.col.target') }}</label>
+                    <input
+                        id="nova-search-target"
+                        v-model="editItem.target"
+                        type="text"
+                        class="nova-search-rules__input"
+                        :placeholder="$tc('nova-search.redirects.placeholder')"
+                    >
+                    <p class="nova-search-rules__help">{{ $tc('nova-search.redirects.help') }}</p>
+                </template>
+
+                <sw-entity-single-select
+                    v-model:value="editItem.salesChannelId"
+                    entity="sales_channel"
+                    :label="$tc('nova-search.analytics.salesChannel')"
+                    :placeholder="$tc('nova-search.rules.allSalesChannels')"
+                />
+
+                <label class="nova-search-rules__check">
+                    <input v-model="editItem.active" type="checkbox">
+                    {{ $tc('nova-search.rules.active') }}
+                </label>
+            </div>
+
+            <template #modal-footer>
+                <mt-button variant="secondary" @click="editItem = null">
+                    {{ $tc('global.default.cancel') }}
+                </mt-button>
+                <mt-button variant="primary" :disabled="!canSave" :is-loading="isSaving" @click="save">
+                    {{ $tc('global.default.save') }}
+                </mt-button>
+            </template>
+        </sw-modal>
+
+        {# Löschen bestätigen #}
+        <sw-modal
+            v-if="deleteItem"
+            :title="$tc('nova-search.rules.delete')"
+            variant="small"
+            @modal-close="deleteItem = null"
+        >
+            <p>{{ $tc('nova-search.rules.confirmDelete', 0, { name: isSynonym ? deleteItem.terms.join(', ') : deleteItem.term }) }}</p>
+            <template #modal-footer>
+                <mt-button variant="secondary" @click="deleteItem = null">
+                    {{ $tc('global.default.cancel') }}
+                </mt-button>
+                <mt-button variant="critical" @click="confirmDelete">
+                    {{ $tc('nova-search.rules.delete') }}
+                </mt-button>
+            </template>
+        </sw-modal>
+    </template>
+</sw-page>
+{% endblock %}

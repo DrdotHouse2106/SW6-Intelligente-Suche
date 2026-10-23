@@ -172,6 +172,11 @@ Component.register('nova-search-analytics', {
             return row.rewriteStatus ? this.$tc(`nova-search.analytics.rewriteStatus.${row.rewriteStatus}`) : '–';
         },
 
+        /** „Beheben“: Synonym- bzw. Weiterleitungsliste mit vorbelegtem Begriff öffnen */
+        fix(list, term) {
+            this.$router.push({ name: `nova.search.${list}`, query: { new: term } });
+        },
+
         openSettings() {
             this.$router.push({ name: 'sw.extension.config', params: { namespace: 'NovaSearch' } });
         },

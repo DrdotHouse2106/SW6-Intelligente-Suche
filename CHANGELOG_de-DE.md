@@ -1,3 +1,9 @@
+# 1.7.0
+- Neu: Synonyme und Weiterleitungen als eigene Listen unter „Erweiterungen → Nova Suche“ (Reiter neben der Auswertung) – Suche, Aktiv-Schalter, Bearbeiten, Löschen, Verkaufskanal je Eintrag
+- Neu: CSV-Import (auch Exporte anderer Suchdienste) und CSV-Export
+- Neu: „Ohne Treffer“ in der Auswertung mit Knöpfen „Synonym“ und „Weiterleitung“ zum direkten Beheben
+- Bisherige Einträge aus den Textfeldern der Konfiguration werden beim Update übernommen; die Textfelder entfallen
+
 # 1.6.0
 - Neu: Menüpunkt „Erweiterungen → Nova Suche“ mit Auswertung – Kennzahlen mit Vergleich zum Vorzeitraum, Suchen pro Tag, Suchbegriffe, ohne Treffer (inkl. Claude-Umschreibung), geklickte Produkte, Claude-Kosten, CSV-Export und Knopf zu den Einstellungen
 - Tageswerte je Suchbegriff und Produkt (nach 2 Jahren gelöscht)

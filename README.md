@@ -154,12 +154,12 @@ Auch Shopwares Standard-Route `/store-api/search` nutzt das gelernte Ranking und
 
 ## Auswertung in der Administration
 
-**Erweiterungen → Nova Suche** (eigener Menüpunkt) zeigt für einen Verkaufskanal oder alle Shops und einen Zeitraum (7, 30, 90 oder 365 Tage):
+**Erweiterungen → Nova Suche** (eigener Menüpunkt, Reiter *Auswertung · Synonyme · Weiterleitungen*) zeigt für einen Verkaufskanal oder alle Shops und einen Zeitraum (7, 30, 90 oder 365 Tage):
 
 - **Kennzahlen** mit Veränderung zum Vorzeitraum: Suchen, Anteil ohne Treffer, Klickrate, in den Warenkorb, Käufe nach einer Suche, verschiedene Begriffe
 - **Suchen pro Tag** als Balken (orange: ohne Treffer)
 - **Suchbegriffe** mit Suchen, Klicks, Klickrate, Warenkorb, Käufen – ⚠ markiert Begriffe, die oft gesucht, aber nie angeklickt wurden (Treffer passen nicht)
-- **Ohne Treffer** mit Stand der Claude-Umschreibung – Abhilfe über Synonyme/Weiterleitungen
+- **Ohne Treffer** mit Stand der Claude-Umschreibung und Knöpfen „Synonym“/„Weiterleitung“ zum direkten Beheben
 - **Geklickte Produkte** (Link zum Produkt in der Administration)
 - **Claude-Kosten** des laufenden Monats im Verhältnis zum Limit
 - **CSV-Export** je Tabelle (Excel-tauglich, gleiche Daten wie `nova-search:export`)
@@ -181,30 +181,30 @@ Sieht der Suchbegriff wie eine Nummer aus (mindestens 3 Ziffern, keine weiteren 
 
 ## Suchregeln: Synonyme und Weiterleitungen
 
-*Erweiterungen → Nova Suche → Konfigurieren → Suchregeln.* Am besten unter **„Alle Verkaufskanäle“** pflegen; einzelne Shops können eigene Regeln bekommen. Gilt für Suchfenster, Suchergebnisseite und App.
+*Erweiterungen → Nova Suche → Reiter **Synonyme** bzw. **Weiterleitungen**.* Jede Regel ist ein eigener Eintrag in einer Liste – mit Suchfeld, Schalter „Aktiv“, Bearbeiten und Löschen. Ohne Verkaufskanal gilt eine Regel für alle Shops; mit Verkaufskanal nur dort. Gilt für Suchfenster, Suchergebnisseite und App, sofort nach dem Speichern.
 
-**Synonyme** – eine Gruppe pro Zeile, Begriffe mit Komma getrennt:
-
-```
-bremsklötze, bremsbeläge
-auspuff, schalldämpfer, abgasanlage
-```
+**Synonyme** – Gruppen gleichwertiger Begriffe, z. B. `bremsklötze, bremsbeläge`:
 
 - Jeder Begriff einer Gruppe findet auch die Produkte der anderen: „bremsklötze“ zeigt Bremsbeläge.
 - Mehrwortsuchen bleiben genau: „bremsklötze 2cv“ zeigt Bremsbeläge **für den 2CV**, nicht alle Bremsbeläge (Shopwares UND-Suche bleibt erhalten).
-- Begriffe aus mehreren Wörtern sind möglich („zweiter schalldämpfer“), Groß-/Kleinschreibung ist egal, Zeilen mit `#` sind Kommentare.
-- **Übernahme aus einem anderen Suchdienst:** Synonyme dort als CSV exportieren und je Gruppe eine Zeile einfügen – Komma, Semikolon oder Tabulator als Trenner werden erkannt.
+- Begriffe aus mehreren Wörtern sind möglich („zweiter schalldämpfer“), Groß-/Kleinschreibung ist egal.
 
-**Weiterleitungen** – ein Begriff pro Zeile, `Suchbegriff = Ziel`:
-
-```
-kundenkonto = /account
-versand = /versand-und-zahlungsbedingungen/
-```
+**Weiterleitungen** – Suchbegriff → Ziel, z. B. `versand` → `/versand-und-zahlungsbedingungen/`:
 
 - Gilt bei genau diesem Suchbegriff: Enter bzw. die Suchergebnisseite führt direkt zum Ziel; im Suchfenster erscheint oben ein Link „Direkt zu …“.
-- Ziel ist ein Pfad im Shop (wird um die Shop-Adresse inkl. Sprachpfad ergänzt) oder eine vollständige `https://`-Adresse. Andere Angaben werden ignoriert.
+- Ziel ist ein Pfad im Shop (wird um die Shop-Adresse inkl. Sprachpfad ergänzt) oder eine vollständige `https://`-Adresse. Andere Angaben werden beim Speichern abgelehnt.
+- Gibt es denselben Begriff allgemein und für einen Verkaufskanal, gewinnt der Verkaufskanal.
 - Die App bekommt das Ziel im Feld `redirect` der Such-API.
+
+**Aus der Auswertung beheben:** Im Reiter *Auswertung → Ohne Treffer* steht bei jedem Begriff „Synonym“ bzw. „Weiterleitung“ – das öffnet das Anlegen-Fenster mit dem Begriff schon eingetragen.
+
+**CSV-Import und -Export** (Knöpfe über der Liste):
+
+- Synonyme: eine Gruppe pro Zeile, Begriffe durch Komma getrennt. Exporte anderer Suchdienste mit mehreren Spalten funktionieren auch – die Spalte mit der Begriffsliste wird erkannt, Kopfzeilen und bereits vorhandene Gruppen werden übersprungen.
+- Weiterleitungen: `begriff;ziel` (auch `begriff = ziel` oder mit Komma). Bereits vorhandene Begriffe werden übersprungen.
+- Der Export ist im selben Format und lässt sich wieder importieren (z. B. in einen anderen Shop).
+
+**Update von 1.6.0 oder älter:** Die bisherigen Textfelder unter *Konfigurieren → Suchregeln* werden beim Update automatisch in die Listen übernommen und danach aus der Konfiguration entfernt.
 
 ## Ausgeschlossene Produkte
 
@@ -217,7 +217,7 @@ versand = /versand-und-zahlungsbedingungen/
 ## Umstieg von einem externen Suchdienst
 
 1. Nova Suche installieren (ist zunächst in keinem Shop aktiv).
-2. Synonyme, Weiterleitungen und Ausschlüsse übernehmen (siehe oben).
+2. Synonyme und Weiterleitungen als CSV importieren, Ausschlüsse einstellen (siehe oben).
 3. In einem kleinen Shop **„Sofortsuche verwenden“** einschalten, Cache löschen, testen.
 4. Dort das Plugin bzw. Skript des bisherigen Dienstes deaktivieren – sonst öffnen sich zwei Suchfenster.
 5. Nach ein paar Tagen die übrigen Shops umstellen, altes Plugin deinstallieren, Abo kündigen.
@@ -420,13 +420,13 @@ Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetre
 
 **Ursache:** Keiner der anderen Begriffe der Gruppe kommt in Produktnamen bzw. Suchwörtern vor – oder das Suchfenster zeigt noch ein zwischengespeichertes Ergebnis
 
-**Lösung:** Mindestens ein Begriff der Gruppe muss so geschrieben sein wie im Shop (z. B. „bremsbeläge“, wenn die Produkte so heißen). Nach Änderungen an den Regeln einmal *Einstellungen → Caches & Indizes → Cache löschen*
+**Lösung:** Mindestens ein Begriff der Gruppe muss so geschrieben sein wie im Shop (z. B. „bremsbeläge“, wenn die Produkte so heißen). Prüfen, ob die Gruppe auf „Aktiv“ steht und für den richtigen Verkaufskanal gilt. Bereits zwischengespeicherte Seiten: Knopf „Cache leeren“ über der Liste
 
 ### Weiterleitung greift nicht
 
 **Ursache:** Der Begriff muss genau passen (nur Groß-/Kleinschreibung und Leerzeichen am Rand sind egal), oder das Ziel ist ungültig (z. B. ohne `/` am Anfang bzw. ohne `https://`)
 
-**Lösung:** Zeile prüfen, z. B. `kundenkonto = /account`. Beim Tippen im Suchfenster erscheint der Link erst bei genau diesem Begriff
+**Lösung:** Eintrag unter *Nova Suche → Weiterleitungen* prüfen (Aktiv, Verkaufskanal, Ziel z. B. `/account`). Beim Tippen im Suchfenster erscheint der Link erst bei genau diesem Begriff
 
 ### Ausgeschlossenes Produkt erscheint trotzdem
 

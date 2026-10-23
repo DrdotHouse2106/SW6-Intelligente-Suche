@@ -35,9 +35,10 @@
                 "clicks": "Klicks",
                 "product": "Produkt",
                 "number": "Produktnummer",
-                "claude": "Claude-Umschreibung"
+                "claude": "Claude-Umschreibung",
+                "fix": "Beheben"
             },
-            "zeroHint": "Beheben: Synonym oder Weiterleitung unter „Einstellungen → Suchregeln“ anlegen. Begriffe mit ⚠ in „Suchbegriffe“ wurden oft gesucht, aber nie angeklickt.",
+            "zeroHint": "Beheben: Mit „Synonym“ oder „Weiterleitung“ legst du direkt eine Regel für den Begriff an. Begriffe mit ⚠ in „Suchbegriffe“ wurden oft gesucht, aber nie angeklickt.",
             "rewriteDone": "→ „{rewrite}“",
             "rewriteStatus": {
                 "pending": "wartet auf Auswertung",
@@ -48,7 +49,57 @@
             "empty": "Keine Daten im gewählten Zeitraum.",
             "emptyZero": "Keine Suchen ohne Treffer – sehr gut!",
             "claudeTitle": "Claude-Kosten diesen Monat",
-            "claudeSpent": "{spent} $ von {limit} $ verbraucht ({month})"
+            "claudeSpent": "{spent} $ von {limit} $ verbraucht ({month})",
+            "fixSynonym": "Synonym",
+            "fixRedirect": "Weiterleitung"
+        },
+        "tabs": {
+            "analytics": "Auswertung",
+            "synonyms": "Synonyme",
+            "redirects": "Weiterleitungen"
+        },
+        "rules": {
+            "search": "Liste durchsuchen …",
+            "count": "{count} Eintrag | {count} Einträge",
+            "import": "CSV importieren",
+            "active": "Aktiv",
+            "edit": "Bearbeiten",
+            "delete": "Löschen",
+            "noMatch": "Kein Eintrag passt zur Suche.",
+            "allSalesChannels": "Alle Verkaufskanäle",
+            "confirmDelete": "„{name}“ wirklich löschen?",
+            "imported": "{imported} Einträge importiert, {skipped} übersprungen.",
+            "saveError": "Speichern fehlgeschlagen.",
+            "loadError": "Die Liste konnte nicht geladen werden.",
+            "cacheHint": "Änderungen gelten sofort für neue Suchen. Bereits zwischengespeicherte Suchseiten zeigen sie erst nach dem Leeren des Caches.",
+            "clearCache": "Cache leeren",
+            "cacheCleared": "Cache geleert."
+        },
+        "synonyms": {
+            "add": "Synonym anlegen",
+            "editTitle": "Synonym bearbeiten",
+            "saved": "Synonym gespeichert.",
+            "intro": "Gleichwertige Begriffe: Wer einen davon sucht, findet auch Produkte mit den anderen. Beispiel: bremsklötze, bremsbeläge.",
+            "empty": "Noch keine Synonyme angelegt.",
+            "placeholder": "z. B. bremsklötze, bremsbeläge, bremsbacken",
+            "help": "Mindestens zwei Begriffe, durch Komma getrennt. Groß-/Kleinschreibung spielt keine Rolle.",
+            "importHint": "CSV-Import: eine Gruppe pro Zeile, Begriffe durch Komma getrennt (auch Exporte anderer Suchdienste, die Spalte mit den Begriffen wird erkannt). Doppelte Gruppen werden übersprungen.",
+            "col": {
+                "terms": "Begriffe"
+            }
+        },
+        "redirects": {
+            "add": "Weiterleitung anlegen",
+            "editTitle": "Weiterleitung bearbeiten",
+            "saved": "Weiterleitung gespeichert.",
+            "intro": "Wer genau diesen Begriff sucht, landet direkt auf der Zielseite statt in den Suchergebnissen. Beispiel: versand → /versand.",
+            "empty": "Noch keine Weiterleitungen angelegt.",
+            "placeholder": "/versand oder https://…",
+            "help": "Ziel als Pfad im Shop (/konto) oder vollständige Adresse (https://…).",
+            "importHint": "CSV-Import: eine Weiterleitung pro Zeile im Format „begriff;ziel“ (oder mit Komma bzw. =). Bereits vorhandene Begriffe werden übersprungen.",
+            "col": {
+                "target": "Ziel"
+            }
         }
     }
 }

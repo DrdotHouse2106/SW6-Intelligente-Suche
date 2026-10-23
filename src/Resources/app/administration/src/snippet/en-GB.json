@@ -35,9 +35,10 @@
                 "clicks": "Clicks",
                 "product": "Product",
                 "number": "Product number",
-                "claude": "Claude rewrite"
+                "claude": "Claude rewrite",
+                "fix": "Fix"
             },
-            "zeroHint": "Fix: add a synonym or redirect under \"Settings → Search rules\". Terms marked ⚠ were searched often but never clicked.",
+            "zeroHint": "Fix: use \"Synonym\" or \"Redirect\" to create a rule for the term right away. Terms marked ⚠ were searched often but never clicked.",
             "rewriteDone": "→ \"{rewrite}\"",
             "rewriteStatus": {
                 "pending": "waiting",
@@ -48,7 +49,57 @@
             "empty": "No data in this period.",
             "emptyZero": "No searches without results – great!",
             "claudeTitle": "Claude costs this month",
-            "claudeSpent": "{spent} $ of {limit} $ used ({month})"
+            "claudeSpent": "{spent} $ of {limit} $ used ({month})",
+            "fixSynonym": "Synonym",
+            "fixRedirect": "Redirect"
+        },
+        "tabs": {
+            "analytics": "Analytics",
+            "synonyms": "Synonyms",
+            "redirects": "Redirects"
+        },
+        "rules": {
+            "search": "Search list …",
+            "count": "{count} entry | {count} entries",
+            "import": "Import CSV",
+            "active": "Active",
+            "edit": "Edit",
+            "delete": "Delete",
+            "noMatch": "No entry matches the search.",
+            "allSalesChannels": "All sales channels",
+            "confirmDelete": "Really delete \"{name}\"?",
+            "imported": "{imported} entries imported, {skipped} skipped.",
+            "saveError": "Saving failed.",
+            "loadError": "The list could not be loaded.",
+            "cacheHint": "Changes apply to new searches immediately. Cached search pages show them after clearing the cache.",
+            "clearCache": "Clear cache",
+            "cacheCleared": "Cache cleared."
+        },
+        "synonyms": {
+            "add": "Add synonym",
+            "editTitle": "Edit synonym",
+            "saved": "Synonym saved.",
+            "intro": "Equivalent terms: searching for one also finds products containing the others. Example: brake pads, brake shoes.",
+            "empty": "No synonyms yet.",
+            "placeholder": "e.g. brake pads, brake shoes",
+            "help": "At least two terms, separated by commas. Case does not matter.",
+            "importHint": "CSV import: one group per line, terms separated by commas (exports of other search services work too, the terms column is detected). Duplicate groups are skipped.",
+            "col": {
+                "terms": "Terms"
+            }
+        },
+        "redirects": {
+            "add": "Add redirect",
+            "editTitle": "Edit redirect",
+            "saved": "Redirect saved.",
+            "intro": "Searching exactly this term leads straight to the target page instead of the search results. Example: shipping → /shipping.",
+            "empty": "No redirects yet.",
+            "placeholder": "/shipping or https://…",
+            "help": "Target as shop path (/account) or full URL (https://…).",
+            "importHint": "CSV import: one redirect per line as \"term;target\" (comma or = also work). Existing terms are skipped.",
+            "col": {
+                "target": "Target"
+            }
         }
     }
 }

@@ -20,6 +20,9 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 - ✅ **Zuletzt gesucht**: eigene letzte Suchbegriffe des Besuchers als Chips, einzeln
   entfernbar (✕) und „Alles löschen“. Nur im Browser gespeichert, nur mit Komfort-Einwilligung
 - 🟡 Highlights wahlweise automatisch: „am beliebtesten“, „Bestseller“, „neu“ (1.5.0) – Produktstream folgt
+- ⬜ **Persönliche Vorschläge beim Öffnen**: Produkte passend zu dem, was der Besucher zuletzt
+  angesehen oder gesucht hat (gleiche Kategorie, gleiches Fahrzeugmodell bzw. gleiche Eigenschaft),
+  bei angemeldeten Kunden auch aus früheren Bestellungen („Passt zu Ihrem Fahrzeug“) – nur mit Einwilligung
 
 ### 1.2 Ergebnisse beim Tippen
 
@@ -48,7 +51,7 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 ### 1.4 Regeln (Merchandising)
 
 - ✅ **Synonyme**: Gruppen gleichwertiger Begriffe (z. B. `bremsklötze, bremsbeläge`) –
-  in der Plugin-Konfiguration (1.2.0); eigene Verwaltungsseite mit CSV-Import/-Export folgt in Phase 2
+  seit 1.7.0 als Liste unter *Erweiterungen → Nova Suche* mit CSV-Import/-Export
 - ✅ **Weiterleitungen**: Suchbegriff → Seite (z. B. `kundenkonto` → Konto, `versand` →
   Versandinfos, `widerruf` → Widerrufsseite)
 - ✅ **Ausgeschlossene Produkte**: Produkte/Kategorien/Eigenschaften, die nie im Suchfenster
@@ -57,7 +60,7 @@ Alles, was Kunden heute im Suchfenster sehen und was für den Umstieg nötig ist
 
 ### 1.5 Übernahme der bestehenden Daten
 
-- ✅ Import vorhandener Synonym-Gruppen: CSV-Zeilen in das Feld „Synonyme“ einfügen
+- ✅ Import vorhandener Synonym-Gruppen und Weiterleitungen als CSV (1.7.0)
 - ⬜ Import von Suchbegriffen und Klickdaten der letzten Monate (CSV), damit „Beliebte
   Suchanfragen“ und das Lernen nicht bei null starten
 - ✅ Umstiegs-Checkliste in der README (altes Plugin deaktivieren, Skript entfernen)
@@ -83,8 +86,8 @@ Seit 1.6.0: *Erweiterungen → Nova Suche*, je Verkaufskanal und Zeitraum (Gerä
 
 - 🟡 Suchbegriffe: Anzahl, Klickrate, Ø Klickposition
 - 🟡 Geklickte Produkte: Klicks, Klickrate, Ø Position
-- 🟡 **Suchen ohne Treffer** mit Button **„Beheben“** → direkt Synonym, Weiterleitung, Umschreibung
-  oder feste Produkte anlegen; Claude-Vorschlag mit einem Klick übernehmen
+- 🟡 **Suchen ohne Treffer** mit Button **„Beheben“** → Synonym und Weiterleitung ✅ (1.7.0);
+  Umschreibung, feste Produkte und Claude-Vorschlag mit einem Klick folgen
 - ✅ Begriffe mit vielen Suchen, aber 0 % Klickrate (Treffer passen nicht)
 
 ### 2.3 Claude in der Administration

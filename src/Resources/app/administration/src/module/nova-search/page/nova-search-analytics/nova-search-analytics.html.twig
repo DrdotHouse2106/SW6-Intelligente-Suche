@@ -12,6 +12,7 @@
 
     <template #content>
         <div class="nova-search-analytics__content">
+            <nova-search-tabs />
             <div class="nova-search-analytics__filters">
                 <sw-entity-single-select
                     v-model:value="salesChannelId"
@@ -125,6 +126,7 @@
                                     <th>{{ $tc('nova-search.analytics.col.term') }}</th>
                                     <th class="is--num">{{ $tc('nova-search.analytics.zeroShort') }}</th>
                                     <th>{{ $tc('nova-search.analytics.col.claude') }}</th>
+                                    <th>{{ $tc('nova-search.analytics.col.fix') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -132,9 +134,17 @@
                                     <td>{{ row.term }}</td>
                                     <td class="is--num">{{ row.zeroResults }}</td>
                                     <td>{{ rewriteLabel(row) }}</td>
+                                    <td class="nova-search-analytics__fix">
+                                        <mt-button size="small" variant="secondary" @click="fix('synonyms', row.term)">
+                                            {{ $tc('nova-search.analytics.fixSynonym') }}
+                                        </mt-button>
+                                        <mt-button size="small" variant="secondary" @click="fix('redirects', row.term)">
+                                            {{ $tc('nova-search.analytics.fixRedirect') }}
+                                        </mt-button>
+                                    </td>
                                 </tr>
                                 <tr v-if="data.zeroResults.length === 0">
-                                    <td colspan="3" class="nova-search-analytics__empty">{{ $tc('nova-search.analytics.emptyZero') }}</td>
+                                    <td colspan="4" class="nova-search-analytics__empty">{{ $tc('nova-search.analytics.emptyZero') }}</td>
                                 </tr>
                             </tbody>
                         </table>
