@@ -1,3 +1,6 @@
+# 1.10.1
+- Number search: numbers with a group prefix (e.g. "281-281569") are also found by the part after the prefix ("281569"); the index is rebuilt automatically after the update
+
 # 1.10.0
 - "Request this part" form right in the search window (email or phone, sent by mail, customer stays in the search)
 

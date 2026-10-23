@@ -189,6 +189,7 @@ Sieht der Suchbegriff wie eine Nummer aus (mindestens 3 Ziffern, keine weiteren 
 - Durchsucht werden standardmäßig **Artikelnummer, Herstellernummer und EAN**. Zusätzlich wählbar: **Zusatzfelder** (technischer Name, z. B. `oe_nummer`) und **Eigenschaften** (z. B. „OE-Nummer“, „Vergleichsnummer“). Mehrere Nummern in einem Feld dürfen durch Komma, Semikolon, Zeilenumbruch oder Leerzeichen getrennt sein.
 - **Checkbox „Nur exakte Teilenummer“** neben dem Suchfeld im Suchfenster: Ist sie angehakt, erscheinen **ausschließlich** Produkte mit genau dieser Nummer – keine unscharfen Treffer, kein Nummernanfang, keine Umschreibung. Gibt es die Nummer nicht, steht dort „Keine Teilenummer … gefunden“. So funktionieren auch Nummern mit wenigen Ziffern (z. B. `ab12cd`), die automatisch nicht als Nummer erkannt würden. Das Häkchen bleibt für die Sitzung des Besuchers erhalten und gilt auch für Enter (Suchergebnisseite). Abschaltbar unter *Nummernsuche*.
 - **Ohne Häkchen** gilt als Nummer, was mindestens 3 Ziffern hat und aus einem Wort besteht: `1a32zq`, `25043 25031` und `5461234` ja – `2cv`, `2cv6` oder `ami8` nein, die werden ganz normal gesucht.
+- **Nummern mit Gruppen-Vorsatz**: Steht vor der eigentlichen Nummer ein kurzer Vorsatz mit Bindestrich oder Schrägstrich (z. B. `281-281569`, `191A-194003`), findet auch der hintere Teil allein das Produkt: `281569`, `28 15 69`. Kunden tippen oft nur diesen Teil.
 - **Anfang genügt** (abschaltbar): Gibt es keine exakte Nummer, werden Nummern gefunden, die so beginnen (ab 6 Zeichen).
 - Der Index wird beim Speichern von Produkten automatisch aktualisiert. Komplett aufgebaut wird er beim ersten stündlichen Lauf nach der Installation und nach geänderten Einstellungen – sofort mit `bin/console nova-search:numbers`.
 - Einstellungen unter *Konfigurieren → Nummernsuche*, am besten unter „Alle Verkaufskanäle“ (der Index gilt für alle Shops; was ein Shop zeigen darf, prüft weiterhin Shopware).
@@ -477,6 +478,12 @@ Hier sammeln wir Hürden, die bei Installation und Betrieb tatsächlich aufgetre
 **Ursache:** Der andere Verkaufskanal hat keine Domain mit http(s)-Adresse, ist inaktiv, oder das Produkt ist dort nicht sichtbar – oder dieser Shop hat selbst Treffer (dann wird nicht weitergesucht)
 
 **Lösung:** Unter *Verkaufskanäle* Domain und Status des anderen Shops prüfen; die Einstellung „Schwestershops“ im richtigen Verkaufskanal setzen (nicht nur unter „Alle Verkaufskanäle“, wenn Shops gegenseitig verweisen sollen)
+
+### Kunden finden Produkte nicht über den hinteren Teil der Artikelnummer
+
+**Ursache:** Artikelnummern mit Gruppen-Vorsatz (`281-281569`) waren bis 1.10.0 nur über die ganze Nummer oder ihren Anfang auffindbar; Kunden tippen aber oft nur `281569` oder `28 15 69`
+
+**Lösung:** Ab 1.10.1 wird der Teil nach dem Vorsatz mit in den Nummern-Index aufgenommen. Der Index baut sich nach dem Update beim nächsten stündlichen Lauf neu auf – sofort mit `bin/console nova-search:numbers`
 
 ### Ausgeschlossenes Produkt erscheint trotzdem
 

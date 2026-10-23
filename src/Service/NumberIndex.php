@@ -12,7 +12,8 @@ use Shopware\Core\System\SystemConfig\SystemConfigService;
  * Nummernsuche: Artikelnummer, Herstellernummer, EAN sowie wahlweise Zusatzfelder und Eigenschaften
  * (z. B. „OE-Nummer“) werden normalisiert gespeichert – kleingeschrieben, ohne Leerzeichen, Punkte,
  * Bindestriche und Schrägstriche. Mehrere Nummern in einem Feld (getrennt durch Komma, Semikolon,
- * Zeilenumbruch oder Leerzeichen) werden einzeln aufgenommen.
+ * Zeilenumbruch oder Leerzeichen) werden einzeln aufgenommen. Nummern mit Gruppen-Vorsatz
+ * („281-281569“, „191A-194003“) sind zusätzlich über den Teil nach dem Vorsatz auffindbar („281569“).
  *
  * Der Index gilt für alle Verkaufskanäle; Sichtbarkeit und Verfügbarkeit prüft weiterhin die
  * normale Produktsuche.
@@ -206,11 +207,31 @@ class NumberIndex
                 if (\strlen($number) >= 3 && \strlen($number) <= 64 && preg_match('/\d/', $number) === 1) {
                     $numbers[$number] = true;
                 }
+
+                $tail = self::tail($part);
+                if ($tail !== null) {
+                    $numbers[$tail] = true;
+                }
             }
         }
 
         // Rein numerische Schlüssel macht PHP zu int – zurück in Zeichenketten wandeln
         return array_map('strval', array_keys($numbers));
+    }
+
+    /**
+     * Teil nach einem kurzen Gruppen-Vorsatz: „281-281569“ → „281569“, „191A-194003“ → „194003“.
+     * Kunden tippen oft nur diesen Teil. Nur wenn er selbst wie eine Nummer aussieht (mind. 5 Zeichen, 3 Ziffern).
+     */
+    public static function tail(string $value): ?string
+    {
+        if (preg_match('/^\s*[a-z0-9]{1,5}\s*[-\/]\s*(\S.*)$/iu', $value, $match) !== 1) {
+            return null;
+        }
+
+        $tail = self::normalize($match[1]);
+
+        return \strlen($tail) >= 5 && \strlen($tail) <= 64 && preg_match_all('/\d/', $tail) >= 3 ? $tail : null;
     }
 
     private static function looksLikeNumber(string $normalized): bool
@@ -351,6 +372,7 @@ class NumberIndex
      */
     private function settingsHash(array $settings): string
     {
-        return hash('sha256', (string) json_encode($settings) . '|v1');
+        // v2: zusätzlich Nummern ohne Gruppen-Vorsatz – erzwingt nach dem Update einen Neuaufbau
+        return hash('sha256', (string) json_encode($settings) . '|v2');
     }
 }

@@ -1,3 +1,6 @@
+# 1.10.1
+- Nummernsuche: Nummern mit Gruppen-Vorsatz (z. B. „281-281569“) sind auch über den hinteren Teil auffindbar („281569“, „28 15 69“); der Index baut sich nach dem Update automatisch neu auf
+
 # 1.10.0
 - „Teil anfragen“ direkt im Suchfenster: E-Mail oder Telefon genügt, Anfrage per Mail an den Shop, der Kunde bleibt in der Suche; Kontaktformular weiter als Link
 - Neue Einstellungen: „Teil anfragen“ im Suchfenster, Empfänger für Anfragen
