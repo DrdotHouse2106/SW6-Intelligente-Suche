@@ -1,0 +1,18 @@
+{# Treffer aus Schwestershops – Variable: partners (siehe PartnerSearch) #}
+{% for partner in partners|default([]) %}
+    {% block nova_search_partner %}
+        <section class="nova-search-highlights nova-search-partner">
+            <h2 class="nova-search-title">{{ 'novaSearch.partnerTitle'|trans({ '%shop%': partner.name, '%count%': partner.total }) }}</h2>
+            <ul class="nova-search-grid nova-search-partner-grid list-unstyled">
+                {% for product in partner.products %}
+                    {% sw_include '@NovaSearch/storefront/nova-search/card.html.twig' with { product: product, externalUrl: partner.url } %}
+                {% endfor %}
+            </ul>
+            {% if partner.total > partner.products|length %}
+                <a class="nova-search-partner-more nova-search-focusable" href="{{ partner.searchUrl }}">
+                    {{ 'novaSearch.partnerMore'|trans({ '%shop%': partner.name, '%count%': partner.total }) }} →
+                </a>
+            {% endif %}
+        </section>
+    {% endblock %}
+{% endfor %}

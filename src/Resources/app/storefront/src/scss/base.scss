@@ -761,6 +761,13 @@ a.nova-search-hint:focus-visible {
     margin-top: 1.5rem;
 }
 
+// Über umgeschriebenen Treffern: klar vom eigenen Ergebnis getrennt
+.nova-search-main .nova-search-partner {
+    margin: 0 0 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
 .nova-search-partner-more {
     display: inline-block;
     margin-top: 0.75rem;

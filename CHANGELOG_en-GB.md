@@ -1,3 +1,6 @@
+# 1.10.3
+- Sister shops are also searched when results only came from a rewrite; their hits are shown above the rewritten results
+
 # 1.10.2
 - Start view without highlights: popular searches in up to 4 columns instead of one long list
 

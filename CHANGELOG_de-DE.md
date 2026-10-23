@@ -1,3 +1,6 @@
+# 1.10.3
+- Schwestershops werden auch gefragt, wenn die Treffer nur über eine Umschreibung kamen (z. B. „lichtmaschine cx“ → „lichtmaschine“); ihre Treffer stehen dann über den umgeschriebenen
+
 # 1.10.2
 - Startansicht ohne Highlights: beliebte Suchanfragen in bis zu 4 Spalten nebeneinander statt einer langen Liste – das Fenster wird deutlich niedriger
 
