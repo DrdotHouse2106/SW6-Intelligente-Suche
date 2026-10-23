@@ -1,3 +1,6 @@
+# 1.7.2
+- Bestseller highlights count orders instead of quantity
+
 # 1.7.1
 - New: switch "Only products with image" for highlights and no-results recommendations (default: on)
 

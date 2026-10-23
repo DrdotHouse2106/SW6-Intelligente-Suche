@@ -10,7 +10,7 @@ use Shopware\Core\Framework\Uuid\Uuid;
 /**
  * Produkt-IDs für „Aktuelle Highlights“ und Empfehlungen bei 0 Treffern.
  *
- * Modi: manual (von Hand gewählt), bestseller (meistverkauft, 90 Tage), popular (in der Suche am
+ * Modi: manual (von Hand gewählt), bestseller (in den meisten Bestellungen, 90 Tage), popular (in der Suche am
  * häufigsten geklickt/gekauft, 90 Tage), newest (zuletzt angelegt). Ergebnisse werden eine Stunde
  * zwischengespeichert; Sichtbarkeit und Verfügbarkeit prüft anschließend die normale Produktsuche.
  */
@@ -77,7 +77,8 @@ class HighlightProvider
              WHERE oli.`version_id` = :version AND oli.`product_id` IS NOT NULL AND oli.`type` = :type
                AND o.`sales_channel_id` = :sc AND o.`order_date_time` >= :since
              GROUP BY oli.`product_id`
-             ORDER BY SUM(oli.`quantity`) DESC
+             -- Anzahl Bestellungen zählt, nicht die Stückzahl: 100 Schrauben in einer Bestellung sind ein Kauf
+             ORDER BY COUNT(DISTINCT oli.`order_id`) DESC, SUM(oli.`quantity`) DESC
              LIMIT ' . self::LIMIT,
             [
                 'version' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),

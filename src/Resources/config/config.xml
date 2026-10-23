@@ -97,7 +97,7 @@
             <name>highlightMode</name>
             <label>Highlights</label>
             <label lang="de-DE">Aktuelle Highlights</label>
-            <helpText lang="de-DE">Automatisch: Bestseller = meistverkauft (90 Tage), Beliebt in der Suche = am häufigsten geklickt/gekauft nach einer Suche (90 Tage), Neu = zuletzt angelegt. Wird stündlich aktualisiert.</helpText>
+            <helpText lang="de-DE">Automatisch: Bestseller = in den meisten Bestellungen enthalten (90 Tage, die Stückzahl zählt nicht), Beliebt in der Suche = am häufigsten geklickt/gekauft nach einer Suche (90 Tage), Neu = zuletzt angelegt. Wird stündlich aktualisiert.</helpText>
             <defaultValue>manual</defaultValue>
             <options>
                 <option><id>manual</id><name>Selected products only</name><name lang="de-DE">Nur die gewählten Produkte</name></option>

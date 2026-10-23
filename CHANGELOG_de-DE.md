@@ -1,3 +1,6 @@
+# 1.7.2
+- Bestseller-Highlights zählen Bestellungen statt Stückzahl – Kleinteile in großer Menge (z. B. 100 Schrauben) drängen sich nicht mehr vor
+
 # 1.7.1
 - Neu: Schalter „Nur Produkte mit Bild“ für Aktuelle Highlights und Empfehlungen ohne Treffer (Standard: an)
 
