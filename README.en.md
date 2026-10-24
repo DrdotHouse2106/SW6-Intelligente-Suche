@@ -26,7 +26,7 @@ Fast **search window** for Shopware 6.7: clicking the search field opens a large
 
 ```bash
 cd <shopware-root>/custom/plugins
-git clone https://github.com/DrdotHouse2106/SW6-Intelligente-Suche.git NovaSearch
+git clone https://github.com/DrdotHouse2106/SW6-Nova-Suche.git NovaSearch
 cd <shopware-root>
 bin/console plugin:refresh
 bin/console plugin:install --activate NovaSearch

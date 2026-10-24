@@ -304,7 +304,7 @@ Die Dateien sind UTF-8 mit BOM (Umlaute in Excel korrekt). Suchbegriffe, die Exc
 
 ```bash
 cd <shopware-root>/custom/plugins
-git clone https://github.com/DrdotHouse2106/SW6-Intelligente-Suche.git NovaSearch
+git clone https://github.com/DrdotHouse2106/SW6-Nova-Suche.git NovaSearch
 
 cd <shopware-root>
 bin/console plugin:refresh

@@ -1,3 +1,7 @@
+# 1.10.7
+- New plugin icon in Nova style
+- Repository renamed to SW6-Nova-Suche
+
 # 1.10.6
 - With a redirect and no results, the search window only shows the redirect link (no "no results", request form, recommendations or sister shops); the term is not queued for Claude
 

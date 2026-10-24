@@ -1,3 +1,7 @@
+# 1.10.7
+- Neues Plugin-Icon im Nova-Stil (Erweiterungen → Meine Erweiterungen)
+- Repository umbenannt in SW6-Nova-Suche – alte Adresse leitet weiter
+
 # 1.10.6
 - Gibt es für den Begriff eine Weiterleitung und keine Treffer, zeigt das Suchfenster nur den Link – ohne „Keine Treffer“, „Teil anfragen“, Empfehlungen und Schwestershop; der Begriff wird nicht für Claude vorgemerkt
 
